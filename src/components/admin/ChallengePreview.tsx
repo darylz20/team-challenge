@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Clock, Lightbulb, Camera, MapPin, Trophy } from 'lucide-react'
+import { Clock, Lightbulb, Camera, MapPin, Trophy, HelpCircle } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { MediaGallery } from '../shared/MediaGallery'
 import type {
@@ -10,6 +10,7 @@ import type {
   ScoringConfig,
   HintsConfig,
   MultipleChoiceConfig,
+  OpenDoorConfig,
 } from '../../types'
 
 interface ChallengePreviewProps {
@@ -97,6 +98,34 @@ function GpsCheckPreview() {
   )
 }
 
+function OpenDoorPreview({ config }: { config: OpenDoorConfig }) {
+  const answers = config.answers ?? []
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-2">
+        {answers.slice(0, 4).map((answer, i) => (
+          <div
+            key={i}
+            className="flex items-center justify-between gap-2 p-3 rounded-lg border-2 border-surface-overlay bg-surface-raised"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <HelpCircle size={16} className="text-text-faint shrink-0" />
+              <span className="text-xs text-text-faint">Deur {i + 1}</span>
+            </div>
+            <span className="text-xs text-amber font-mono shrink-0">{answer.points} pt</span>
+          </div>
+        ))}
+      </div>
+      <input
+        type="text"
+        readOnly
+        placeholder="Typ een antwoord..."
+        className="w-full bg-surface-raised border border-surface-overlay rounded-lg px-4 py-3 text-text placeholder:text-text-faint outline-none"
+      />
+    </div>
+  )
+}
+
 // Horizontal media width based on media size
 const horizontalWidthClass: Record<string, string> = {
   small: 'w-1/4',
@@ -120,10 +149,16 @@ export function ChallengePreview({
 }: ChallengePreviewProps) {
   const [revealedHints, setRevealedHints] = useState(0)
 
-  const pointsLabel =
-    scoring.mode === 'fixed'
-      ? `${scoring.fixed_points} pts`
-      : scoring.placements.map((p) => `${p.points}`).join(' / ') + ' pts'
+  // Points label depends on type — interactive types compute from their own config
+  let pointsLabel: string
+  if (type === 'open_door') {
+    const total = (config as OpenDoorConfig).answers?.reduce((s, a) => s + (a.points || 0), 0) ?? 0
+    pointsLabel = `max ${total} pt`
+  } else if (scoring.mode === 'fixed') {
+    pointsLabel = `${scoring.fixed_points} pts`
+  } else {
+    pointsLabel = scoring.placements.map((p) => `${p.points}`).join(' / ') + ' pts'
+  }
 
   const hasMedia = mediaItems.length > 0
   const isHorizontalMedia = display.media_position === 'left' || display.media_position === 'right'
@@ -198,6 +233,8 @@ export function ChallengePreview({
         return <PhotoUploadPreview />
       case 'gps_check':
         return <GpsCheckPreview />
+      case 'open_door':
+        return <OpenDoorPreview config={config as OpenDoorConfig} />
     }
   }
 

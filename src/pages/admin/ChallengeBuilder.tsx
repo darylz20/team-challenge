@@ -15,8 +15,8 @@ import { AttemptsEditor } from '../../components/admin/AttemptsEditor'
 import { DisplaySettingsEditor } from '../../components/admin/DisplaySettingsEditor'
 import { ChallengePreview } from '../../components/admin/ChallengePreview'
 import { useChallenges, useChallenge } from '../../hooks/useChallenges'
-import type { ChallengeType, ChallengeConfig, ScoringConfig, HintsConfig, AttemptsConfig, DisplayConfig, MediaItem } from '../../types'
-import { DEFAULT_CHALLENGE_CONFIGS, DEFAULT_SCORING, DEFAULT_DISPLAY, DEFAULT_ATTEMPTS } from '../../types'
+import type { ChallengeType, ChallengeConfig, ScoringConfig, HintsConfig, AttemptsConfig, DisplayConfig, MediaItem, OpenDoorConfig } from '../../types'
+import { DEFAULT_CHALLENGE_CONFIGS, DEFAULT_SCORING, DEFAULT_DISPLAY, DEFAULT_ATTEMPTS, TYPE_CAPABILITIES } from '../../types'
 
 export function ChallengeBuilder() {
   const { id: gameId, cid } = useParams()
@@ -80,11 +80,22 @@ export function ChallengeBuilder() {
     if (!title.trim()) return
     setSaving(true)
 
+    // For interactive types (uses_progress), top-level `points` is the max possible
+    // (sum of per-item points) so leaderboards/cards have a reasonable number.
+    let topLevelPoints: number
+    if (type === 'open_door') {
+      topLevelPoints = (config as OpenDoorConfig).answers?.reduce((s, a) => s + (a.points || 0), 0) ?? 0
+    } else if (scoring.mode === 'fixed') {
+      topLevelPoints = scoring.fixed_points
+    } else {
+      topLevelPoints = scoring.placements[0]?.points ?? 0
+    }
+
     const formData = {
       title: title.trim(),
       description: description.trim() || null,
       type,
-      points: scoring.mode === 'fixed' ? scoring.fixed_points : (scoring.placements[0]?.points ?? 0),
+      points: topLevelPoints,
       time_limit: timeLimit ? parseInt(timeLimit) : null,
       hint: hints.items[0]?.text ?? null,
       config: { ...config, scoring, hints, attempts, display, media: mediaItems },
@@ -205,13 +216,15 @@ export function ChallengeBuilder() {
           <AnswerConfigEditor type={type} config={config} onChange={setConfig} gameId={gameId} />
         </Card>
 
-        {/* Scoring */}
-        <Card className="space-y-4">
-          <h3 className="font-display text-sm font-bold text-text-muted uppercase tracking-wider">
-            Scoring
-          </h3>
-          <ScoringEditor scoring={scoring} onChange={setScoring} />
-        </Card>
+        {/* Scoring (hidden for interactive types — they score per item via answer config) */}
+        {TYPE_CAPABILITIES[type].uses_global_scoring && (
+          <Card className="space-y-4">
+            <h3 className="font-display text-sm font-bold text-text-muted uppercase tracking-wider">
+              Scoring
+            </h3>
+            <ScoringEditor scoring={scoring} onChange={setScoring} />
+          </Card>
+        )}
 
         {/* Hints */}
         <Card className="space-y-4">
@@ -221,21 +234,25 @@ export function ChallengeBuilder() {
           <HintsEditor hints={hints} onChange={setHints} />
         </Card>
 
-        {/* Attempts */}
-        <Card className="space-y-4">
-          <h3 className="font-display text-sm font-bold text-text-muted uppercase tracking-wider">
-            Attempts
-          </h3>
-          <AttemptsEditor attempts={attempts} onChange={setAttempts} />
-        </Card>
+        {/* Attempts (hidden for interactive types — they manage attempts per item) */}
+        {TYPE_CAPABILITIES[type].uses_global_attempts && (
+          <Card className="space-y-4">
+            <h3 className="font-display text-sm font-bold text-text-muted uppercase tracking-wider">
+              Attempts
+            </h3>
+            <AttemptsEditor attempts={attempts} onChange={setAttempts} />
+          </Card>
+        )}
 
         {/* Display */}
-        <Card className="space-y-4">
-          <h3 className="font-display text-sm font-bold text-text-muted uppercase tracking-wider">
-            Display
-          </h3>
-          <DisplaySettingsEditor display={display} onChange={setDisplay} />
-        </Card>
+        {TYPE_CAPABILITIES[type].uses_display_config && (
+          <Card className="space-y-4">
+            <h3 className="font-display text-sm font-bold text-text-muted uppercase tracking-wider">
+              Display
+            </h3>
+            <DisplaySettingsEditor display={display} onChange={setDisplay} />
+          </Card>
+        )}
 
         {/* Time Limit */}
         <Card className="space-y-4">

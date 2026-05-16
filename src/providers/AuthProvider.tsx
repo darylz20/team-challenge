@@ -101,6 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const session: TeamSession = {
       team: data.team,
       game: data.game,
+      session_token: data.session_token,
     }
 
     setTeamSession(session)

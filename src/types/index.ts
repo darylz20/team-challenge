@@ -25,7 +25,12 @@ export interface Game {
 }
 
 // ── Challenge Types ──
-export type ChallengeType = 'multiple_choice' | 'free_text' | 'photo_upload' | 'gps_check'
+export type ChallengeType =
+  | 'multiple_choice'
+  | 'free_text'
+  | 'photo_upload'
+  | 'gps_check'
+  | 'open_door'
 export type MediaType = 'image' | 'audio' | 'video'
 
 export interface MediaItem {
@@ -76,11 +81,53 @@ export interface GpsCheckConfig {
   radius_meters: number
 }
 
+// ── Open Deur (De Slimste Mens) ──
+export interface OpenDoorAnswer {
+  text: string
+  points: number
+}
+
+export interface OpenDoorConfig {
+  answers: OpenDoorAnswer[] // fixed length: 4
+  fuzzy: boolean
+}
+
 export type ChallengeConfig =
   | MultipleChoiceConfig
   | FreeTextConfig
   | PhotoUploadConfig
   | GpsCheckConfig
+  | OpenDoorConfig
+
+// ── Type capabilities registry ──
+// Drives builder UI visibility + player flow routing.
+export interface TypeCapabilities {
+  uses_global_scoring: boolean    // show ScoringEditor card?
+  uses_global_attempts: boolean   // show AttemptsEditor card?
+  uses_progress: boolean          // uses challenge_progress + finalize_challenge?
+  uses_display_config: boolean    // show DisplaySettingsEditor card?
+}
+
+export const TYPE_CAPABILITIES: Record<ChallengeType, TypeCapabilities> = {
+  multiple_choice:   { uses_global_scoring: true,  uses_global_attempts: true,  uses_progress: false, uses_display_config: true  },
+  free_text:         { uses_global_scoring: true,  uses_global_attempts: true,  uses_progress: false, uses_display_config: true  },
+  photo_upload:      { uses_global_scoring: true,  uses_global_attempts: true,  uses_progress: false, uses_display_config: true  },
+  gps_check:         { uses_global_scoring: true,  uses_global_attempts: true,  uses_progress: false, uses_display_config: true  },
+  open_door:         { uses_global_scoring: false, uses_global_attempts: false, uses_progress: true,  uses_display_config: true  },
+}
+
+// ── Challenge Progress (interactive types) ──
+export interface ChallengeProgressState {
+  // open_door: which answer indices have been found so far
+  found?: number[]
+  // future types add their own keys here
+}
+
+export interface ChallengeProgress {
+  state: ChallengeProgressState
+  started_at: string
+  finalized: boolean
+}
 
 // ── Placement-based Scoring ──
 export interface PlacementReward {
@@ -147,6 +194,10 @@ export interface TeamSession {
     title: string
     status: GameStatus
   }
+  // Single-device enforcement: issued by login_team RPC.
+  // Required for stateful RPCs (get_or_init_progress, *_attempt, finalize_challenge).
+  // Optional for backward compat with sessions stored before this field existed.
+  session_token?: string
 }
 
 // ── Submission Types ──
@@ -185,6 +236,15 @@ export const DEFAULT_CHALLENGE_CONFIGS: Record<ChallengeType, ChallengeConfig> =
   free_text: { correct_answer: '', case_sensitive: false },
   photo_upload: { requires_review: true },
   gps_check: { lat: 0, lng: 0, radius_meters: 50 },
+  open_door: {
+    answers: [
+      { text: '', points: 10 },
+      { text: '', points: 10 },
+      { text: '', points: 10 },
+      { text: '', points: 10 },
+    ],
+    fuzzy: true,
+  },
 }
 
 export const DEFAULT_SCORING: ScoringConfig = {

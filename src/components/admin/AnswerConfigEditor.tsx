@@ -10,6 +10,7 @@ import type {
   FreeTextConfig,
   PhotoUploadConfig,
   GpsCheckConfig,
+  OpenDoorConfig,
 } from '../../types'
 
 interface AnswerConfigEditorProps {
@@ -29,6 +30,8 @@ export function AnswerConfigEditor({ type, config, onChange, gameId }: AnswerCon
       return <PhotoUploadEditor config={config as PhotoUploadConfig} onChange={onChange} />
     case 'gps_check':
       return <GpsCheckEditor config={config as GpsCheckConfig} onChange={onChange} />
+    case 'open_door':
+      return <OpenDoorEditor config={config as OpenDoorConfig} onChange={onChange} />
   }
 }
 
@@ -177,6 +180,61 @@ function PhotoUploadEditor({ config, onChange }: { config: PhotoUploadConfig; on
         description="Admin must verify the photo and award points manually"
         checked={config.requires_review}
         onChange={(v) => onChange({ ...config, requires_review: v })}
+      />
+    </div>
+  )
+}
+
+function OpenDoorEditor({ config, onChange }: { config: OpenDoorConfig; onChange: (c: ChallengeConfig) => void }) {
+  // Ensure exactly 4 answer slots (defensive — config should have 4 from defaults)
+  const answers = config.answers.length === 4
+    ? config.answers
+    : [
+        ...config.answers.slice(0, 4),
+        ...Array(Math.max(0, 4 - config.answers.length)).fill({ text: '', points: 10 }),
+      ]
+
+  function updateAnswer(i: number, patch: Partial<{ text: string; points: number }>) {
+    const next = [...answers]
+    next[i] = { ...next[i], ...patch }
+    onChange({ ...config, answers: next })
+  }
+
+  const totalPoints = answers.reduce((sum, a) => sum + (a.points || 0), 0)
+
+  return (
+    <div className="space-y-3">
+      <p className="text-sm text-text-muted">
+        Vier verwachte antwoorden. Spelers typen ze één voor één in. Per gevonden antwoord krijgen ze de ingestelde punten.
+      </p>
+      <div className="space-y-2">
+        {answers.map((answer, i) => (
+          <div key={i} className="flex gap-2 items-start p-2.5 rounded-lg bg-surface-overlay/30">
+            <span className="font-display text-neon font-bold w-6 text-center pt-2.5">{i + 1}</span>
+            <Input
+              value={answer.text}
+              onChange={(e) => updateAnswer(i, { text: e.target.value })}
+              placeholder={`Antwoord ${i + 1}`}
+              className="flex-1"
+            />
+            <div className="w-24">
+              <Input
+                type="number"
+                min={0}
+                value={answer.points}
+                onChange={(e) => updateAnswer(i, { points: parseInt(e.target.value) || 0 })}
+                placeholder="Pt"
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="text-xs text-text-faint">Totaal mogelijk: <span className="text-text">{totalPoints} pt</span></p>
+      <Toggle
+        label="Typo's toestaan (fuzzy matching)"
+        description="Klein verschil tussen invoer en juist antwoord wordt geaccepteerd (1-2 typo's afhankelijk van lengte)"
+        checked={config.fuzzy}
+        onChange={(v) => onChange({ ...config, fuzzy: v })}
       />
     </div>
   )

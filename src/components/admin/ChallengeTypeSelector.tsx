@@ -1,4 +1,4 @@
-import { ListChecks, Type, Camera, MapPin } from 'lucide-react'
+import { ListChecks, Type, Camera, MapPin, DoorOpen } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import type { ChallengeType } from '../../types'
 
@@ -7,6 +7,7 @@ const types: { value: ChallengeType; label: string; icon: typeof ListChecks; des
   { value: 'free_text', label: 'Free Text', icon: Type, description: 'Type an answer' },
   { value: 'photo_upload', label: 'Photo Upload', icon: Camera, description: 'Upload a photo' },
   { value: 'gps_check', label: 'GPS Check', icon: MapPin, description: 'Visit a location' },
+  { value: 'open_door', label: 'Open Deur', icon: DoorOpen, description: '4 antwoorden, tegen de klok' },
 ]
 
 interface ChallengeTypeSelectorProps {

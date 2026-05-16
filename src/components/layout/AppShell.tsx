@@ -2,6 +2,7 @@ import { type ReactNode } from 'react'
 import { MobileNav } from './MobileNav'
 import { useAuth } from '../../providers/AuthProvider'
 import { useSubmissionNotifications } from '../../hooks/useSubmissionNotifications'
+import { useSessionEnforcement } from '../../hooks/useSessionEnforcement'
 
 interface AppShellProps {
   children: ReactNode
@@ -10,6 +11,7 @@ interface AppShellProps {
 export function AppShell({ children }: AppShellProps) {
   const { teamSession } = useAuth()
   useSubmissionNotifications(teamSession?.game.id, teamSession?.team.id)
+  useSessionEnforcement()
 
   return (
     <div className="min-h-dvh bg-abyss flex flex-col">

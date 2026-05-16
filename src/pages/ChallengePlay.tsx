@@ -6,11 +6,12 @@ import { useAuth } from '../providers/AuthProvider'
 import { useChallenge } from '../hooks/useChallenges'
 import { useSubmission } from '../hooks/useSubmissions'
 import { MediaGallery } from '../components/shared/MediaGallery'
+import { OpenDoorPlay } from '../components/play/OpenDoorPlay'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { cn } from '../lib/utils'
-import { DEFAULT_DISPLAY } from '../types'
+import { DEFAULT_DISPLAY, TYPE_CAPABILITIES } from '../types'
 import type {
   MultipleChoiceConfig,
   GpsCheckConfig,
@@ -168,6 +169,76 @@ function GpsCheckInput({
   )
 }
 
+// ── Interactive challenge view (open_door etc) ──
+// Renders the prompt (title, media, description) + dispatches to the
+// type-specific Play component which manages its own progress and submit.
+function InteractiveChallengeView({ challenge }: { challenge: NonNullable<ReturnType<typeof useChallenge>['challenge']> }) {
+  const navigate = useNavigate()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const fullConfig = challenge.config as any
+  const display: DisplayConfig = { ...DEFAULT_DISPLAY, ...(fullConfig?.display ?? {}) }
+  const mediaItems: MediaItem[] = fullConfig?.media ?? (
+    challenge.media_url && challenge.media_type
+      ? [{ url: challenge.media_url, type: challenge.media_type }]
+      : []
+  )
+
+  const descriptionBlock = challenge.description ? (
+    <p className={cn(
+      'text-text leading-relaxed whitespace-pre-wrap text-sm',
+      display.description_align === 'center' && 'text-center',
+    )}>{challenge.description}</p>
+  ) : null
+
+  const mediaBlock = mediaItems.length > 0 ? (
+    <MediaGallery items={mediaItems} layout={display.media_layout} size={display.media_size} />
+  ) : null
+
+  function renderTypeSpecific() {
+    switch (challenge.type) {
+      case 'open_door':
+        return <OpenDoorPlay challenge={challenge} />
+      default:
+        return <p className="text-sm text-text-muted">Onbekend type</p>
+    }
+  }
+
+  return (
+    <div className="animate-fade-in pb-20">
+      {/* Header */}
+      <div className="flex items-start gap-2 py-4">
+        <button
+          onClick={() => navigate('/')}
+          className="p-2 -ml-2 mt-0.5 text-text-muted hover:text-text transition-colors shrink-0"
+        >
+          <ArrowLeft size={20} />
+        </button>
+        <div className="flex-1 min-w-0">
+          <h1 className="font-display text-lg font-bold text-text leading-snug break-words">
+            {challenge.title}
+          </h1>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        {/* Description + media */}
+        {(descriptionBlock || mediaBlock) && (
+          <div className="space-y-3">
+            {display.media_position === 'above' && mediaBlock}
+            {descriptionBlock}
+            {display.media_position !== 'above' && mediaBlock}
+          </div>
+        )}
+
+        <div className="border-t border-surface-overlay" />
+
+        {/* Type-specific gameplay */}
+        {renderTypeSpecific()}
+      </div>
+    </div>
+  )
+}
+
 // ── Main Page ──
 
 export function ChallengePlay() {
@@ -204,6 +275,14 @@ export function ChallengePlay() {
         <Button variant="ghost" className="mt-4" onClick={() => navigate('/')}>Go back</Button>
       </div>
     )
+  }
+
+  // ── Interactive types (uses_progress) use a parallel flow ──
+  // Skip the entire single-submission scaffolding (useSubmission state, hint
+  // deductions, manual submit button). The per-type Play component owns
+  // attempts, progress, scoring, and finalization through useChallengeProgress.
+  if (TYPE_CAPABILITIES[challenge.type].uses_progress) {
+    return <InteractiveChallengeView challenge={challenge} />
   }
 
   // Parse config fields with defaults
