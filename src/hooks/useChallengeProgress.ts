@@ -12,6 +12,7 @@ export interface OpenDoorAttemptResult {
   matched: boolean
   index?: number
   points?: number
+  place?: number | null // populated when scoring_mode is 'placement'
   error?: string
   time_expired?: boolean
 }

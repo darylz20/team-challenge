@@ -20,6 +20,11 @@ type Feedback =
 export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
   const config = challenge.config as OpenDoorConfig
   const answers = config.answers ?? []
+  const scoringMode = config.scoring_mode ?? 'fixed'
+  const placements = config.placements ?? []
+  // Max points awardable per answer (used for display on unfound doors)
+  const maxPerAnswerForMode = (i: number) =>
+    scoringMode === 'placement' ? (placements[0]?.points ?? 0) : (answers[i]?.points ?? 0)
 
   const {
     state,
@@ -99,7 +104,10 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
         text: answer?.text ?? '',
         points: result.points ?? 0,
       })
-      toast.success(`+${result.points} pt`, { description: answer?.text })
+      const placeLabel = result.place
+        ? ` (${result.place}e team)`
+        : ''
+      toast.success(`+${result.points} pt${placeLabel}`, { description: answer?.text })
     } else {
       setFeedback({ type: 'miss' })
     }
@@ -133,8 +141,18 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
     )
   }
 
-  const totalPossible = answers.reduce((s, a) => s + (a.points || 0), 0)
-  const earnedSoFar = found.reduce((s, idx) => s + (answers[idx]?.points || 0), 0)
+  const pointsPerFind = state.points_per_find ?? {}
+  // Max possible per team: in placement mode = best place × 4; in fixed = sum of per-answer points
+  const totalPossible =
+    scoringMode === 'placement'
+      ? (placements[0]?.points ?? 0) * answers.length
+      : answers.reduce((s, a) => s + (a.points || 0), 0)
+  // Earned so far: prefer per-find awards (always set by attempt RPC),
+  // fall back to fixed answer.points for legacy progress data.
+  const earnedSoFar = found.reduce((s, idx) => {
+    const award = pointsPerFind[String(idx)]
+    return s + (award != null ? award : (answers[idx]?.points || 0))
+  }, 0)
 
   return (
     <div className="space-y-4">
@@ -162,6 +180,10 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
         {answers.map((answer, i) => {
           const isFound = found.includes(i)
           const justFound = feedback?.type === 'hit' && feedback.index === i
+          const awarded = isFound
+            ? (pointsPerFind[String(i)] ?? answer.points ?? 0)
+            : null
+          const maxForUnfound = maxPerAnswerForMode(i)
           return (
             <div
               key={i}
@@ -188,7 +210,11 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
                   'text-xs font-mono',
                   isFound ? 'text-lime' : 'text-text-faint',
                 )}>
-                  {isFound ? `+${answer.points} pt` : `${answer.points} pt`}
+                  {isFound
+                    ? `+${awarded} pt`
+                    : scoringMode === 'placement'
+                      ? `tot ${maxForUnfound} pt`
+                      : `${maxForUnfound} pt`}
                 </p>
               </div>
             </div>

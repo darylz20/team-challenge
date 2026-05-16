@@ -84,11 +84,17 @@ export interface GpsCheckConfig {
 // ── Open Deur (De Slimste Mens) ──
 export interface OpenDoorAnswer {
   text: string
-  points: number
+  points: number // used in 'fixed' scoring mode
 }
+
+export type OpenDoorScoringMode = 'fixed' | 'placement'
 
 export interface OpenDoorConfig {
   answers: OpenDoorAnswer[] // fixed length: 4
+  scoring_mode: OpenDoorScoringMode
+  // Used in 'placement' mode — applied independently PER answer:
+  // 1st team to find answer X gets placements[place=1].points, 2nd team gets placements[place=2].points, etc.
+  placements: PlacementReward[]
   fuzzy: boolean
 }
 
@@ -120,6 +126,8 @@ export const TYPE_CAPABILITIES: Record<ChallengeType, TypeCapabilities> = {
 export interface ChallengeProgressState {
   // open_door: which answer indices have been found so far
   found?: number[]
+  // open_door: actual points awarded for each find (key = index as string)
+  points_per_find?: Record<string, number>
   // future types add their own keys here
 }
 
@@ -242,6 +250,12 @@ export const DEFAULT_CHALLENGE_CONFIGS: Record<ChallengeType, ChallengeConfig> =
       { text: '', points: 10 },
       { text: '', points: 10 },
       { text: '', points: 10 },
+    ],
+    scoring_mode: 'fixed',
+    placements: [
+      { place: 1, points: 30 },
+      { place: 2, points: 20 },
+      { place: 3, points: 10 },
     ],
     fuzzy: true,
   },

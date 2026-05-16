@@ -81,10 +81,14 @@ export function ChallengeBuilder() {
     setSaving(true)
 
     // For interactive types (uses_progress), top-level `points` is the max possible
-    // (sum of per-item points) so leaderboards/cards have a reasonable number.
+    // so leaderboards/cards have a reasonable number.
     let topLevelPoints: number
     if (type === 'open_door') {
-      topLevelPoints = (config as OpenDoorConfig).answers?.reduce((s, a) => s + (a.points || 0), 0) ?? 0
+      const od = config as OpenDoorConfig
+      const mode = od.scoring_mode ?? 'fixed'
+      topLevelPoints = mode === 'placement'
+        ? (od.placements?.[0]?.points ?? 0) * (od.answers?.length ?? 0)
+        : od.answers?.reduce((s, a) => s + (a.points || 0), 0) ?? 0
     } else if (scoring.mode === 'fixed') {
       topLevelPoints = scoring.fixed_points
     } else {

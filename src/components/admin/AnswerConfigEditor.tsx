@@ -2,6 +2,7 @@ import { Plus, Trash2, ImagePlus, X } from 'lucide-react'
 import { Input } from '../ui/Input'
 import { Toggle } from '../ui/Toggle'
 import { Button } from '../ui/Button'
+import { cn } from '../../lib/utils'
 import { uploadChallengeMedia, deleteChallengeMedia } from '../../lib/storage'
 import type {
   ChallengeType,
@@ -11,6 +12,7 @@ import type {
   PhotoUploadConfig,
   GpsCheckConfig,
   OpenDoorConfig,
+  PlacementReward,
 } from '../../types'
 
 interface AnswerConfigEditorProps {
@@ -186,7 +188,7 @@ function PhotoUploadEditor({ config, onChange }: { config: PhotoUploadConfig; on
 }
 
 function OpenDoorEditor({ config, onChange }: { config: OpenDoorConfig; onChange: (c: ChallengeConfig) => void }) {
-  // Ensure exactly 4 answer slots (defensive — config should have 4 from defaults)
+  // Ensure exactly 4 answer slots (defensive)
   const answers = config.answers.length === 4
     ? config.answers
     : [
@@ -194,19 +196,68 @@ function OpenDoorEditor({ config, onChange }: { config: OpenDoorConfig; onChange
         ...Array(Math.max(0, 4 - config.answers.length)).fill({ text: '', points: 10 }),
       ]
 
+  // Backward-compat defaults for fields added later
+  const scoringMode = config.scoring_mode ?? 'fixed'
+  const placements: PlacementReward[] = config.placements ?? [
+    { place: 1, points: 30 },
+    { place: 2, points: 20 },
+    { place: 3, points: 10 },
+  ]
+
   function updateAnswer(i: number, patch: Partial<{ text: string; points: number }>) {
     const next = [...answers]
     next[i] = { ...next[i], ...patch }
     onChange({ ...config, answers: next })
   }
 
-  const totalPoints = answers.reduce((sum, a) => sum + (a.points || 0), 0)
+  function updatePlacements(next: PlacementReward[]) {
+    onChange({ ...config, placements: next })
+  }
+
+  function addPlace() {
+    const nextPlace = (placements[placements.length - 1]?.place ?? 0) + 1
+    updatePlacements([...placements, { place: nextPlace, points: 0 }])
+  }
+
+  function removePlace(idx: number) {
+    updatePlacements(placements.filter((_, i) => i !== idx))
+  }
+
+  // Totals shown to admin
+  const totalFixed = answers.reduce((sum, a) => sum + (a.points || 0), 0)
+  const totalPlacementBestCase = (placements[0]?.points ?? 0) * answers.length
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <p className="text-sm text-text-muted">
-        Vier verwachte antwoorden. Spelers typen ze één voor één in. Per gevonden antwoord krijgen ze de ingestelde punten.
+        Vier verwachte antwoorden. Spelers typen ze één voor één in.
       </p>
+
+      {/* Scoring mode picker */}
+      <div className="flex gap-2">
+        {(['fixed', 'placement'] as const).map((mode) => (
+          <button
+            key={mode}
+            type="button"
+            onClick={() => onChange({ ...config, scoring_mode: mode, placements })}
+            className={cn(
+              'flex-1 px-3 py-2 rounded-lg text-sm font-medium border-2 transition-all',
+              scoringMode === mode
+                ? 'border-neon bg-neon/10 text-neon'
+                : 'border-surface-overlay bg-surface-raised text-text-muted hover:border-text-faint',
+            )}
+          >
+            {mode === 'fixed' ? 'Vaste punten' : 'Placement'}
+          </button>
+        ))}
+      </div>
+      <p className="text-xs text-text-faint">
+        {scoringMode === 'fixed'
+          ? 'Elk team krijgt dezelfde punten voor een gevonden antwoord.'
+          : 'Eerste team dat een antwoord vindt krijgt de meeste punten, latere teams minder. Per antwoord apart.'}
+      </p>
+
+      {/* Answers */}
       <div className="space-y-2">
         {answers.map((answer, i) => (
           <div key={i} className="flex gap-2 items-start p-2.5 rounded-lg bg-surface-overlay/30">
@@ -217,19 +268,74 @@ function OpenDoorEditor({ config, onChange }: { config: OpenDoorConfig; onChange
               placeholder={`Antwoord ${i + 1}`}
               className="flex-1"
             />
-            <div className="w-24">
-              <Input
-                type="number"
-                min={0}
-                value={answer.points}
-                onChange={(e) => updateAnswer(i, { points: parseInt(e.target.value) || 0 })}
-                placeholder="Pt"
-              />
-            </div>
+            {scoringMode === 'fixed' && (
+              <div className="w-24">
+                <Input
+                  type="number"
+                  min={0}
+                  value={answer.points}
+                  onChange={(e) => updateAnswer(i, { points: parseInt(e.target.value) || 0 })}
+                  placeholder="Pt"
+                />
+              </div>
+            )}
           </div>
         ))}
       </div>
-      <p className="text-xs text-text-faint">Totaal mogelijk: <span className="text-text">{totalPoints} pt</span></p>
+
+      {/* Placement table */}
+      {scoringMode === 'placement' && (
+        <div className="space-y-2 p-3 rounded-lg bg-surface-overlay/20 border border-surface-overlay">
+          <p className="text-xs font-medium text-text-muted uppercase tracking-wider">
+            Placement (geldt per antwoord)
+          </p>
+          {placements.map((p, i) => (
+            <div key={i} className="flex gap-2 items-center">
+              <span className="text-text-muted text-sm w-16">{p.place}e team</span>
+              <div className="flex-1">
+                <Input
+                  type="number"
+                  min={0}
+                  value={p.points}
+                  onChange={(e) => {
+                    const next = [...placements]
+                    next[i] = { ...p, points: parseInt(e.target.value) || 0 }
+                    updatePlacements(next)
+                  }}
+                />
+              </div>
+              <span className="text-xs text-text-faint shrink-0">pt</span>
+              <button
+                type="button"
+                onClick={() => removePlace(i)}
+                className="p-1.5 text-text-faint hover:text-magenta transition-colors"
+                disabled={placements.length <= 1}
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={addPlace}
+            className="flex items-center gap-1 text-xs text-neon hover:text-neon-dim transition-colors mt-1"
+          >
+            <Plus size={12} /> Plaats toevoegen
+          </button>
+          <p className="text-xs text-text-faint">
+            Teams die later komen dan {placements.length}e krijgen 0 pt.
+          </p>
+        </div>
+      )}
+
+      <p className="text-xs text-text-faint">
+        Maximaal mogelijk per team:{' '}
+        <span className="text-text">
+          {scoringMode === 'fixed' ? totalFixed : totalPlacementBestCase} pt
+        </span>
+        {scoringMode === 'placement' && ' (als 1e voor alle 4)'}
+      </p>
+
       <Toggle
         label="Typo's toestaan (fuzzy matching)"
         description="Klein verschil tussen invoer en juist antwoord wordt geaccepteerd (1-2 typo's afhankelijk van lengte)"

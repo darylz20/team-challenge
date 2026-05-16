@@ -100,21 +100,27 @@ function GpsCheckPreview() {
 
 function OpenDoorPreview({ config }: { config: OpenDoorConfig }) {
   const answers = config.answers ?? []
+  const mode = config.scoring_mode ?? 'fixed'
+  const placements = config.placements ?? []
+  const bestPlace = placements[0]?.points ?? 0
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-2">
-        {answers.slice(0, 4).map((answer, i) => (
-          <div
-            key={i}
-            className="flex items-center justify-between gap-2 p-3 rounded-lg border-2 border-surface-overlay bg-surface-raised"
-          >
-            <div className="flex items-center gap-2 min-w-0">
-              <HelpCircle size={16} className="text-text-faint shrink-0" />
-              <span className="text-xs text-text-faint">Deur {i + 1}</span>
+        {answers.slice(0, 4).map((answer, i) => {
+          const display = mode === 'placement' ? `tot ${bestPlace}` : `${answer.points}`
+          return (
+            <div
+              key={i}
+              className="flex items-center justify-between gap-2 p-3 rounded-lg border-2 border-surface-overlay bg-surface-raised"
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <HelpCircle size={16} className="text-text-faint shrink-0" />
+                <span className="text-xs text-text-faint">Deur {i + 1}</span>
+              </div>
+              <span className="text-xs text-amber font-mono shrink-0">{display} pt</span>
             </div>
-            <span className="text-xs text-amber font-mono shrink-0">{answer.points} pt</span>
-          </div>
-        ))}
+          )
+        })}
       </div>
       <input
         type="text"
@@ -152,7 +158,11 @@ export function ChallengePreview({
   // Points label depends on type — interactive types compute from their own config
   let pointsLabel: string
   if (type === 'open_door') {
-    const total = (config as OpenDoorConfig).answers?.reduce((s, a) => s + (a.points || 0), 0) ?? 0
+    const od = config as OpenDoorConfig
+    const mode = od.scoring_mode ?? 'fixed'
+    const total = mode === 'placement'
+      ? (od.placements?.[0]?.points ?? 0) * (od.answers?.length ?? 0)
+      : od.answers?.reduce((s, a) => s + (a.points || 0), 0) ?? 0
     pointsLabel = `max ${total} pt`
   } else if (scoring.mode === 'fixed') {
     pointsLabel = `${scoring.fixed_points} pts`
