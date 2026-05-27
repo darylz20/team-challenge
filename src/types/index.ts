@@ -31,6 +31,7 @@ export type ChallengeType =
   | 'photo_upload'
   | 'gps_check'
   | 'open_door'
+  | 'puzzle'
 export type MediaType = 'image' | 'audio' | 'video'
 
 export interface MediaItem {
@@ -98,12 +99,34 @@ export interface OpenDoorConfig {
   fuzzy: boolean
 }
 
+// ── Puzzel (De Slimste Mens) ──
+// 12 terms in a grid. Player must identify 3 themes by typing their names.
+// Each theme groups 4 of the 12 terms.
+// Per-theme max_attempts: a wrong guess decrements ALL unsolved+unlocked themes.
+// Theme "locked" when its attempts hit 0 — no reveal.
+export interface PuzzleTheme {
+  name: string
+  // Indices into PuzzleConfig.terms (each between 0 and 11, exactly 4, no overlap with other themes)
+  term_indices: number[]
+  max_attempts: number
+  points: number // used in 'fixed' scoring mode
+}
+
+export interface PuzzleConfig {
+  terms: string[] // exactly 12
+  themes: PuzzleTheme[] // exactly 3
+  scoring_mode: OpenDoorScoringMode // 'fixed' | 'placement' (reused alias)
+  placements: PlacementReward[] // applied per-theme in 'placement' mode
+  fuzzy: boolean
+}
+
 export type ChallengeConfig =
   | MultipleChoiceConfig
   | FreeTextConfig
   | PhotoUploadConfig
   | GpsCheckConfig
   | OpenDoorConfig
+  | PuzzleConfig
 
 // ── Type capabilities registry ──
 // Drives builder UI visibility + player flow routing.
@@ -120,6 +143,7 @@ export const TYPE_CAPABILITIES: Record<ChallengeType, TypeCapabilities> = {
   photo_upload:      { uses_global_scoring: true,  uses_global_attempts: true,  uses_progress: false, uses_display_config: true  },
   gps_check:         { uses_global_scoring: true,  uses_global_attempts: true,  uses_progress: false, uses_display_config: true  },
   open_door:         { uses_global_scoring: false, uses_global_attempts: false, uses_progress: true,  uses_display_config: true  },
+  puzzle:            { uses_global_scoring: false, uses_global_attempts: false, uses_progress: true,  uses_display_config: false },
 }
 
 // ── Challenge Progress (interactive types) ──
@@ -128,6 +152,14 @@ export interface ChallengeProgressState {
   found?: number[]
   // open_door: actual points awarded for each find (key = index as string)
   points_per_find?: Record<string, number>
+  // puzzle: which theme indices have been solved
+  solved?: number[]
+  // puzzle: which theme indices are locked (out of attempts, no reveal)
+  locked?: number[]
+  // puzzle: attempts remaining per theme (same order as themes config)
+  attempts_remaining?: number[]
+  // puzzle: actual points awarded per solved theme
+  points_per_solve?: Record<string, number>
   // future types add their own keys here
 }
 
@@ -250,6 +282,21 @@ export const DEFAULT_CHALLENGE_CONFIGS: Record<ChallengeType, ChallengeConfig> =
       { text: '', points: 10 },
       { text: '', points: 10 },
       { text: '', points: 10 },
+    ],
+    scoring_mode: 'fixed',
+    placements: [
+      { place: 1, points: 30 },
+      { place: 2, points: 20 },
+      { place: 3, points: 10 },
+    ],
+    fuzzy: true,
+  },
+  puzzle: {
+    terms: Array.from({ length: 12 }, () => ''),
+    themes: [
+      { name: '', term_indices: [0, 1, 2, 3], max_attempts: 3, points: 30 },
+      { name: '', term_indices: [4, 5, 6, 7], max_attempts: 3, points: 30 },
+      { name: '', term_indices: [8, 9, 10, 11], max_attempts: 3, points: 30 },
     ],
     scoring_mode: 'fixed',
     placements: [

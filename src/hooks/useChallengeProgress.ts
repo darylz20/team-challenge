@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../providers/AuthProvider'
 import type { ChallengeProgressState } from '../types'
@@ -13,6 +13,19 @@ export interface OpenDoorAttemptResult {
   index?: number
   points?: number
   place?: number | null // populated when scoring_mode is 'placement'
+  error?: string
+  time_expired?: boolean
+}
+
+export interface PuzzleAttemptResult {
+  matched: boolean
+  index?: number
+  points?: number
+  place?: number | null
+  already_solved?: boolean
+  already_locked?: boolean
+  newly_locked?: number[]
+  state?: import('../types').ChallengeProgressState
   error?: string
   time_expired?: boolean
 }
@@ -83,10 +96,6 @@ export function useChallengeProgress({ challengeId, timeLimitSeconds }: UseChall
       ? Math.max(0, timeLimitSeconds - Math.floor((now - startedAt) / 1000))
       : null
 
-  // Latest state in a ref so callbacks don't need to be re-created on every state change
-  const stateRef = useRef(state)
-  stateRef.current = state
-
   const attemptOpenDoor = useCallback(
     async (text: string): Promise<OpenDoorAttemptResult> => {
       if (!challengeId || !teamId || !gameId || !sessionToken) {
@@ -105,6 +114,28 @@ export function useChallengeProgress({ challengeId, timeLimitSeconds }: UseChall
         setState(data.state as ChallengeProgressState)
       }
       return data as OpenDoorAttemptResult
+    },
+    [challengeId, teamId, gameId, sessionToken],
+  )
+
+  const attemptPuzzle = useCallback(
+    async (text: string): Promise<PuzzleAttemptResult> => {
+      if (!challengeId || !teamId || !gameId || !sessionToken) {
+        return { matched: false, error: 'Session missing' }
+      }
+      const { data, error: rpcError } = await supabase.rpc('puzzle_attempt', {
+        p_team_id: teamId,
+        p_challenge_id: challengeId,
+        p_game_id: gameId,
+        p_session_token: sessionToken,
+        p_attempt: text,
+      })
+      if (rpcError) return { matched: false, error: rpcError.message }
+      if (data?.error) return { matched: false, error: data.error as string, time_expired: data.time_expired }
+      if (data?.state) {
+        setState(data.state as ChallengeProgressState)
+      }
+      return data as PuzzleAttemptResult
     },
     [challengeId, teamId, gameId, sessionToken],
   )
@@ -131,6 +162,7 @@ export function useChallengeProgress({ challengeId, timeLimitSeconds }: UseChall
     error,
     timeRemaining, // null if no time limit set
     attemptOpenDoor,
+    attemptPuzzle,
     finalize,
   }
 }

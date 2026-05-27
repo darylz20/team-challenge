@@ -11,6 +11,7 @@ import type {
   HintsConfig,
   MultipleChoiceConfig,
   OpenDoorConfig,
+  PuzzleConfig,
 } from '../../types'
 
 interface ChallengePreviewProps {
@@ -132,6 +133,61 @@ function OpenDoorPreview({ config }: { config: OpenDoorConfig }) {
   )
 }
 
+function PuzzlePreview({ config }: { config: PuzzleConfig }) {
+  const terms = config.terms ?? []
+  const themes = config.themes ?? []
+  const themeColors = ['border-neon bg-neon/15', 'border-amber bg-amber/15', 'border-magenta bg-magenta/15']
+  function colorForTerm(i: number): string | null {
+    for (let t = 0; t < themes.length; t++) {
+      if (themes[t].term_indices?.includes(i)) return themeColors[t] ?? null
+    }
+    return null
+  }
+  return (
+    <div className="space-y-3">
+      {/* Theme slots — all unsolved in preview */}
+      <div className="grid grid-cols-3 gap-2">
+        {themes.map((t, i) => (
+          <div
+            key={i}
+            className={cn(
+              'rounded-lg p-2 text-center border-2',
+              themeColors[i].replace('/15', '/5'),
+            )}
+          >
+            <p className="text-xs text-text-faint">Thema {i + 1}</p>
+            <p className="text-sm font-bold text-text-muted">?</p>
+            <p className="text-xs text-text-faint">{t.max_attempts} pog.</p>
+          </div>
+        ))}
+      </div>
+      {/* 12 terms grid */}
+      <div className="grid grid-cols-4 gap-1.5">
+        {terms.slice(0, 12).map((term, i) => {
+          const color = colorForTerm(i)
+          return (
+            <div
+              key={i}
+              className={cn(
+                'px-2 py-2 rounded text-xs text-center border truncate',
+                color ?? 'border-surface-overlay bg-surface-raised text-text-muted',
+              )}
+            >
+              {term || `—`}
+            </div>
+          )
+        })}
+      </div>
+      <input
+        type="text"
+        readOnly
+        placeholder="Typ een themanaam..."
+        className="w-full bg-surface-raised border border-surface-overlay rounded-lg px-4 py-3 text-text placeholder:text-text-faint outline-none"
+      />
+    </div>
+  )
+}
+
 // Horizontal media width based on media size
 const horizontalWidthClass: Record<string, string> = {
   small: 'w-1/4',
@@ -163,6 +219,13 @@ export function ChallengePreview({
     const total = mode === 'placement'
       ? (od.placements?.[0]?.points ?? 0) * (od.answers?.length ?? 0)
       : od.answers?.reduce((s, a) => s + (a.points || 0), 0) ?? 0
+    pointsLabel = `max ${total} pt`
+  } else if (type === 'puzzle') {
+    const pz = config as PuzzleConfig
+    const mode = pz.scoring_mode ?? 'fixed'
+    const total = mode === 'placement'
+      ? (pz.placements?.[0]?.points ?? 0) * (pz.themes?.length ?? 0)
+      : pz.themes?.reduce((s, t) => s + (t.points || 0), 0) ?? 0
     pointsLabel = `max ${total} pt`
   } else if (scoring.mode === 'fixed') {
     pointsLabel = `${scoring.fixed_points} pts`
@@ -245,6 +308,8 @@ export function ChallengePreview({
         return <GpsCheckPreview />
       case 'open_door':
         return <OpenDoorPreview config={config as OpenDoorConfig} />
+      case 'puzzle':
+        return <PuzzlePreview config={config as PuzzleConfig} />
     }
   }
 

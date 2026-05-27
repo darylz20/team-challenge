@@ -7,6 +7,7 @@ import { useChallenge } from '../hooks/useChallenges'
 import { useSubmission } from '../hooks/useSubmissions'
 import { MediaGallery } from '../components/shared/MediaGallery'
 import { OpenDoorPlay } from '../components/play/OpenDoorPlay'
+import { PuzzlePlay } from '../components/play/PuzzlePlay'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
@@ -198,6 +199,8 @@ function InteractiveChallengeView({ challenge }: { challenge: NonNullable<Return
     switch (challenge.type) {
       case 'open_door':
         return <OpenDoorPlay challenge={challenge} />
+      case 'puzzle':
+        return <PuzzlePlay challenge={challenge} />
       default:
         return <p className="text-sm text-text-muted">Onbekend type</p>
     }

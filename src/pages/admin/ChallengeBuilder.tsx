@@ -15,7 +15,7 @@ import { AttemptsEditor } from '../../components/admin/AttemptsEditor'
 import { DisplaySettingsEditor } from '../../components/admin/DisplaySettingsEditor'
 import { ChallengePreview } from '../../components/admin/ChallengePreview'
 import { useChallenges, useChallenge } from '../../hooks/useChallenges'
-import type { ChallengeType, ChallengeConfig, ScoringConfig, HintsConfig, AttemptsConfig, DisplayConfig, MediaItem, OpenDoorConfig } from '../../types'
+import type { ChallengeType, ChallengeConfig, ScoringConfig, HintsConfig, AttemptsConfig, DisplayConfig, MediaItem, OpenDoorConfig, PuzzleConfig } from '../../types'
 import { DEFAULT_CHALLENGE_CONFIGS, DEFAULT_SCORING, DEFAULT_DISPLAY, DEFAULT_ATTEMPTS, TYPE_CAPABILITIES } from '../../types'
 
 export function ChallengeBuilder() {
@@ -89,6 +89,12 @@ export function ChallengeBuilder() {
       topLevelPoints = mode === 'placement'
         ? (od.placements?.[0]?.points ?? 0) * (od.answers?.length ?? 0)
         : od.answers?.reduce((s, a) => s + (a.points || 0), 0) ?? 0
+    } else if (type === 'puzzle') {
+      const pz = config as PuzzleConfig
+      const mode = pz.scoring_mode ?? 'fixed'
+      topLevelPoints = mode === 'placement'
+        ? (pz.placements?.[0]?.points ?? 0) * (pz.themes?.length ?? 0)
+        : pz.themes?.reduce((s, t) => s + (t.points || 0), 0) ?? 0
     } else if (scoring.mode === 'fixed') {
       topLevelPoints = scoring.fixed_points
     } else {

@@ -12,6 +12,7 @@ import type {
   PhotoUploadConfig,
   GpsCheckConfig,
   OpenDoorConfig,
+  PuzzleConfig,
   PlacementReward,
 } from '../../types'
 
@@ -34,6 +35,8 @@ export function AnswerConfigEditor({ type, config, onChange, gameId }: AnswerCon
       return <GpsCheckEditor config={config as GpsCheckConfig} onChange={onChange} />
     case 'open_door':
       return <OpenDoorEditor config={config as OpenDoorConfig} onChange={onChange} />
+    case 'puzzle':
+      return <PuzzleEditor config={config as PuzzleConfig} onChange={onChange} />
   }
 }
 
@@ -339,6 +342,295 @@ function OpenDoorEditor({ config, onChange }: { config: OpenDoorConfig; onChange
       <Toggle
         label="Typo's toestaan (fuzzy matching)"
         description="Klein verschil tussen invoer en juist antwoord wordt geaccepteerd (1-2 typo's afhankelijk van lengte)"
+        checked={config.fuzzy}
+        onChange={(v) => onChange({ ...config, fuzzy: v })}
+      />
+    </div>
+  )
+}
+
+function PuzzleEditor({ config, onChange }: { config: PuzzleConfig; onChange: (c: ChallengeConfig) => void }) {
+  // Defensive normalization: ensure 12 terms + 3 themes always
+  const terms = config.terms.length === 12
+    ? config.terms
+    : [...config.terms, ...Array(Math.max(0, 12 - config.terms.length)).fill('')].slice(0, 12)
+  const themes = config.themes.length === 3
+    ? config.themes
+    : [
+        ...config.themes.slice(0, 3),
+        ...Array(Math.max(0, 3 - config.themes.length)).fill(null).map((_, i) => ({
+          name: '',
+          term_indices: [i * 4, i * 4 + 1, i * 4 + 2, i * 4 + 3],
+          max_attempts: 3,
+          points: 30,
+        })),
+      ]
+
+  const scoringMode = config.scoring_mode ?? 'fixed'
+  const placements: PlacementReward[] = config.placements ?? [
+    { place: 1, points: 30 },
+    { place: 2, points: 20 },
+    { place: 3, points: 10 },
+  ]
+
+  function updateTerm(i: number, value: string) {
+    const next = [...terms]
+    next[i] = value
+    onChange({ ...config, terms: next })
+  }
+
+  function updateTheme(i: number, patch: Partial<typeof themes[number]>) {
+    const next = [...themes]
+    next[i] = { ...next[i], ...patch }
+    onChange({ ...config, themes: next })
+  }
+
+  function toggleTermInTheme(themeIdx: number, termIdx: number) {
+    const theme = themes[themeIdx]
+    const current = theme.term_indices
+    const isSelected = current.includes(termIdx)
+    let nextIndices: number[]
+    if (isSelected) {
+      nextIndices = current.filter((i) => i !== termIdx)
+    } else {
+      if (current.length >= 4) return // already at 4
+      // Check if other themes use this term — if so, remove from those
+      const otherThemes = themes.map((t, i) => i === themeIdx
+        ? t
+        : { ...t, term_indices: t.term_indices.filter((idx) => idx !== termIdx) })
+      otherThemes[themeIdx] = { ...theme, term_indices: [...current, termIdx].sort((a, b) => a - b) }
+      onChange({ ...config, themes: otherThemes })
+      return
+    }
+    updateTheme(themeIdx, { term_indices: nextIndices })
+  }
+
+  // Theme-color per index for the visual grouping in the term grid
+  const themeColors = ['bg-neon/20 border-neon', 'bg-amber/20 border-amber', 'bg-magenta/20 border-magenta']
+  function colorForTerm(termIdx: number): string | null {
+    for (let i = 0; i < themes.length; i++) {
+      if (themes[i].term_indices.includes(termIdx)) return themeColors[i]
+    }
+    return null
+  }
+
+  // Validation hints
+  const usedCount = new Map<number, number>()
+  themes.forEach((t) => t.term_indices.forEach((i) => usedCount.set(i, (usedCount.get(i) ?? 0) + 1)))
+  const unassigned = terms.map((_, i) => i).filter((i) => !usedCount.has(i))
+  const overlapping = Array.from(usedCount.entries()).filter(([, c]) => c > 1).map(([i]) => i)
+  const wrongCountThemes = themes.map((t, i) => ({ i, count: t.term_indices.length })).filter((x) => x.count !== 4)
+
+  const totalFixed = themes.reduce((sum, t) => sum + (t.points || 0), 0)
+  const totalPlacementBest = (placements[0]?.points ?? 0) * themes.length
+
+  function updatePlacements(next: PlacementReward[]) {
+    onChange({ ...config, placements: next })
+  }
+
+  return (
+    <div className="space-y-5">
+      <p className="text-sm text-text-muted">
+        Speler ziet 12 termen en moet de 3 thema's raden. Een foute gok kost een poging bij élk nog niet
+        opgelost thema — themas met meer pogingen blijven dus langer bereikbaar.
+      </p>
+
+      {/* 12 terms grid editor */}
+      <div className="space-y-2">
+        <p className="text-xs font-medium text-text-muted uppercase tracking-wider">12 termen</p>
+        <div className="grid grid-cols-2 gap-2">
+          {terms.map((term, i) => {
+            const color = colorForTerm(i)
+            return (
+              <div key={i} className={cn(
+                'flex items-center gap-1.5 p-1.5 rounded-lg border-2',
+                color ?? 'border-surface-overlay bg-surface-overlay/30',
+              )}>
+                <span className="text-text-faint text-xs font-mono w-5 text-center shrink-0">{i + 1}</span>
+                <input
+                  type="text"
+                  value={term}
+                  onChange={(e) => updateTerm(i, e.target.value)}
+                  placeholder={`Term ${i + 1}`}
+                  className="flex-1 min-w-0 bg-transparent text-sm text-text placeholder:text-text-faint outline-none"
+                />
+              </div>
+            )
+          })}
+        </div>
+        {unassigned.length > 0 && (
+          <p className="text-xs text-amber">
+            ⚠ {unassigned.length} term{unassigned.length !== 1 ? 'en' : ''} niet aan een thema toegewezen
+          </p>
+        )}
+        {overlapping.length > 0 && (
+          <p className="text-xs text-magenta">
+            ⚠ Term{overlapping.length !== 1 ? 'en' : ''} {overlapping.map((i) => i + 1).join(', ')} zit in meerdere thema's
+          </p>
+        )}
+      </div>
+
+      {/* Scoring mode picker (same pattern as Open Deur) */}
+      <div className="space-y-2">
+        <p className="text-xs font-medium text-text-muted uppercase tracking-wider">Scoring</p>
+        <div className="flex gap-2">
+          {(['fixed', 'placement'] as const).map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => onChange({ ...config, scoring_mode: mode, placements })}
+              className={cn(
+                'flex-1 px-3 py-2 rounded-lg text-sm font-medium border-2 transition-all',
+                scoringMode === mode
+                  ? 'border-neon bg-neon/10 text-neon'
+                  : 'border-surface-overlay bg-surface-raised text-text-muted hover:border-text-faint',
+              )}
+            >
+              {mode === 'fixed' ? 'Vaste punten' : 'Placement'}
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-text-faint">
+          {scoringMode === 'fixed'
+            ? 'Elk team krijgt vaste punten per opgelost thema.'
+            : '1e team dat een thema raadt krijgt meer pt dan latere teams. Per thema apart.'}
+        </p>
+      </div>
+
+      {/* 3 themes editor */}
+      <div className="space-y-3">
+        <p className="text-xs font-medium text-text-muted uppercase tracking-wider">3 thema's</p>
+        {themes.map((theme, ti) => (
+          <div key={ti} className={cn(
+            'space-y-2 p-3 rounded-lg border-2',
+            themeColors[ti].replace('bg-', 'bg-').replace('/20', '/5'),
+          )}>
+            <div className="flex items-center gap-2">
+              <span className="font-display font-bold text-text-muted shrink-0">Thema {ti + 1}</span>
+              <Input
+                value={theme.name}
+                onChange={(e) => updateTheme(ti, { name: e.target.value })}
+                placeholder={`Themanaam (bv. Vogels)`}
+                className="flex-1"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-text-muted">Max pogingen</label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={theme.max_attempts}
+                  onChange={(e) => updateTheme(ti, { max_attempts: Math.max(1, parseInt(e.target.value) || 1) })}
+                />
+              </div>
+              {scoringMode === 'fixed' && (
+                <div>
+                  <label className="text-xs text-text-muted">Punten (vast)</label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={theme.points}
+                    onChange={(e) => updateTheme(ti, { points: parseInt(e.target.value) || 0 })}
+                  />
+                </div>
+              )}
+            </div>
+            <div>
+              <p className="text-xs text-text-muted mb-1">
+                Termen voor dit thema ({theme.term_indices.length}/4)
+              </p>
+              <div className="grid grid-cols-4 gap-1.5">
+                {terms.map((term, ti2) => {
+                  const inThis = theme.term_indices.includes(ti2)
+                  const inOther = themes.some((other, oi) => oi !== ti && other.term_indices.includes(ti2))
+                  return (
+                    <button
+                      key={ti2}
+                      type="button"
+                      onClick={() => toggleTermInTheme(ti, ti2)}
+                      className={cn(
+                        'px-2 py-1 rounded text-xs text-left transition-all border',
+                        inThis
+                          ? 'border-neon bg-neon/15 text-neon'
+                          : inOther
+                            ? 'border-surface-overlay bg-surface-overlay/20 text-text-faint'
+                            : 'border-surface-overlay bg-surface-raised text-text-muted hover:border-text-faint',
+                      )}
+                      title={inOther ? 'Zit al in een ander thema — kies dit om het over te zetten' : ''}
+                    >
+                      <span className="font-mono text-text-faint mr-1">{ti2 + 1}</span>
+                      <span className="truncate">{term || '—'}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        ))}
+        {wrongCountThemes.length > 0 && (
+          <p className="text-xs text-amber">
+            ⚠ Elk thema moet exact 4 termen hebben.
+          </p>
+        )}
+      </div>
+
+      {/* Placement table */}
+      {scoringMode === 'placement' && (
+        <div className="space-y-2 p-3 rounded-lg bg-surface-overlay/20 border border-surface-overlay">
+          <p className="text-xs font-medium text-text-muted uppercase tracking-wider">
+            Placement (geldt per thema)
+          </p>
+          {placements.map((p, i) => (
+            <div key={i} className="flex gap-2 items-center">
+              <span className="text-text-muted text-sm w-16">{p.place}e team</span>
+              <div className="flex-1">
+                <Input
+                  type="number"
+                  min={0}
+                  value={p.points}
+                  onChange={(e) => {
+                    const next = [...placements]
+                    next[i] = { ...p, points: parseInt(e.target.value) || 0 }
+                    updatePlacements(next)
+                  }}
+                />
+              </div>
+              <span className="text-xs text-text-faint shrink-0">pt</span>
+              <button
+                type="button"
+                onClick={() => updatePlacements(placements.filter((_, idx) => idx !== i))}
+                className="p-1.5 text-text-faint hover:text-magenta transition-colors"
+                disabled={placements.length <= 1}
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => {
+              const nextPlace = (placements[placements.length - 1]?.place ?? 0) + 1
+              updatePlacements([...placements, { place: nextPlace, points: 0 }])
+            }}
+            className="flex items-center gap-1 text-xs text-neon hover:text-neon-dim transition-colors"
+          >
+            <Plus size={12} /> Plaats toevoegen
+          </button>
+        </div>
+      )}
+
+      <p className="text-xs text-text-faint">
+        Maximaal mogelijk per team:{' '}
+        <span className="text-text">
+          {scoringMode === 'fixed' ? totalFixed : totalPlacementBest} pt
+        </span>
+        {scoringMode === 'placement' && ' (als 1e voor alle 3)'}
+      </p>
+
+      <Toggle
+        label="Typo's toestaan op themanaam"
+        description="Kleine spelfouten in de themanaam worden geaccepteerd"
         checked={config.fuzzy}
         onChange={(v) => onChange({ ...config, fuzzy: v })}
       />
