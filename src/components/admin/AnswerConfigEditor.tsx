@@ -13,6 +13,8 @@ import type {
   GpsCheckConfig,
   OpenDoorConfig,
   PuzzleConfig,
+  GalleryConfig,
+  GalleryItem,
   PlacementReward,
 } from '../../types'
 
@@ -37,6 +39,8 @@ export function AnswerConfigEditor({ type, config, onChange, gameId }: AnswerCon
       return <OpenDoorEditor config={config as OpenDoorConfig} onChange={onChange} />
     case 'puzzle':
       return <PuzzleEditor config={config as PuzzleConfig} onChange={onChange} />
+    case 'gallery':
+      return <GalleryEditor config={config as GalleryConfig} onChange={onChange} gameId={gameId} />
   }
 }
 
@@ -631,6 +635,277 @@ function PuzzleEditor({ config, onChange }: { config: PuzzleConfig; onChange: (c
       <Toggle
         label="Typo's toestaan op themanaam"
         description="Kleine spelfouten in de themanaam worden geaccepteerd"
+        checked={config.fuzzy}
+        onChange={(v) => onChange({ ...config, fuzzy: v })}
+      />
+    </div>
+  )
+}
+
+function GalleryEditor({ config, onChange, gameId }: { config: GalleryConfig; onChange: (c: ChallengeConfig) => void; gameId?: string }) {
+  const items = config.items ?? []
+  const scoringMode = config.scoring_mode ?? 'fixed'
+  const placements: PlacementReward[] = config.placements ?? [
+    { place: 1, points: 20 },
+    { place: 2, points: 10 },
+    { place: 3, points: 5 },
+  ]
+  const attempts = config.attempts ?? { unlimited: true, max: 5 }
+
+  function updateItem(i: number, patch: Partial<GalleryItem>) {
+    const next = [...items]
+    next[i] = { ...next[i], ...patch }
+    onChange({ ...config, items: next })
+  }
+
+  function addItem() {
+    onChange({
+      ...config,
+      items: [...items, { media: { url: '', type: 'image' }, answer: '', points: 10 }],
+    })
+  }
+
+  async function removeItem(i: number) {
+    const item = items[i]
+    if (item?.media?.url) await deleteChallengeMedia(item.media.url)
+    onChange({ ...config, items: items.filter((_, idx) => idx !== i) })
+  }
+
+  async function handleImageUpload(i: number, file: File) {
+    if (!gameId) return
+    const url = await uploadChallengeMedia(file, gameId)
+    if (url) {
+      updateItem(i, { media: { url, type: 'image' } })
+    }
+  }
+
+  async function clearImage(i: number) {
+    const item = items[i]
+    if (item?.media?.url) await deleteChallengeMedia(item.media.url)
+    updateItem(i, { media: { url: '', type: 'image' } })
+  }
+
+  function updatePlacements(next: PlacementReward[]) {
+    onChange({ ...config, placements: next })
+  }
+
+  const totalFixed = items.reduce((sum, item) => sum + (item.points || 0), 0)
+  const totalPlacementBest = (placements[0]?.points ?? 0) * items.length
+  const itemsMissingImage = items.filter((it) => !it.media?.url).length
+  const itemsMissingAnswer = items.filter((it) => !it.answer?.trim()).length
+
+  return (
+    <div className="space-y-5">
+      <p className="text-sm text-text-muted">
+        Set foto's met een antwoord per foto onder één thema. Speler tikt antwoorden één voor één in,
+        server bepaalt zelf bij welke foto het hoort.
+      </p>
+
+      {/* Theme */}
+      <div className="space-y-2">
+        <Input
+          label="Overkoepelend thema"
+          value={config.theme ?? ''}
+          onChange={(e) => onChange({ ...config, theme: e.target.value })}
+          placeholder="Bijv. Acteurs in Disney-films"
+        />
+        <Toggle
+          label="Thema tonen aan speler"
+          description="Als hint zichtbaar bovenaan de challenge"
+          checked={config.show_theme}
+          onChange={(v) => onChange({ ...config, show_theme: v })}
+        />
+      </div>
+
+      {/* Scoring mode */}
+      <div className="space-y-2">
+        <p className="text-xs font-medium text-text-muted uppercase tracking-wider">Scoring</p>
+        <div className="flex gap-2">
+          {(['fixed', 'placement'] as const).map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => onChange({ ...config, scoring_mode: mode, placements })}
+              className={cn(
+                'flex-1 px-3 py-2 rounded-lg text-sm font-medium border-2 transition-all',
+                scoringMode === mode
+                  ? 'border-neon bg-neon/10 text-neon'
+                  : 'border-surface-overlay bg-surface-raised text-text-muted hover:border-text-faint',
+              )}
+            >
+              {mode === 'fixed' ? 'Vaste punten' : 'Placement'}
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-text-faint">
+          {scoringMode === 'fixed'
+            ? 'Vaste punten per goed antwoord.'
+            : '1e team met antwoord X = meeste pt. Per foto apart.'}
+        </p>
+      </div>
+
+      {/* Items */}
+      <div className="space-y-2">
+        <p className="text-xs font-medium text-text-muted uppercase tracking-wider">
+          Foto's ({items.length})
+        </p>
+        <div className="space-y-2">
+          {items.map((item, i) => (
+            <div key={i} className="flex gap-2 p-2 rounded-lg bg-surface-overlay/30 border border-surface-overlay">
+              {/* Image */}
+              <div className="shrink-0">
+                {item.media?.url ? (
+                  <div className="relative">
+                    <img src={item.media.url} alt="" className="w-20 h-20 object-cover rounded" />
+                    <button
+                      type="button"
+                      onClick={() => clearImage(i)}
+                      className="absolute -top-1 -right-1 p-0.5 rounded-full bg-surface text-text-muted hover:text-magenta transition-colors"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="w-20 h-20 flex flex-col items-center justify-center gap-1 rounded border-2 border-dashed border-surface-overlay cursor-pointer hover:border-text-faint transition-colors">
+                    <ImagePlus size={18} className="text-text-faint" />
+                    <span className="text-[10px] text-text-faint">Upload</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) handleImageUpload(i, file)
+                      }}
+                    />
+                  </label>
+                )}
+              </div>
+              {/* Answer + points + delete */}
+              <div className="flex-1 min-w-0 space-y-1.5">
+                <Input
+                  value={item.answer ?? ''}
+                  onChange={(e) => updateItem(i, { answer: e.target.value })}
+                  placeholder={`Antwoord ${i + 1}`}
+                />
+                <div className="flex gap-2 items-center">
+                  {scoringMode === 'fixed' && (
+                    <div className="w-24">
+                      <Input
+                        type="number"
+                        min={0}
+                        value={item.points}
+                        onChange={(e) => updateItem(i, { points: parseInt(e.target.value) || 0 })}
+                        placeholder="Pt"
+                      />
+                    </div>
+                  )}
+                  <span className="text-xs text-text-faint">{scoringMode === 'fixed' ? 'pt' : ''}</span>
+                  <div className="flex-1" />
+                  <button
+                    type="button"
+                    onClick={() => removeItem(i)}
+                    className="p-1.5 text-text-faint hover:text-magenta transition-colors"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <Button type="button" variant="ghost" size="sm" className="gap-1" onClick={addItem}>
+          <Plus size={14} /> Foto toevoegen
+        </Button>
+        {itemsMissingImage > 0 && (
+          <p className="text-xs text-amber">⚠ {itemsMissingImage} foto{itemsMissingImage !== 1 ? "'s" : ''} mist een afbeelding</p>
+        )}
+        {itemsMissingAnswer > 0 && (
+          <p className="text-xs text-amber">⚠ {itemsMissingAnswer} foto{itemsMissingAnswer !== 1 ? "'s" : ''} mist een antwoord</p>
+        )}
+      </div>
+
+      {/* Placement table */}
+      {scoringMode === 'placement' && (
+        <div className="space-y-2 p-3 rounded-lg bg-surface-overlay/20 border border-surface-overlay">
+          <p className="text-xs font-medium text-text-muted uppercase tracking-wider">
+            Placement (geldt per foto)
+          </p>
+          {placements.map((p, i) => (
+            <div key={i} className="flex gap-2 items-center">
+              <span className="text-text-muted text-sm w-16">{p.place}e team</span>
+              <div className="flex-1">
+                <Input
+                  type="number"
+                  min={0}
+                  value={p.points}
+                  onChange={(e) => {
+                    const next = [...placements]
+                    next[i] = { ...p, points: parseInt(e.target.value) || 0 }
+                    updatePlacements(next)
+                  }}
+                />
+              </div>
+              <span className="text-xs text-text-faint shrink-0">pt</span>
+              <button
+                type="button"
+                onClick={() => updatePlacements(placements.filter((_, idx) => idx !== i))}
+                className="p-1.5 text-text-faint hover:text-magenta transition-colors"
+                disabled={placements.length <= 1}
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => {
+              const nextPlace = (placements[placements.length - 1]?.place ?? 0) + 1
+              updatePlacements([...placements, { place: nextPlace, points: 0 }])
+            }}
+            className="flex items-center gap-1 text-xs text-neon hover:text-neon-dim transition-colors"
+          >
+            <Plus size={12} /> Plaats toevoegen
+          </button>
+        </div>
+      )}
+
+      {/* Attempts */}
+      <div className="space-y-2 p-3 rounded-lg bg-surface-overlay/20 border border-surface-overlay">
+        <p className="text-xs font-medium text-text-muted uppercase tracking-wider">Pogingen</p>
+        <Toggle
+          label="Onbeperkt"
+          description="Speler kan blijven proberen tot tijd op is of alle foto's gevonden"
+          checked={attempts.unlimited}
+          onChange={(v) => onChange({ ...config, attempts: { ...attempts, unlimited: v } })}
+        />
+        {!attempts.unlimited && (
+          <div>
+            <label className="text-xs text-text-muted">Max foute pogingen (totaal)</label>
+            <Input
+              type="number"
+              min={1}
+              value={attempts.max}
+              onChange={(e) => onChange({ ...config, attempts: { ...attempts, max: Math.max(1, parseInt(e.target.value) || 1) } })}
+            />
+            <p className="text-xs text-text-faint mt-1">
+              Na {attempts.max} foute pogingen wordt de challenge automatisch afgerond.
+            </p>
+          </div>
+        )}
+      </div>
+
+      <p className="text-xs text-text-faint">
+        Maximaal mogelijk per team:{' '}
+        <span className="text-text">
+          {scoringMode === 'fixed' ? totalFixed : totalPlacementBest} pt
+        </span>
+        {scoringMode === 'placement' && items.length > 0 && ` (als 1e voor alle ${items.length})`}
+      </p>
+
+      <Toggle
+        label="Typo's toestaan (fuzzy matching)"
+        description="Klein verschil tussen invoer en juist antwoord wordt geaccepteerd"
         checked={config.fuzzy}
         onChange={(v) => onChange({ ...config, fuzzy: v })}
       />

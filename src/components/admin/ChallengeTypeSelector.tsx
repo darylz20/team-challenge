@@ -1,4 +1,4 @@
-import { ListChecks, Type, Camera, MapPin, DoorOpen, Grid3x3 } from 'lucide-react'
+import { ListChecks, Type, Camera, MapPin, DoorOpen, Grid3x3, Images } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import type { ChallengeType } from '../../types'
 
@@ -9,6 +9,7 @@ const types: { value: ChallengeType; label: string; icon: typeof ListChecks; des
   { value: 'gps_check', label: 'GPS Check', icon: MapPin, description: 'Visit a location' },
   { value: 'open_door', label: 'Open Deur', icon: DoorOpen, description: '4 antwoorden, tegen de klok' },
   { value: 'puzzle', label: 'Puzzel', icon: Grid3x3, description: '12 termen, 3 thema\'s raden' },
+  { value: 'gallery', label: 'Galerij', icon: Images, description: 'Antwoord per foto onder thema' },
 ]
 
 interface ChallengeTypeSelectorProps {

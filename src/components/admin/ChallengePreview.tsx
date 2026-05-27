@@ -12,6 +12,7 @@ import type {
   MultipleChoiceConfig,
   OpenDoorConfig,
   PuzzleConfig,
+  GalleryConfig,
 } from '../../types'
 
 interface ChallengePreviewProps {
@@ -133,6 +134,48 @@ function OpenDoorPreview({ config }: { config: OpenDoorConfig }) {
   )
 }
 
+function GalleryPreview({ config }: { config: GalleryConfig }) {
+  const items = config.items ?? []
+  const mode = config.scoring_mode ?? 'fixed'
+  const bestPlace = config.placements?.[0]?.points ?? 0
+  return (
+    <div className="space-y-3">
+      {config.show_theme && config.theme && (
+        <div className="text-center">
+          <p className="text-xs text-text-faint uppercase tracking-wider">Thema</p>
+          <p className="text-sm font-semibold text-text">{config.theme}</p>
+        </div>
+      )}
+      <div className="grid grid-cols-2 gap-2">
+        {items.length === 0 ? (
+          <p className="col-span-2 text-xs text-text-faint italic text-center py-4">Nog geen foto's toegevoegd</p>
+        ) : (
+          items.map((item, i) => (
+            <div key={i} className="relative rounded border-2 border-surface-overlay bg-surface-raised overflow-hidden">
+              {item.media?.url ? (
+                <img src={item.media.url} alt="" className="w-full h-24 object-cover" />
+              ) : (
+                <div className="w-full h-24 flex items-center justify-center bg-surface-overlay/30">
+                  <HelpCircle size={20} className="text-text-faint" />
+                </div>
+              )}
+              <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-void/80 text-[10px] font-mono text-amber">
+                {mode === 'placement' ? `tot ${bestPlace}` : `${item.points}`} pt
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+      <input
+        type="text"
+        readOnly
+        placeholder="Typ een antwoord..."
+        className="w-full bg-surface-raised border border-surface-overlay rounded-lg px-4 py-3 text-text placeholder:text-text-faint outline-none"
+      />
+    </div>
+  )
+}
+
 function PuzzlePreview({ config }: { config: PuzzleConfig }) {
   const terms = config.terms ?? []
   const themes = config.themes ?? []
@@ -227,6 +270,13 @@ export function ChallengePreview({
       ? (pz.placements?.[0]?.points ?? 0) * (pz.themes?.length ?? 0)
       : pz.themes?.reduce((s, t) => s + (t.points || 0), 0) ?? 0
     pointsLabel = `max ${total} pt`
+  } else if (type === 'gallery') {
+    const g = config as GalleryConfig
+    const mode = g.scoring_mode ?? 'fixed'
+    const total = mode === 'placement'
+      ? (g.placements?.[0]?.points ?? 0) * (g.items?.length ?? 0)
+      : g.items?.reduce((s, it) => s + (it.points || 0), 0) ?? 0
+    pointsLabel = `max ${total} pt`
   } else if (scoring.mode === 'fixed') {
     pointsLabel = `${scoring.fixed_points} pts`
   } else {
@@ -310,6 +360,8 @@ export function ChallengePreview({
         return <OpenDoorPreview config={config as OpenDoorConfig} />
       case 'puzzle':
         return <PuzzlePreview config={config as PuzzleConfig} />
+      case 'gallery':
+        return <GalleryPreview config={config as GalleryConfig} />
     }
   }
 

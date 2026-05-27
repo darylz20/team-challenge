@@ -32,6 +32,7 @@ export type ChallengeType =
   | 'gps_check'
   | 'open_door'
   | 'puzzle'
+  | 'gallery'
 export type MediaType = 'image' | 'audio' | 'video'
 
 export interface MediaItem {
@@ -120,6 +121,26 @@ export interface PuzzleConfig {
   fuzzy: boolean
 }
 
+// ── Galerij (De Slimste Mens) ──
+// Set of images, each with an answer. Optional shared theme shown as hint.
+// Single shared input: server fuzzy-matches against unfound items.
+// One global max-attempts counter for the whole challenge.
+export interface GalleryItem {
+  media: MediaItem
+  answer: string
+  points: number // used in 'fixed' scoring mode
+}
+
+export interface GalleryConfig {
+  theme: string
+  show_theme: boolean // tonen aan speler als hint?
+  items: GalleryItem[] // variable length (admin chooses)
+  scoring_mode: OpenDoorScoringMode
+  placements: PlacementReward[] // per-item placement in 'placement' mode
+  attempts: AttemptsConfig // total wrong-attempt counter across the whole challenge
+  fuzzy: boolean
+}
+
 export type ChallengeConfig =
   | MultipleChoiceConfig
   | FreeTextConfig
@@ -127,6 +148,7 @@ export type ChallengeConfig =
   | GpsCheckConfig
   | OpenDoorConfig
   | PuzzleConfig
+  | GalleryConfig
 
 // ── Type capabilities registry ──
 // Drives builder UI visibility + player flow routing.
@@ -144,6 +166,7 @@ export const TYPE_CAPABILITIES: Record<ChallengeType, TypeCapabilities> = {
   gps_check:         { uses_global_scoring: true,  uses_global_attempts: true,  uses_progress: false, uses_display_config: true  },
   open_door:         { uses_global_scoring: false, uses_global_attempts: false, uses_progress: true,  uses_display_config: true  },
   puzzle:            { uses_global_scoring: false, uses_global_attempts: false, uses_progress: true,  uses_display_config: false },
+  gallery:           { uses_global_scoring: false, uses_global_attempts: false, uses_progress: true,  uses_display_config: true  },
 }
 
 // ── Challenge Progress (interactive types) ──
@@ -160,6 +183,8 @@ export interface ChallengeProgressState {
   attempts_remaining?: number[]
   // puzzle: actual points awarded per solved theme
   points_per_solve?: Record<string, number>
+  // gallery: total wrong-attempts used so far (across whole challenge)
+  attempts_used?: number
   // future types add their own keys here
 }
 
@@ -304,6 +329,19 @@ export const DEFAULT_CHALLENGE_CONFIGS: Record<ChallengeType, ChallengeConfig> =
       { place: 2, points: 20 },
       { place: 3, points: 10 },
     ],
+    fuzzy: true,
+  },
+  gallery: {
+    theme: '',
+    show_theme: false,
+    items: [],
+    scoring_mode: 'fixed',
+    placements: [
+      { place: 1, points: 20 },
+      { place: 2, points: 10 },
+      { place: 3, points: 5 },
+    ],
+    attempts: { unlimited: true, max: 5 },
     fuzzy: true,
   },
 }
