@@ -33,6 +33,7 @@ export type ChallengeType =
   | 'open_door'
   | 'puzzle'
   | 'gallery'
+  | 'collective_memory'
 export type MediaType = 'image' | 'audio' | 'video'
 
 export interface MediaItem {
@@ -141,6 +142,24 @@ export interface GalleryConfig {
   fuzzy: boolean
 }
 
+// ── Collectief Geheugen (De Slimste Mens) ──
+// One media fragment (image/video) + 5 keywords with ascending point values.
+// Single input, server fuzzy-matches against unfound keywords.
+// One global max-attempts counter.
+// Media is supplied via the standard challenge media (config.media[0]).
+export interface CollectiveMemoryKeyword {
+  text: string
+  points: number // used in 'fixed' scoring mode (typical: 10/20/30/40/50)
+}
+
+export interface CollectiveMemoryConfig {
+  keywords: CollectiveMemoryKeyword[] // fixed length: 5
+  scoring_mode: OpenDoorScoringMode
+  placements: PlacementReward[] // per-keyword placement in 'placement' mode
+  attempts: AttemptsConfig // total wrong-attempt counter
+  fuzzy: boolean
+}
+
 export type ChallengeConfig =
   | MultipleChoiceConfig
   | FreeTextConfig
@@ -149,6 +168,7 @@ export type ChallengeConfig =
   | OpenDoorConfig
   | PuzzleConfig
   | GalleryConfig
+  | CollectiveMemoryConfig
 
 // ── Type capabilities registry ──
 // Drives builder UI visibility + player flow routing.
@@ -167,6 +187,7 @@ export const TYPE_CAPABILITIES: Record<ChallengeType, TypeCapabilities> = {
   open_door:         { uses_global_scoring: false, uses_global_attempts: false, uses_progress: true,  uses_display_config: true  },
   puzzle:            { uses_global_scoring: false, uses_global_attempts: false, uses_progress: true,  uses_display_config: false },
   gallery:           { uses_global_scoring: false, uses_global_attempts: false, uses_progress: true,  uses_display_config: true  },
+  collective_memory: { uses_global_scoring: false, uses_global_attempts: false, uses_progress: true,  uses_display_config: true  },
 }
 
 // ── Challenge Progress (interactive types) ──
@@ -342,6 +363,23 @@ export const DEFAULT_CHALLENGE_CONFIGS: Record<ChallengeType, ChallengeConfig> =
       { place: 3, points: 5 },
     ],
     attempts: { unlimited: true, max: 5 },
+    fuzzy: true,
+  },
+  collective_memory: {
+    keywords: [
+      { text: '', points: 10 },
+      { text: '', points: 20 },
+      { text: '', points: 30 },
+      { text: '', points: 40 },
+      { text: '', points: 50 },
+    ],
+    scoring_mode: 'fixed',
+    placements: [
+      { place: 1, points: 30 },
+      { place: 2, points: 20 },
+      { place: 3, points: 10 },
+    ],
+    attempts: { unlimited: false, max: 5 },
     fuzzy: true,
   },
 }

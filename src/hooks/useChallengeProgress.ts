@@ -17,6 +17,18 @@ export interface OpenDoorAttemptResult {
   time_expired?: boolean
 }
 
+export interface CollectiveMemoryAttemptResult {
+  matched: boolean
+  index?: number
+  points?: number
+  place?: number | null
+  attempts_used?: number
+  attempts_exhausted?: boolean
+  state?: import('../types').ChallengeProgressState
+  error?: string
+  time_expired?: boolean
+}
+
 export interface GalleryAttemptResult {
   matched: boolean
   index?: number
@@ -130,6 +142,28 @@ export function useChallengeProgress({ challengeId, timeLimitSeconds }: UseChall
     [challengeId, teamId, gameId, sessionToken],
   )
 
+  const attemptCollectiveMemory = useCallback(
+    async (text: string): Promise<CollectiveMemoryAttemptResult> => {
+      if (!challengeId || !teamId || !gameId || !sessionToken) {
+        return { matched: false, error: 'Session missing' }
+      }
+      const { data, error: rpcError } = await supabase.rpc('collective_memory_attempt', {
+        p_team_id: teamId,
+        p_challenge_id: challengeId,
+        p_game_id: gameId,
+        p_session_token: sessionToken,
+        p_attempt: text,
+      })
+      if (rpcError) return { matched: false, error: rpcError.message }
+      if (data?.error) return { matched: false, error: data.error as string, time_expired: data.time_expired, attempts_exhausted: data.attempts_exhausted }
+      if (data?.state) {
+        setState(data.state as ChallengeProgressState)
+      }
+      return data as CollectiveMemoryAttemptResult
+    },
+    [challengeId, teamId, gameId, sessionToken],
+  )
+
   const attemptGallery = useCallback(
     async (text: string): Promise<GalleryAttemptResult> => {
       if (!challengeId || !teamId || !gameId || !sessionToken) {
@@ -198,6 +232,7 @@ export function useChallengeProgress({ challengeId, timeLimitSeconds }: UseChall
     attemptOpenDoor,
     attemptPuzzle,
     attemptGallery,
+    attemptCollectiveMemory,
     finalize,
   }
 }

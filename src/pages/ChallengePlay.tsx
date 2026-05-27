@@ -9,6 +9,7 @@ import { MediaGallery } from '../components/shared/MediaGallery'
 import { OpenDoorPlay } from '../components/play/OpenDoorPlay'
 import { PuzzlePlay } from '../components/play/PuzzlePlay'
 import { GalleryPlay } from '../components/play/GalleryPlay'
+import { CollectiveMemoryPlay } from '../components/play/CollectiveMemoryPlay'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
@@ -204,6 +205,8 @@ function InteractiveChallengeView({ challenge }: { challenge: NonNullable<Return
         return <PuzzlePlay challenge={challenge} />
       case 'gallery':
         return <GalleryPlay challenge={challenge} />
+      case 'collective_memory':
+        return <CollectiveMemoryPlay challenge={challenge} />
       default:
         return <p className="text-sm text-text-muted">Onbekend type</p>
     }

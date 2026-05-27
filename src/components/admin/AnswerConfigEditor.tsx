@@ -15,6 +15,7 @@ import type {
   PuzzleConfig,
   GalleryConfig,
   GalleryItem,
+  CollectiveMemoryConfig,
   PlacementReward,
 } from '../../types'
 
@@ -41,6 +42,8 @@ export function AnswerConfigEditor({ type, config, onChange, gameId }: AnswerCon
       return <PuzzleEditor config={config as PuzzleConfig} onChange={onChange} />
     case 'gallery':
       return <GalleryEditor config={config as GalleryConfig} onChange={onChange} gameId={gameId} />
+    case 'collective_memory':
+      return <CollectiveMemoryEditor config={config as CollectiveMemoryConfig} onChange={onChange} />
   }
 }
 
@@ -906,6 +909,188 @@ function GalleryEditor({ config, onChange, gameId }: { config: GalleryConfig; on
       <Toggle
         label="Typo's toestaan (fuzzy matching)"
         description="Klein verschil tussen invoer en juist antwoord wordt geaccepteerd"
+        checked={config.fuzzy}
+        onChange={(v) => onChange({ ...config, fuzzy: v })}
+      />
+    </div>
+  )
+}
+
+function CollectiveMemoryEditor({ config, onChange }: { config: CollectiveMemoryConfig; onChange: (c: ChallengeConfig) => void }) {
+  // Defensive: always exactly 5 keywords
+  const keywords = config.keywords.length === 5
+    ? config.keywords
+    : [
+        ...config.keywords.slice(0, 5),
+        ...Array(Math.max(0, 5 - config.keywords.length)).fill(null).map((_, i) => ({
+          text: '',
+          points: (i + 1) * 10,
+        })),
+      ]
+
+  const scoringMode = config.scoring_mode ?? 'fixed'
+  const placements: PlacementReward[] = config.placements ?? [
+    { place: 1, points: 30 },
+    { place: 2, points: 20 },
+    { place: 3, points: 10 },
+  ]
+  const attempts = config.attempts ?? { unlimited: false, max: 5 }
+
+  function updateKeyword(i: number, patch: Partial<{ text: string; points: number }>) {
+    const next = [...keywords]
+    next[i] = { ...next[i], ...patch }
+    onChange({ ...config, keywords: next })
+  }
+
+  function updatePlacements(next: PlacementReward[]) {
+    onChange({ ...config, placements: next })
+  }
+
+  const totalFixed = keywords.reduce((sum, k) => sum + (k.points || 0), 0)
+  const totalPlacementBest = (placements[0]?.points ?? 0) * keywords.length
+
+  return (
+    <div className="space-y-5">
+      <p className="text-sm text-text-muted">
+        Voeg het beeldfragment toe via Challenge Prompt (media-upload bovenaan). Speler ziet de media + 5 trefwoord-slots
+        met oplopende waardes (10/20/30/40/50 pt typisch). Hoogste waarde = lastigste/meest specifiek.
+      </p>
+
+      {/* Scoring mode */}
+      <div className="space-y-2">
+        <p className="text-xs font-medium text-text-muted uppercase tracking-wider">Scoring</p>
+        <div className="flex gap-2">
+          {(['fixed', 'placement'] as const).map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => onChange({ ...config, scoring_mode: mode, placements })}
+              className={cn(
+                'flex-1 px-3 py-2 rounded-lg text-sm font-medium border-2 transition-all',
+                scoringMode === mode
+                  ? 'border-neon bg-neon/10 text-neon'
+                  : 'border-surface-overlay bg-surface-raised text-text-muted hover:border-text-faint',
+              )}
+            >
+              {mode === 'fixed' ? 'Vaste punten' : 'Placement'}
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-text-faint">
+          {scoringMode === 'fixed'
+            ? 'Vaste punten per trefwoord (oplopend).'
+            : '1e team met trefwoord X = meeste pt. Per trefwoord apart.'}
+        </p>
+      </div>
+
+      {/* 5 keyword rows */}
+      <div className="space-y-2">
+        <p className="text-xs font-medium text-text-muted uppercase tracking-wider">5 trefwoorden</p>
+        {keywords.map((kw, i) => (
+          <div key={i} className="flex gap-2 items-start p-2.5 rounded-lg bg-surface-overlay/30">
+            <span className="font-display text-neon font-bold w-6 text-center pt-2.5">{i + 1}</span>
+            <Input
+              value={kw.text}
+              onChange={(e) => updateKeyword(i, { text: e.target.value })}
+              placeholder={`Trefwoord ${i + 1}`}
+              className="flex-1"
+            />
+            {scoringMode === 'fixed' && (
+              <div className="w-24">
+                <Input
+                  type="number"
+                  min={0}
+                  value={kw.points}
+                  onChange={(e) => updateKeyword(i, { points: parseInt(e.target.value) || 0 })}
+                  placeholder="Pt"
+                />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Placement table */}
+      {scoringMode === 'placement' && (
+        <div className="space-y-2 p-3 rounded-lg bg-surface-overlay/20 border border-surface-overlay">
+          <p className="text-xs font-medium text-text-muted uppercase tracking-wider">
+            Placement (geldt per trefwoord)
+          </p>
+          {placements.map((p, i) => (
+            <div key={i} className="flex gap-2 items-center">
+              <span className="text-text-muted text-sm w-16">{p.place}e team</span>
+              <div className="flex-1">
+                <Input
+                  type="number"
+                  min={0}
+                  value={p.points}
+                  onChange={(e) => {
+                    const next = [...placements]
+                    next[i] = { ...p, points: parseInt(e.target.value) || 0 }
+                    updatePlacements(next)
+                  }}
+                />
+              </div>
+              <span className="text-xs text-text-faint shrink-0">pt</span>
+              <button
+                type="button"
+                onClick={() => updatePlacements(placements.filter((_, idx) => idx !== i))}
+                className="p-1.5 text-text-faint hover:text-magenta transition-colors"
+                disabled={placements.length <= 1}
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => {
+              const nextPlace = (placements[placements.length - 1]?.place ?? 0) + 1
+              updatePlacements([...placements, { place: nextPlace, points: 0 }])
+            }}
+            className="flex items-center gap-1 text-xs text-neon hover:text-neon-dim transition-colors"
+          >
+            <Plus size={12} /> Plaats toevoegen
+          </button>
+        </div>
+      )}
+
+      {/* Attempts */}
+      <div className="space-y-2 p-3 rounded-lg bg-surface-overlay/20 border border-surface-overlay">
+        <p className="text-xs font-medium text-text-muted uppercase tracking-wider">Pogingen</p>
+        <Toggle
+          label="Onbeperkt"
+          description="Speler kan blijven proberen tot tijd op is of alle trefwoorden gevonden"
+          checked={attempts.unlimited}
+          onChange={(v) => onChange({ ...config, attempts: { ...attempts, unlimited: v } })}
+        />
+        {!attempts.unlimited && (
+          <div>
+            <label className="text-xs text-text-muted">Max foute pogingen (totaal)</label>
+            <Input
+              type="number"
+              min={1}
+              value={attempts.max}
+              onChange={(e) => onChange({ ...config, attempts: { ...attempts, max: Math.max(1, parseInt(e.target.value) || 1) } })}
+            />
+            <p className="text-xs text-text-faint mt-1">
+              Na {attempts.max} foute pogingen wordt de challenge automatisch afgerond.
+            </p>
+          </div>
+        )}
+      </div>
+
+      <p className="text-xs text-text-faint">
+        Maximaal mogelijk per team:{' '}
+        <span className="text-text">
+          {scoringMode === 'fixed' ? totalFixed : totalPlacementBest} pt
+        </span>
+        {scoringMode === 'placement' && ` (als 1e voor alle 5)`}
+      </p>
+
+      <Toggle
+        label="Typo's toestaan (fuzzy matching)"
+        description="Klein verschil tussen invoer en juist trefwoord wordt geaccepteerd"
         checked={config.fuzzy}
         onChange={(v) => onChange({ ...config, fuzzy: v })}
       />

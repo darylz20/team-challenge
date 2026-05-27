@@ -13,6 +13,7 @@ import type {
   OpenDoorConfig,
   PuzzleConfig,
   GalleryConfig,
+  CollectiveMemoryConfig,
 } from '../../types'
 
 interface ChallengePreviewProps {
@@ -128,6 +129,36 @@ function OpenDoorPreview({ config }: { config: OpenDoorConfig }) {
         type="text"
         readOnly
         placeholder="Typ een antwoord..."
+        className="w-full bg-surface-raised border border-surface-overlay rounded-lg px-4 py-3 text-text placeholder:text-text-faint outline-none"
+      />
+    </div>
+  )
+}
+
+function CollectiveMemoryPreview({ config }: { config: CollectiveMemoryConfig }) {
+  const keywords = config.keywords ?? []
+  const mode = config.scoring_mode ?? 'fixed'
+  const bestPlace = config.placements?.[0]?.points ?? 0
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-5 gap-1.5">
+        {keywords.slice(0, 5).map((kw, i) => {
+          const display = mode === 'placement' ? `tot ${bestPlace}` : `${kw.points}`
+          return (
+            <div
+              key={i}
+              className="flex flex-col items-center justify-center p-2 rounded border-2 border-surface-overlay bg-surface-raised"
+            >
+              <HelpCircle size={14} className="text-text-faint mb-0.5" />
+              <span className="text-[10px] font-mono text-amber">{display}</span>
+            </div>
+          )
+        })}
+      </div>
+      <input
+        type="text"
+        readOnly
+        placeholder="Typ een trefwoord..."
         className="w-full bg-surface-raised border border-surface-overlay rounded-lg px-4 py-3 text-text placeholder:text-text-faint outline-none"
       />
     </div>
@@ -277,6 +308,13 @@ export function ChallengePreview({
       ? (g.placements?.[0]?.points ?? 0) * (g.items?.length ?? 0)
       : g.items?.reduce((s, it) => s + (it.points || 0), 0) ?? 0
     pointsLabel = `max ${total} pt`
+  } else if (type === 'collective_memory') {
+    const cm = config as CollectiveMemoryConfig
+    const mode = cm.scoring_mode ?? 'fixed'
+    const total = mode === 'placement'
+      ? (cm.placements?.[0]?.points ?? 0) * (cm.keywords?.length ?? 0)
+      : cm.keywords?.reduce((s, k) => s + (k.points || 0), 0) ?? 0
+    pointsLabel = `max ${total} pt`
   } else if (scoring.mode === 'fixed') {
     pointsLabel = `${scoring.fixed_points} pts`
   } else {
@@ -362,6 +400,8 @@ export function ChallengePreview({
         return <PuzzlePreview config={config as PuzzleConfig} />
       case 'gallery':
         return <GalleryPreview config={config as GalleryConfig} />
+      case 'collective_memory':
+        return <CollectiveMemoryPreview config={config as CollectiveMemoryConfig} />
     }
   }
 
