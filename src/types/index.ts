@@ -28,8 +28,6 @@ export interface Game {
 export type ChallengeType =
   | 'multiple_choice'
   | 'free_text'
-  | 'photo_upload'
-  | 'gps_check'
   | 'open_door'
   | 'puzzle'
   | 'gallery'
@@ -72,16 +70,6 @@ export interface MultipleChoiceConfig {
 export interface FreeTextConfig {
   correct_answer: string
   case_sensitive: boolean
-}
-
-export interface PhotoUploadConfig {
-  requires_review: boolean
-}
-
-export interface GpsCheckConfig {
-  lat: number
-  lng: number
-  radius_meters: number
 }
 
 // ── Open Deur (De Slimste Mens) ──
@@ -163,8 +151,6 @@ export interface CollectiveMemoryConfig {
 export type ChallengeConfig =
   | MultipleChoiceConfig
   | FreeTextConfig
-  | PhotoUploadConfig
-  | GpsCheckConfig
   | OpenDoorConfig
   | PuzzleConfig
   | GalleryConfig
@@ -182,8 +168,6 @@ export interface TypeCapabilities {
 export const TYPE_CAPABILITIES: Record<ChallengeType, TypeCapabilities> = {
   multiple_choice:   { uses_global_scoring: true,  uses_global_attempts: true,  uses_progress: false, uses_display_config: true  },
   free_text:         { uses_global_scoring: true,  uses_global_attempts: true,  uses_progress: false, uses_display_config: true  },
-  photo_upload:      { uses_global_scoring: true,  uses_global_attempts: true,  uses_progress: false, uses_display_config: true  },
-  gps_check:         { uses_global_scoring: true,  uses_global_attempts: true,  uses_progress: false, uses_display_config: true  },
   open_door:         { uses_global_scoring: false, uses_global_attempts: false, uses_progress: true,  uses_display_config: true  },
   puzzle:            { uses_global_scoring: false, uses_global_attempts: false, uses_progress: true,  uses_display_config: false },
   gallery:           { uses_global_scoring: false, uses_global_attempts: false, uses_progress: true,  uses_display_config: true  },
@@ -330,8 +314,6 @@ export interface ChallengeFormData {
 export const DEFAULT_CHALLENGE_CONFIGS: Record<ChallengeType, ChallengeConfig> = {
   multiple_choice: { options: [{ text: '', is_correct: false }, { text: '', is_correct: false }], allow_multiple: false },
   free_text: { correct_answer: '', case_sensitive: false },
-  photo_upload: { requires_review: true },
-  gps_check: { lat: 0, lng: 0, radius_meters: 50 },
   open_door: {
     answers: [
       { text: '', points: 10 },

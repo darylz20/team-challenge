@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { ArrowLeft, Clock, Lightbulb, Camera, MapPin, Trophy, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
+import { ArrowLeft, Clock, Lightbulb, Trophy, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import { useAuth } from '../providers/AuthProvider'
 import { useChallenge } from '../hooks/useChallenges'
 import { useSubmission } from '../hooks/useSubmissions'
@@ -17,7 +17,6 @@ import { cn } from '../lib/utils'
 import { DEFAULT_DISPLAY, TYPE_CAPABILITIES } from '../types'
 import type {
   MultipleChoiceConfig,
-  GpsCheckConfig,
   AttemptsConfig,
   DisplayConfig,
   MediaItem,
@@ -101,74 +100,6 @@ function FreeTextInput({
       placeholder="Type your answer..."
       className="w-full bg-surface-raised border border-surface-overlay rounded-lg px-4 py-3 text-text placeholder:text-text-faint outline-none focus:border-neon transition-colors disabled:opacity-60"
     />
-  )
-}
-
-function PhotoUploadInput({ disabled }: { disabled: boolean }) {
-  return (
-    <div className={cn(
-      'flex flex-col items-center gap-3 p-8 rounded-lg border-2 border-dashed border-surface-overlay',
-      disabled && 'opacity-60',
-    )}>
-      <Camera size={32} className="text-text-faint" />
-      <span className="text-sm text-text-muted">
-        {disabled ? 'Already submitted' : 'Tap to take a photo or upload'}
-      </span>
-    </div>
-  )
-}
-
-function GpsCheckInput({
-  onCheck,
-  disabled,
-}: {
-  config: GpsCheckConfig
-  onCheck: (coords: { lat: number; lng: number }) => void
-  disabled: boolean
-}) {
-  const [checking, setChecking] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  function handleCheck() {
-    if (disabled) return
-    setChecking(true)
-    setError(null)
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setChecking(false)
-        onCheck({ lat: pos.coords.latitude, lng: pos.coords.longitude })
-      },
-      (err) => {
-        setChecking(false)
-        setError(err.message)
-      },
-      { enableHighAccuracy: true, timeout: 10000 },
-    )
-  }
-
-  return (
-    <div className="flex flex-col items-center gap-3">
-      <button
-        type="button"
-        onClick={handleCheck}
-        disabled={disabled || checking}
-        className={cn(
-          'flex flex-col items-center gap-3 p-8 rounded-lg border-2 border-dashed border-surface-overlay w-full transition-colors',
-          !disabled && 'hover:border-neon/50 cursor-pointer',
-          disabled && 'opacity-60 cursor-not-allowed',
-        )}
-      >
-        {checking ? (
-          <Loader2 size={32} className="text-neon animate-spin" />
-        ) : (
-          <MapPin size={32} className="text-text-faint" />
-        )}
-        <span className="text-sm text-text-muted">
-          {checking ? 'Getting your location...' : disabled ? 'Already checked in' : 'Check in at this location'}
-        </span>
-      </button>
-      {error && <p className="text-xs text-magenta">{error}</p>}
-    </div>
   )
 }
 
@@ -337,13 +268,6 @@ export function ChallengePlay() {
         if (!freeText.trim()) return
         answer = { text: freeText.trim() }
         break
-      case 'photo_upload':
-        // Future: handle photo upload
-        answer = { photo_url: '' }
-        break
-      case 'gps_check':
-        // Handled via onCheck callback
-        return
     }
 
     answer.hints_used = revealedHints
@@ -362,31 +286,6 @@ export function ChallengePlay() {
       } else {
         toast.error('Incorrect answer', {
           description: 'Try again or use a hint',
-        })
-      }
-    }
-  }
-
-  async function handleGpsCheck(coords: { lat: number; lng: number }) {
-    const answer: Record<string, unknown> = {
-      lat: coords.lat,
-      lng: coords.lng,
-      hints_used: revealedHints,
-    }
-    setSubmitError(null)
-    const { error, result } = await submitAnswer(teamSession!.game.id, answer)
-    if (error) {
-      setSubmitError(error)
-      toast.error('Check-in failed', { description: error })
-    } else if (result) {
-      setSubmitResult({ correct: result.is_correct, points: result.points_awarded })
-      if (result.is_correct) {
-        toast.success('You made it!', {
-          description: `+${result.points_awarded} pts awarded`,
-        })
-      } else {
-        toast.error('Not quite there yet', {
-          description: 'Get closer to the target location',
         })
       }
     }
@@ -466,16 +365,6 @@ export function ChallengePlay() {
           <FreeTextInput
             value={freeText}
             onChange={setFreeText}
-            disabled={disabled}
-          />
-        )
-      case 'photo_upload':
-        return <PhotoUploadInput disabled={disabled} />
-      case 'gps_check':
-        return (
-          <GpsCheckInput
-            config={challenge!.config as GpsCheckConfig}
-            onCheck={handleGpsCheck}
             disabled={disabled}
           />
         )
@@ -609,7 +498,7 @@ export function ChallengePlay() {
         )}
 
         {/* Submit button */}
-        {canRetry && challenge.type !== 'gps_check' && (
+        {canRetry && (
           <Button
             className="w-full"
             size="lg"

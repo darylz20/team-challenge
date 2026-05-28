@@ -9,8 +9,6 @@ import type {
   ChallengeConfig,
   MultipleChoiceConfig,
   FreeTextConfig,
-  PhotoUploadConfig,
-  GpsCheckConfig,
   OpenDoorConfig,
   PuzzleConfig,
   GalleryConfig,
@@ -32,10 +30,6 @@ export function AnswerConfigEditor({ type, config, onChange, gameId }: AnswerCon
       return <MultipleChoiceEditor config={config as MultipleChoiceConfig} onChange={onChange} gameId={gameId} />
     case 'free_text':
       return <FreeTextEditor config={config as FreeTextConfig} onChange={onChange} />
-    case 'photo_upload':
-      return <PhotoUploadEditor config={config as PhotoUploadConfig} onChange={onChange} />
-    case 'gps_check':
-      return <GpsCheckEditor config={config as GpsCheckConfig} onChange={onChange} />
     case 'open_door':
       return <OpenDoorEditor config={config as OpenDoorConfig} onChange={onChange} />
     case 'puzzle':
@@ -179,19 +173,6 @@ function FreeTextEditor({ config, onChange }: { config: FreeTextConfig; onChange
         description="Require exact casing to match"
         checked={config.case_sensitive}
         onChange={(v) => onChange({ ...config, case_sensitive: v })}
-      />
-    </div>
-  )
-}
-
-function PhotoUploadEditor({ config, onChange }: { config: PhotoUploadConfig; onChange: (c: ChallengeConfig) => void }) {
-  return (
-    <div className="space-y-3">
-      <Toggle
-        label="Requires manual review"
-        description="Admin must verify the photo and award points manually"
-        checked={config.requires_review}
-        onChange={(v) => onChange({ ...config, requires_review: v })}
       />
     </div>
   )
@@ -1098,40 +1079,3 @@ function CollectiveMemoryEditor({ config, onChange }: { config: CollectiveMemory
   )
 }
 
-function GpsCheckEditor({ config, onChange }: { config: GpsCheckConfig; onChange: (c: ChallengeConfig) => void }) {
-  return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-3">
-        <Input
-          id="lat"
-          label="Latitude"
-          type="number"
-          step="any"
-          value={config.lat || ''}
-          onChange={(e) => onChange({ ...config, lat: parseFloat(e.target.value) || 0 })}
-          placeholder="52.3676"
-        />
-        <Input
-          id="lng"
-          label="Longitude"
-          type="number"
-          step="any"
-          value={config.lng || ''}
-          onChange={(e) => onChange({ ...config, lng: parseFloat(e.target.value) || 0 })}
-          placeholder="4.9041"
-        />
-      </div>
-      <Input
-        id="radius"
-        label="Radius (meters)"
-        type="number"
-        value={config.radius_meters || ''}
-        onChange={(e) => onChange({ ...config, radius_meters: parseInt(e.target.value) || 50 })}
-        placeholder="50"
-      />
-      <p className="text-xs text-text-faint">
-        Players must be within this radius of the target location
-      </p>
-    </div>
-  )
-}

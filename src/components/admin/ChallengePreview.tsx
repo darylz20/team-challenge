@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Clock, Lightbulb, Camera, MapPin, Trophy, HelpCircle } from 'lucide-react'
+import { Clock, Lightbulb, Trophy, HelpCircle } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { MediaGallery } from '../shared/MediaGallery'
 import type {
@@ -79,24 +79,6 @@ function FreeTextPreview() {
         placeholder="Type your answer..."
         className="w-full bg-surface-raised border border-surface-overlay rounded-lg px-4 py-3 text-text placeholder:text-text-faint outline-none"
       />
-    </div>
-  )
-}
-
-function PhotoUploadPreview() {
-  return (
-    <div className="flex flex-col items-center gap-3 p-8 rounded-lg border-2 border-dashed border-surface-overlay">
-      <Camera size={32} className="text-text-faint" />
-      <span className="text-sm text-text-muted">Tap to take a photo or upload</span>
-    </div>
-  )
-}
-
-function GpsCheckPreview() {
-  return (
-    <div className="flex flex-col items-center gap-3 p-8 rounded-lg border-2 border-dashed border-surface-overlay">
-      <MapPin size={32} className="text-text-faint" />
-      <span className="text-sm text-text-muted">Check in at this location</span>
     </div>
   )
 }
@@ -390,10 +372,6 @@ export function ChallengePreview({
         return <MultipleChoicePreview config={config as MultipleChoiceConfig} columns={display.columns} />
       case 'free_text':
         return <FreeTextPreview />
-      case 'photo_upload':
-        return <PhotoUploadPreview />
-      case 'gps_check':
-        return <GpsCheckPreview />
       case 'open_door':
         return <OpenDoorPreview config={config as OpenDoorConfig} />
       case 'puzzle':

@@ -28,19 +28,3 @@ export async function deleteChallengeMedia(url: string): Promise<boolean> {
   return !error
 }
 
-export async function uploadSubmissionPhoto(file: File, gameId: string, challengeId: string): Promise<string | null> {
-  const ext = file.name.split('.').pop()
-  const path = `${gameId}/${challengeId}/${crypto.randomUUID()}.${ext}`
-
-  const { error } = await supabase.storage
-    .from('submission-photos')
-    .upload(path, file)
-
-  if (error) {
-    console.error('Upload error:', error)
-    return null
-  }
-
-  const { data } = supabase.storage.from('submission-photos').getPublicUrl(path)
-  return data.publicUrl
-}

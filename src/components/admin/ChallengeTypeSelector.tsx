@@ -1,12 +1,10 @@
-import { ListChecks, Type, Camera, MapPin, DoorOpen, Grid3x3, Images, Brain } from 'lucide-react'
+import { ListChecks, Type, DoorOpen, Grid3x3, Images, Brain } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import type { ChallengeType } from '../../types'
 
 const types: { value: ChallengeType; label: string; icon: typeof ListChecks; description: string }[] = [
   { value: 'multiple_choice', label: 'Multiple Choice', icon: ListChecks, description: 'Pick from options' },
   { value: 'free_text', label: 'Free Text', icon: Type, description: 'Type an answer' },
-  { value: 'photo_upload', label: 'Photo Upload', icon: Camera, description: 'Upload a photo' },
-  { value: 'gps_check', label: 'GPS Check', icon: MapPin, description: 'Visit a location' },
   { value: 'open_door', label: 'Open Deur', icon: DoorOpen, description: '4 antwoorden, tegen de klok' },
   { value: 'puzzle', label: 'Puzzel', icon: Grid3x3, description: '12 termen, 3 thema\'s raden' },
   { value: 'gallery', label: 'Galerij', icon: Images, description: 'Antwoord per foto onder thema' },
