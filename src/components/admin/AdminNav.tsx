@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Gamepad2, LogOut, X } from 'lucide-react'
+import { LayoutDashboard, Gamepad2, StickyNote, LogOut, X } from 'lucide-react'
 import { useAuth } from '../../providers/AuthProvider'
 import { cn } from '../../lib/utils'
 
 const navItems = [
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
   { to: '/admin/games', icon: Gamepad2, label: 'Games' },
+  { to: '/admin/notes', icon: StickyNote, label: 'Notes' },
 ]
 
 interface AdminNavProps {

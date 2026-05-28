@@ -299,6 +299,16 @@ export interface Submission {
   submitted_at: string
 }
 
+// ── Admin Notes ──
+export interface AdminNote {
+  id: string
+  admin_id: string
+  title: string
+  body: string
+  created_at: string
+  updated_at: string
+}
+
 // ── Helper Types for Forms ──
 export interface GameFormData {
   title: string
