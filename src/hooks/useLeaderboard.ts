@@ -5,6 +5,7 @@ export interface LeaderboardEntry {
   team_id: string
   team_name: string
   team_color: string
+  team_members: string[]
   total_points: number
   challenges_solved: number
   last_submission_at: string | null
@@ -32,7 +33,7 @@ export function useLeaderboard(gameId: string | undefined) {
     // Also fetch all teams in the game so teams with 0 points still appear
     const { data: teams } = await supabase
       .from('teams')
-      .select('id, name, color')
+      .select('id, name, color, member_names')
       .eq('game_id', gameId)
 
     if (!teams) {
@@ -49,6 +50,7 @@ export function useLeaderboard(gameId: string | undefined) {
         team_id: team.id,
         team_name: team.name,
         team_color: team.color,
+        team_members: team.member_names ?? [],
         total_points: 0,
         challenges_solved: 0,
         last_submission_at: null,

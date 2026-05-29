@@ -74,6 +74,13 @@ export function Leaderboard() {
                     )}
                   </div>
 
+                  {/* Member names */}
+                  {entry.team_members.length > 0 && (
+                    <p className="text-xs text-text-faint truncate mb-1.5">
+                      {entry.team_members.join(', ')}
+                    </p>
+                  )}
+
                   {/* Score bar */}
                   <div className="h-1.5 bg-surface-overlay rounded-full overflow-hidden">
                     <div

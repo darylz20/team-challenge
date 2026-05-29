@@ -248,6 +248,7 @@ export interface Team {
   name: string
   color: string
   passcode: string
+  member_names: string[]
   created_at: string
 }
 

@@ -54,5 +54,15 @@ export function useTeams(gameId: string | undefined) {
     if (data) setTeams((prev) => prev.map((t) => (t.id === id ? data : t)))
   }
 
-  return { teams, loading, createTeam, deleteTeam, regeneratePasscode, refetch: fetch }
+  async function updateMembers(id: string, names: string[]) {
+    // Optimistic update
+    setTeams((prev) => prev.map((t) => (t.id === id ? { ...t, member_names: names } : t)))
+    const { error } = await supabase
+      .from('teams')
+      .update({ member_names: names })
+      .eq('id', id)
+    if (error) fetch() // resync on failure
+  }
+
+  return { teams, loading, createTeam, deleteTeam, regeneratePasscode, updateMembers, refetch: fetch }
 }

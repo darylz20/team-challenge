@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Copy, Check, Plus, Trash2, GripVertical, RefreshCw } from 'lucide-react'
+import { ArrowLeft, Copy, Check, Plus, Trash2, GripVertical, RefreshCw, X } from 'lucide-react'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
@@ -35,7 +35,7 @@ export function GameEditor() {
   const navigate = useNavigate()
   const { game, loading, updateGame, publishGame, unpublishGame } = useGame(id)
   const { challenges, deleteChallenge, reorderChallenges } = useChallenges(id)
-  const { teams, createTeam, deleteTeam, regeneratePasscode } = useTeams(id)
+  const { teams, createTeam, deleteTeam, regeneratePasscode, updateMembers } = useTeams(id)
 
   if (loading || !game) {
     return (
@@ -48,7 +48,7 @@ export function GameEditor() {
   const tabs = [
     { label: 'Details', content: <DetailsTab game={game} updateGame={updateGame} publishGame={publishGame} unpublishGame={unpublishGame} /> },
     { label: 'Challenges', content: <ChallengesTab gameId={game.id} challenges={challenges} deleteChallenge={deleteChallenge} reorderChallenges={reorderChallenges} navigate={navigate} /> },
-    { label: 'Teams', content: <TeamsTab teams={teams} createTeam={createTeam} deleteTeam={deleteTeam} regeneratePasscode={regeneratePasscode} /> },
+    { label: 'Teams', content: <TeamsTab teams={teams} createTeam={createTeam} deleteTeam={deleteTeam} regeneratePasscode={regeneratePasscode} updateMembers={updateMembers} /> },
   ]
 
   return (
@@ -212,11 +212,12 @@ function ChallengesTab({ gameId, challenges, deleteChallenge, reorderChallenges,
 }
 
 // ── Teams Tab ──
-function TeamsTab({ teams, createTeam, deleteTeam, regeneratePasscode }: {
+function TeamsTab({ teams, createTeam, deleteTeam, regeneratePasscode, updateMembers }: {
   teams: ReturnType<typeof useTeams>['teams']
   createTeam: ReturnType<typeof useTeams>['createTeam']
   deleteTeam: ReturnType<typeof useTeams>['deleteTeam']
   regeneratePasscode: ReturnType<typeof useTeams>['regeneratePasscode']
+  updateMembers: ReturnType<typeof useTeams>['updateMembers']
 }) {
   const [name, setName] = useState('')
   const [color, setColor] = useState('#00f0ff')
@@ -259,33 +260,39 @@ function TeamsTab({ teams, createTeam, deleteTeam, regeneratePasscode }: {
 
       <div className="space-y-2">
         {teams.map((team) => (
-          <Card key={team.id} className="flex items-center gap-3">
-            <div className="w-4 h-4 rounded-full shrink-0" style={{ backgroundColor: team.color }} />
-            <div className="flex-1 min-w-0">
-              <p className="font-medium truncate">{team.name}</p>
-              <p className="text-xs font-mono text-text-muted tracking-wider">{team.passcode}</p>
+          <Card key={team.id} className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-4 h-4 rounded-full shrink-0" style={{ backgroundColor: team.color }} />
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate">{team.name}</p>
+                <p className="text-xs font-mono text-text-muted tracking-wider">{team.passcode}</p>
+              </div>
+              <button
+                onClick={() => copyPasscode(team)}
+                className="p-1.5 text-text-faint hover:text-neon transition-colors"
+                title="Copy credentials"
+              >
+                {copiedId === team.id ? <Check size={14} className="text-lime" /> : <Copy size={14} />}
+              </button>
+              <button
+                onClick={() => regeneratePasscode(team.id)}
+                className="p-1.5 text-text-faint hover:text-amber transition-colors"
+                title="Regenerate passcode"
+              >
+                <RefreshCw size={14} />
+              </button>
+              <button
+                onClick={() => deleteTeam(team.id)}
+                className="p-1.5 text-text-faint hover:text-magenta transition-colors"
+                title="Delete team"
+              >
+                <Trash2 size={14} />
+              </button>
             </div>
-            <button
-              onClick={() => copyPasscode(team)}
-              className="p-1.5 text-text-faint hover:text-neon transition-colors"
-              title="Copy credentials"
-            >
-              {copiedId === team.id ? <Check size={14} className="text-lime" /> : <Copy size={14} />}
-            </button>
-            <button
-              onClick={() => regeneratePasscode(team.id)}
-              className="p-1.5 text-text-faint hover:text-amber transition-colors"
-              title="Regenerate passcode"
-            >
-              <RefreshCw size={14} />
-            </button>
-            <button
-              onClick={() => deleteTeam(team.id)}
-              className="p-1.5 text-text-faint hover:text-magenta transition-colors"
-              title="Delete team"
-            >
-              <Trash2 size={14} />
-            </button>
+            <TeamMembersEditor
+              members={team.member_names ?? []}
+              onChange={(names) => updateMembers(team.id, names)}
+            />
           </Card>
         ))}
       </div>
@@ -293,6 +300,78 @@ function TeamsTab({ teams, createTeam, deleteTeam, regeneratePasscode }: {
       {teams.length === 0 && (
         <p className="text-sm text-text-muted text-center py-4">No teams yet. Add teams for players to log in.</p>
       )}
+    </div>
+  )
+}
+
+// Member-names editor: chip list + inline add input
+function TeamMembersEditor({ members, onChange }: { members: string[]; onChange: (next: string[]) => void }) {
+  const [newName, setNewName] = useState('')
+
+  function addMember() {
+    const trimmed = newName.trim()
+    if (!trimmed) return
+    // Skip duplicates (case-insensitive)
+    if (members.some((m) => m.toLowerCase() === trimmed.toLowerCase())) {
+      setNewName('')
+      return
+    }
+    onChange([...members, trimmed])
+    setNewName('')
+  }
+
+  function removeMember(i: number) {
+    onChange(members.filter((_, idx) => idx !== i))
+  }
+
+  return (
+    <div className="border-t border-surface-overlay pt-2 space-y-2">
+      <p className="text-[10px] font-medium text-text-faint uppercase tracking-wider">
+        Members ({members.length})
+      </p>
+      {members.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {members.map((name, i) => (
+            <span
+              key={i}
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-overlay/50 text-xs text-text"
+            >
+              {name}
+              <button
+                type="button"
+                onClick={() => removeMember(i)}
+                className="text-text-faint hover:text-magenta transition-colors"
+                title="Remove"
+              >
+                <X size={10} />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+      <div className="flex gap-1.5">
+        <input
+          type="text"
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              addMember()
+            }
+          }}
+          placeholder="Add member name..."
+          className="flex-1 bg-surface border border-surface-overlay rounded px-2.5 py-1 text-xs text-text placeholder:text-text-faint outline-none focus:border-neon"
+        />
+        <button
+          type="button"
+          onClick={addMember}
+          disabled={!newName.trim()}
+          className="px-2.5 py-1 rounded text-xs bg-neon/10 text-neon border border-neon/40 hover:bg-neon/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          Add
+        </button>
+      </div>
     </div>
   )
 }
