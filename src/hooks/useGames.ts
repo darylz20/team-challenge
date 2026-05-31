@@ -71,5 +71,17 @@ export function useGame(id: string | undefined) {
     return updateGame({ status: 'draft', published_at: null } as Partial<Game>)
   }
 
-  return { game, loading, updateGame, publishGame, unpublishGame, refetch: fetch }
+  async function startGame() {
+    return updateGame({ status: 'active' } as Partial<Game>)
+  }
+
+  async function endGame() {
+    return updateGame({ status: 'finished' } as Partial<Game>)
+  }
+
+  async function reopenGame() {
+    return updateGame({ status: 'active' } as Partial<Game>)
+  }
+
+  return { game, loading, updateGame, publishGame, unpublishGame, startGame, endGame, reopenGame, refetch: fetch }
 }

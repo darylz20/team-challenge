@@ -35,7 +35,7 @@ import { supabase } from '../../lib/supabase'
 export function GameEditor() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { game, loading, updateGame, publishGame, unpublishGame } = useGame(id)
+  const { game, loading, updateGame, publishGame, unpublishGame, startGame, endGame, reopenGame } = useGame(id)
   const { challenges, deleteChallenge, reorderChallenges } = useChallenges(id)
   const { teams, createTeam, deleteTeam, regeneratePasscode, updateMembers } = useTeams(id)
 
@@ -48,7 +48,7 @@ export function GameEditor() {
   }
 
   const tabs = [
-    { label: 'Details', content: <DetailsTab game={game} updateGame={updateGame} publishGame={publishGame} unpublishGame={unpublishGame} /> },
+    { label: 'Details', content: <DetailsTab game={game} updateGame={updateGame} publishGame={publishGame} unpublishGame={unpublishGame} startGame={startGame} endGame={endGame} reopenGame={reopenGame} /> },
     { label: 'Challenges', content: <ChallengesTab gameId={game.id} challenges={challenges} deleteChallenge={deleteChallenge} reorderChallenges={reorderChallenges} navigate={navigate} /> },
     { label: 'Teams', content: <TeamsTab teams={teams} createTeam={createTeam} deleteTeam={deleteTeam} regeneratePasscode={regeneratePasscode} updateMembers={updateMembers} /> },
     { label: 'Intro', content: <IntroTab game={game} updateGame={updateGame} /> },
@@ -66,11 +66,14 @@ export function GameEditor() {
 }
 
 // ── Details Tab ──
-function DetailsTab({ game, updateGame, publishGame, unpublishGame }: {
+function DetailsTab({ game, updateGame, publishGame, unpublishGame, startGame, endGame, reopenGame }: {
   game: NonNullable<ReturnType<typeof useGame>['game']>
   updateGame: ReturnType<typeof useGame>['updateGame']
   publishGame: ReturnType<typeof useGame>['publishGame']
   unpublishGame: ReturnType<typeof useGame>['unpublishGame']
+  startGame: ReturnType<typeof useGame>['startGame']
+  endGame: ReturnType<typeof useGame>['endGame']
+  reopenGame: ReturnType<typeof useGame>['reopenGame']
 }) {
   const [title, setTitle] = useState(game.title)
   const [description, setDescription] = useState(game.description ?? '')
@@ -110,16 +113,49 @@ function DetailsTab({ game, updateGame, publishGame, unpublishGame }: {
       <Input id="title" label="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
       <Textarea id="desc" label="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
 
-      <div className="flex gap-3 pt-2">
+      <div className="flex flex-wrap gap-3 pt-2">
         <Button onClick={handleSave} disabled={saving}>
           {saving ? 'Saving...' : 'Save Changes'}
         </Button>
+
         {game.status === 'draft' && (
           <Button variant="secondary" onClick={publishGame}>Publish</Button>
         )}
+
         {game.status === 'published' && (
-          <Button variant="ghost" onClick={unpublishGame}>Unpublish</Button>
+          <>
+            <Button variant="secondary" onClick={startGame}>Start game</Button>
+            <Button variant="ghost" onClick={unpublishGame}>Unpublish</Button>
+          </>
         )}
+
+        {game.status === 'active' && (
+          <Button
+            variant="ghost"
+            onClick={() => {
+              if (confirm('Game beëindigen? Teams kunnen daarna geen challenges meer doen.')) {
+                endGame()
+              }
+            }}
+          >
+            End game
+          </Button>
+        )}
+
+        {game.status === 'finished' && (
+          <Button variant="ghost" onClick={reopenGame}>Reopen game</Button>
+        )}
+      </div>
+
+      {/* Status flow hint */}
+      <div className="text-xs text-text-faint pt-1">
+        <span className="font-mono">draft → published → active → finished</span>
+        <span className="ml-2">
+          {game.status === 'draft' && '• Players can\'t see this game yet.'}
+          {game.status === 'published' && '• Teams can log in. Intro is hidden until you Start game.'}
+          {game.status === 'active' && '• Game is live. Intro carousel is shown, challenges are playable.'}
+          {game.status === 'finished' && '• Game is closed. Leaderboard remains visible.'}
+        </span>
       </div>
     </div>
   )
