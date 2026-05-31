@@ -13,6 +13,7 @@ import { Login } from './pages/Login'
 import { Home } from './pages/Home'
 import { ChallengePlay } from './pages/ChallengePlay'
 import { Leaderboard } from './pages/Leaderboard'
+import { Intro } from './pages/Intro'
 
 // Admin pages
 import { Dashboard } from './pages/admin/Dashboard'
@@ -64,6 +65,7 @@ function App() {
               <AppShell>
                 <Routes>
                   <Route index element={<Home />} />
+                  <Route path="intro" element={<Intro />} />
                   <Route path="challenge/:id" element={<ChallengePlay />} />
                   <Route path="leaderboard" element={<Leaderboard />} />
                 </Routes>

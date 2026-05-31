@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Copy, Check, Plus, Trash2, GripVertical, RefreshCw, X } from 'lucide-react'
+import { ArrowLeft, Copy, Check, Plus, Trash2, GripVertical, RefreshCw, X, ChevronUp, ChevronDown, ImagePlus, Loader2 } from 'lucide-react'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
@@ -28,7 +28,9 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import type { Challenge } from '../../types'
+import type { Challenge, IntroPage, Game } from '../../types'
+import { uploadChallengeMedia, deleteChallengeMedia } from '../../lib/storage'
+import { supabase } from '../../lib/supabase'
 
 export function GameEditor() {
   const { id } = useParams()
@@ -49,6 +51,7 @@ export function GameEditor() {
     { label: 'Details', content: <DetailsTab game={game} updateGame={updateGame} publishGame={publishGame} unpublishGame={unpublishGame} /> },
     { label: 'Challenges', content: <ChallengesTab gameId={game.id} challenges={challenges} deleteChallenge={deleteChallenge} reorderChallenges={reorderChallenges} navigate={navigate} /> },
     { label: 'Teams', content: <TeamsTab teams={teams} createTeam={createTeam} deleteTeam={deleteTeam} regeneratePasscode={regeneratePasscode} updateMembers={updateMembers} /> },
+    { label: 'Intro', content: <IntroTab game={game} updateGame={updateGame} /> },
   ]
 
   return (
@@ -371,6 +374,212 @@ function TeamMembersEditor({ members, onChange }: { members: string[]; onChange:
         >
           Add
         </button>
+      </div>
+    </div>
+  )
+}
+
+// ── Intro Tab ──
+function IntroTab({ game, updateGame }: {
+  game: NonNullable<ReturnType<typeof useGame>['game']>
+  updateGame: ReturnType<typeof useGame>['updateGame']
+}) {
+  const initialPages: IntroPage[] = game.intro_pages ?? []
+  const [pages, setPages] = useState<IntroPage[]>(initialPages)
+  const [saving, setSaving] = useState(false)
+  const [savedAt, setSavedAt] = useState<number | null>(null)
+  const [resetting, setResetting] = useState(false)
+  const [resetCount, setResetCount] = useState<number | null>(null)
+
+  const dirty = JSON.stringify(pages) !== JSON.stringify(initialPages)
+
+  async function handleSave() {
+    setSaving(true)
+    await updateGame({ intro_pages: pages } as Partial<Game>)
+    setSaving(false)
+    setSavedAt(Date.now())
+    setTimeout(() => setSavedAt(null), 2000)
+  }
+
+  function addPage() {
+    setPages((prev) => [...prev, { text: '', media: null }])
+  }
+
+  function removePage(i: number) {
+    const removedMedia = pages[i]?.media?.url
+    if (removedMedia) deleteChallengeMedia(removedMedia)
+    setPages((prev) => prev.filter((_, idx) => idx !== i))
+  }
+
+  function movePage(i: number, dir: -1 | 1) {
+    const j = i + dir
+    if (j < 0 || j >= pages.length) return
+    setPages((prev) => {
+      const next = [...prev]
+      ;[next[i], next[j]] = [next[j], next[i]]
+      return next
+    })
+  }
+
+  function updatePage(i: number, patch: Partial<IntroPage>) {
+    setPages((prev) => prev.map((p, idx) => (idx === i ? { ...p, ...patch } : p)))
+  }
+
+  async function handlePageMedia(i: number, file: File) {
+    const url = await uploadChallengeMedia(file, game.id)
+    if (!url) return
+    const type: 'image' | 'video' = file.type.startsWith('video/') ? 'video' : 'image'
+    // Clean up previous media if any
+    const prevUrl = pages[i]?.media?.url
+    if (prevUrl) deleteChallengeMedia(prevUrl)
+    updatePage(i, { media: { url, type } })
+  }
+
+  async function clearPageMedia(i: number) {
+    const url = pages[i]?.media?.url
+    if (url) await deleteChallengeMedia(url)
+    updatePage(i, { media: null })
+  }
+
+  async function handleResetAcks() {
+    if (!confirm('Alle teams hun acknowledge resetten? Ze moeten dan opnieuw door de intro.')) return
+    setResetting(true)
+    setResetCount(null)
+    const { data } = await supabase.rpc('reset_intro_acknowledgements', { p_game_id: game.id })
+    setResetting(false)
+    setResetCount((data as number) ?? 0)
+    setTimeout(() => setResetCount(null), 3000)
+  }
+
+  return (
+    <div className="space-y-4 max-w-2xl">
+      <div className="space-y-1">
+        <p className="text-sm text-text-muted">
+          Verplichte intro carousel die teams zien voor ze kunnen beginnen. Werkt alleen wanneer de game status <strong>active</strong> is.
+          Laat leeg om geen intro te tonen.
+        </p>
+      </div>
+
+      {/* Pages */}
+      <div className="space-y-3">
+        {pages.map((page, i) => (
+          <Card key={i} className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="font-display text-neon font-bold text-sm">Pagina {i + 1}</span>
+              <div className="flex-1" />
+              <button
+                type="button"
+                onClick={() => movePage(i, -1)}
+                disabled={i === 0}
+                className="p-1 text-text-faint hover:text-text disabled:opacity-30 disabled:cursor-not-allowed"
+                title="Omhoog"
+              >
+                <ChevronUp size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={() => movePage(i, 1)}
+                disabled={i === pages.length - 1}
+                className="p-1 text-text-faint hover:text-text disabled:opacity-30 disabled:cursor-not-allowed"
+                title="Omlaag"
+              >
+                <ChevronDown size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={() => removePage(i)}
+                className="p-1 text-text-faint hover:text-magenta"
+                title="Verwijder pagina"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+
+            <Textarea
+              value={page.text}
+              onChange={(e) => updatePage(i, { text: e.target.value })}
+              placeholder="Tekst van deze pagina..."
+              rows={4}
+            />
+
+            {/* Media */}
+            <div>
+              <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-2">Media (optioneel)</p>
+              {page.media?.url ? (
+                <div className="relative inline-block">
+                  {page.media.type === 'video' ? (
+                    <video
+                      src={page.media.url}
+                      controls
+                      className="max-h-48 rounded border border-surface-overlay"
+                    />
+                  ) : (
+                    <img
+                      src={page.media.url}
+                      alt=""
+                      className="max-h-48 rounded border border-surface-overlay"
+                    />
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => clearPageMedia(i)}
+                    className="absolute -top-1.5 -right-1.5 p-1 rounded-full bg-surface text-text-muted hover:text-magenta border border-surface-overlay"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              ) : (
+                <label className="flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-dashed border-surface-overlay text-sm text-text-muted hover:border-text-faint cursor-pointer w-fit transition-colors">
+                  <ImagePlus size={14} />
+                  Upload afbeelding of video
+                  <input
+                    type="file"
+                    accept="image/*,video/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) handlePageMedia(i, file)
+                    }}
+                  />
+                </label>
+              )}
+            </div>
+          </Card>
+        ))}
+
+        <Button type="button" variant="ghost" size="sm" className="gap-1" onClick={addPage}>
+          <Plus size={14} /> Pagina toevoegen
+        </Button>
+      </div>
+
+      {/* Save */}
+      <div className="flex items-center gap-3 pt-2 border-t border-surface-overlay">
+        <Button onClick={handleSave} disabled={!dirty || saving} className="gap-2">
+          {saving ? <Loader2 size={14} className="animate-spin" /> : null}
+          {saving ? 'Opslaan...' : 'Wijzigingen opslaan'}
+        </Button>
+        {savedAt && <span className="text-xs text-lime flex items-center gap-1"><Check size={12} /> Opgeslagen</span>}
+        {dirty && !saving && !savedAt && <span className="text-xs text-amber">Niet-opgeslagen wijzigingen</span>}
+      </div>
+
+      {/* Reset acks */}
+      <div className="pt-4 border-t border-surface-overlay space-y-2">
+        <p className="text-xs text-text-muted">
+          Na een edit kun je alle teams hun acknowledge resetten — ze moeten dan opnieuw door de intro klikken.
+        </p>
+        <Button
+          onClick={handleResetAcks}
+          disabled={resetting}
+          variant="ghost"
+          size="sm"
+          className="gap-2 text-amber border-amber/30 hover:bg-amber/10"
+        >
+          {resetting ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+          Reset acknowledgements voor alle teams
+        </Button>
+        {resetCount !== null && (
+          <span className="text-xs text-lime block">✓ {resetCount} team{resetCount !== 1 ? 's' : ''} gereset</span>
+        )}
       </div>
     </div>
   )

@@ -12,6 +12,12 @@ export interface Profile {
 // ── Game Types ──
 export type GameStatus = 'draft' | 'published' | 'active' | 'finished'
 
+// Intro carousel: ordered pages shown to teams before the game starts.
+export interface IntroPage {
+  text: string
+  media: MediaItem | null
+}
+
 export interface Game {
   id: string
   title: string
@@ -20,6 +26,7 @@ export interface Game {
   status: GameStatus
   created_by: string
   settings: Record<string, unknown>
+  intro_pages: IntroPage[]
   created_at: string
   published_at: string | null
 }
@@ -249,6 +256,7 @@ export interface Team {
   color: string
   passcode: string
   member_names: string[]
+  intro_acknowledged_at: string | null
   created_at: string
 }
 
