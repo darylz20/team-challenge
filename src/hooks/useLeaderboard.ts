@@ -1,6 +1,14 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 
+export interface SolvedChallenge {
+  challenge_id: string
+  title: string
+  points: number
+  submitted_at: string
+  sort_order: number
+}
+
 export interface LeaderboardEntry {
   team_id: string
   team_name: string
@@ -8,7 +16,17 @@ export interface LeaderboardEntry {
   team_members: string[]
   total_points: number
   challenges_solved: number
+  solved_challenges: SolvedChallenge[]
   last_submission_at: string | null
+}
+
+interface SubmissionRow {
+  team_id: string
+  challenge_id: string
+  points_awarded: number | null
+  is_correct: boolean | null
+  submitted_at: string
+  challenges: { title: string; sort_order: number } | { title: string; sort_order: number }[] | null
 }
 
 export function useLeaderboard(gameId: string | undefined) {
@@ -19,10 +37,10 @@ export function useLeaderboard(gameId: string | undefined) {
     if (!gameId) return
     setLoading(true)
 
-    // Aggregate submissions per team, join with teams table
+    // Submissions with embedded challenge title + sort_order
     const { data: submissions } = await supabase
       .from('submissions')
-      .select('team_id, points_awarded, is_correct, submitted_at, teams(name, color)')
+      .select('team_id, challenge_id, points_awarded, is_correct, submitted_at, challenges(title, sort_order)')
       .eq('game_id', gameId)
 
     if (!submissions) {
@@ -30,7 +48,7 @@ export function useLeaderboard(gameId: string | undefined) {
       return
     }
 
-    // Also fetch all teams in the game so teams with 0 points still appear
+    // All teams (so 0-point teams still appear)
     const { data: teams } = await supabase
       .from('teams')
       .select('id, name, color, member_names')
@@ -41,10 +59,7 @@ export function useLeaderboard(gameId: string | undefined) {
       return
     }
 
-    // Build map: team_id → aggregated stats
     const statsMap = new Map<string, LeaderboardEntry>()
-
-    // Seed with all teams at 0
     for (const team of teams) {
       statsMap.set(team.id, {
         team_id: team.id,
@@ -53,26 +68,43 @@ export function useLeaderboard(gameId: string | undefined) {
         team_members: team.member_names ?? [],
         total_points: 0,
         challenges_solved: 0,
+        solved_challenges: [],
         last_submission_at: null,
       })
     }
 
-    // Aggregate correct submissions
-    for (const sub of submissions) {
+    for (const sub of submissions as SubmissionRow[]) {
       if (!sub.is_correct) continue
       const entry = statsMap.get(sub.team_id)
       if (!entry) continue
-      entry.total_points += sub.points_awarded ?? 0
+
+      // Supabase returns nested relations as object (single fk) — handle both shapes defensively
+      const ch = Array.isArray(sub.challenges) ? sub.challenges[0] : sub.challenges
+      const pts = sub.points_awarded ?? 0
+
+      entry.total_points += pts
       entry.challenges_solved += 1
+      entry.solved_challenges.push({
+        challenge_id: sub.challenge_id,
+        title: ch?.title ?? 'Onbekend',
+        points: pts,
+        submitted_at: sub.submitted_at,
+        sort_order: ch?.sort_order ?? 0,
+      })
+
       if (!entry.last_submission_at || sub.submitted_at > entry.last_submission_at) {
         entry.last_submission_at = sub.submitted_at
       }
     }
 
-    // Sort: highest points first, then fewest seconds elapsed as tiebreaker
+    // Per team: sort solved challenges by sort_order (challenge order in the game)
+    for (const entry of statsMap.values()) {
+      entry.solved_challenges.sort((a, b) => a.sort_order - b.sort_order)
+    }
+
+    // Standings: highest points first; tie-break = earliest last submission
     const sorted = [...statsMap.values()].sort((a, b) => {
       if (b.total_points !== a.total_points) return b.total_points - a.total_points
-      // Tiebreaker: earlier last submission wins
       if (a.last_submission_at && b.last_submission_at) {
         return a.last_submission_at.localeCompare(b.last_submission_at)
       }
@@ -87,7 +119,7 @@ export function useLeaderboard(gameId: string | undefined) {
     fetch()
   }, [fetch])
 
-  // Realtime: re-fetch whenever a submission is inserted/updated for this game
+  // Realtime: re-fetch on any submission change for this game
   useEffect(() => {
     if (!gameId) return
 

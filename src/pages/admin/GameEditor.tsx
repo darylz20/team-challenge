@@ -31,6 +31,7 @@ import { CSS } from '@dnd-kit/utilities'
 import type { Challenge, IntroPage, Game } from '../../types'
 import { uploadChallengeMedia, deleteChallengeMedia } from '../../lib/storage'
 import { supabase } from '../../lib/supabase'
+import { LeaderboardView } from '../Leaderboard'
 
 export function GameEditor() {
   const { id } = useParams()
@@ -52,6 +53,7 @@ export function GameEditor() {
     { label: 'Challenges', content: <ChallengesTab gameId={game.id} challenges={challenges} deleteChallenge={deleteChallenge} reorderChallenges={reorderChallenges} navigate={navigate} /> },
     { label: 'Teams', content: <TeamsTab teams={teams} createTeam={createTeam} deleteTeam={deleteTeam} regeneratePasscode={regeneratePasscode} updateMembers={updateMembers} /> },
     { label: 'Intro', content: <IntroTab game={game} updateGame={updateGame} /> },
+    { label: 'Leaderboard', content: <div className="max-w-2xl"><LeaderboardView gameId={game.id} /></div> },
   ]
 
   return (
