@@ -49,6 +49,7 @@ export interface MediaItem {
 export interface Challenge {
   id: string
   game_id: string
+  section_id: string
   title: string
   description: string | null
   type: ChallengeType
@@ -59,6 +60,17 @@ export interface Challenge {
   media_url: string | null
   media_type: MediaType | null
   config: ChallengeConfig
+  created_at: string
+}
+
+// ── Sections (chapters within a game) ──
+export interface Section {
+  id: string
+  game_id: string
+  title: string
+  description: string | null
+  is_open: boolean
+  sort_order: number
   created_at: string
 }
 
@@ -315,6 +327,7 @@ export interface ChallengeFormData {
   points: number
   time_limit: number | null
   hint: string | null
+  section_id: string
   config: ChallengeConfig
   media_url: string | null
   media_type: MediaType | null

@@ -15,6 +15,7 @@ import { AttemptsEditor } from '../../components/admin/AttemptsEditor'
 import { DisplaySettingsEditor } from '../../components/admin/DisplaySettingsEditor'
 import { ChallengePreview } from '../../components/admin/ChallengePreview'
 import { useChallenges, useChallenge } from '../../hooks/useChallenges'
+import { useSections } from '../../hooks/useSections'
 import type { ChallengeType, ChallengeConfig, ScoringConfig, HintsConfig, AttemptsConfig, DisplayConfig, MediaItem, OpenDoorConfig, PuzzleConfig, GalleryConfig, CollectiveMemoryConfig } from '../../types'
 import { DEFAULT_CHALLENGE_CONFIGS, DEFAULT_SCORING, DEFAULT_DISPLAY, DEFAULT_ATTEMPTS, TYPE_CAPABILITIES } from '../../types'
 
@@ -24,11 +25,13 @@ export function ChallengeBuilder() {
   const isEditing = !!cid
   const { challenge, loading: challengeLoading } = useChallenge(cid)
   const { createChallenge, updateChallenge } = useChallenges(gameId)
+  const { sections } = useSections(gameId)
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [type, setType] = useState<ChallengeType>('multiple_choice')
   const [timeLimit, setTimeLimit] = useState<string>('')
+  const [sectionId, setSectionId] = useState<string>('')
   const [config, setConfig] = useState<ChallengeConfig>(DEFAULT_CHALLENGE_CONFIGS.multiple_choice)
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([])
   const [scoring, setScoring] = useState<ScoringConfig>(DEFAULT_SCORING)
@@ -38,6 +41,13 @@ export function ChallengeBuilder() {
   const [saving, setSaving] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
 
+  // Default section_id to the first section once sections load (new challenge only)
+  useEffect(() => {
+    if (!isEditing && !sectionId && sections.length > 0) {
+      setSectionId(sections[0].id)
+    }
+  }, [isEditing, sectionId, sections])
+
   // Populate fields when editing
   useEffect(() => {
     if (challenge) {
@@ -45,6 +55,7 @@ export function ChallengeBuilder() {
       setDescription(challenge.description ?? '')
       setType(challenge.type)
       setTimeLimit(challenge.time_limit?.toString() ?? '')
+      setSectionId(challenge.section_id)
       setConfig(challenge.config)
 
       // Extract new settings from config JSONB (backward-compatible)
@@ -77,7 +88,7 @@ export function ChallengeBuilder() {
   }
 
   async function handleSave() {
-    if (!title.trim()) return
+    if (!title.trim() || !sectionId) return
     setSaving(true)
 
     // For interactive types (uses_progress), top-level `points` is the max possible
@@ -120,6 +131,7 @@ export function ChallengeBuilder() {
       points: topLevelPoints,
       time_limit: timeLimit ? parseInt(timeLimit) : null,
       hint: hints.items[0]?.text ?? null,
+      section_id: sectionId,
       config: { ...config, scoring, hints, attempts, display, media: mediaItems },
       media_url: mediaItems[0]?.url ?? null,
       media_type: mediaItems[0]?.type ?? null,
@@ -189,6 +201,34 @@ export function ChallengeBuilder() {
       )}
 
       <div className="space-y-6">
+        {/* Section assignment */}
+        <Card className="space-y-3">
+          <h3 className="font-display text-sm font-bold text-text-muted uppercase tracking-wider">
+            Section
+          </h3>
+          {sections.length === 0 ? (
+            <p className="text-xs text-amber">
+              No sections in this game yet. Create one first in the Game Editor → Sections tab.
+            </p>
+          ) : (
+            <>
+              <label htmlFor="section-picker" className="text-sm text-text-muted">Belongs to section</label>
+              <select
+                id="section-picker"
+                value={sectionId}
+                onChange={(e) => setSectionId(e.target.value)}
+                className="w-full bg-surface border border-surface-overlay rounded-lg px-3 py-2.5 text-text outline-none focus:border-neon"
+              >
+                {sections.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.title} {s.is_open ? '· open' : '· closed'}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
+        </Card>
+
         {/* Challenge Prompt */}
         <Card className="space-y-4">
           <h3 className="font-display text-sm font-bold text-text-muted uppercase tracking-wider">
@@ -292,7 +332,7 @@ export function ChallengeBuilder() {
         </Card>
 
         {/* Save */}
-        <Button onClick={handleSave} disabled={!title.trim() || saving} className="w-full gap-2" size="lg">
+        <Button onClick={handleSave} disabled={!title.trim() || !sectionId || saving} className="w-full gap-2" size="lg">
           <Save size={18} />
           {saving ? 'Saving...' : isEditing ? 'Update Challenge' : 'Create Challenge'}
         </Button>

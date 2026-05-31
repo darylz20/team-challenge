@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Copy, Check, Plus, Trash2, GripVertical, RefreshCw, X, ChevronUp, ChevronDown, ImagePlus, Loader2 } from 'lucide-react'
+import { ArrowLeft, Copy, Check, Plus, Trash2, GripVertical, RefreshCw, X, ChevronUp, ChevronDown, ImagePlus, Loader2, Edit, Lock, Unlock } from 'lucide-react'
+import { cn } from '../../lib/utils'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
@@ -28,7 +29,8 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import type { Challenge, IntroPage, Game } from '../../types'
+import type { Challenge, IntroPage, Game, Section } from '../../types'
+import { useSections } from '../../hooks/useSections'
 import { uploadChallengeMedia, deleteChallengeMedia } from '../../lib/storage'
 import { supabase } from '../../lib/supabase'
 import { LeaderboardView } from '../Leaderboard'
@@ -39,6 +41,7 @@ export function GameEditor() {
   const { game, loading, updateGame, publishGame, unpublishGame, startGame, endGame, reopenGame } = useGame(id)
   const { challenges, deleteChallenge, reorderChallenges } = useChallenges(id)
   const { teams, createTeam, deleteTeam, regeneratePasscode, updateMembers } = useTeams(id)
+  const { sections, createSection, updateSection, deleteSection } = useSections(id)
 
   if (loading || !game) {
     return (
@@ -50,7 +53,8 @@ export function GameEditor() {
 
   const tabs = [
     { label: 'Details', content: <DetailsTab game={game} updateGame={updateGame} publishGame={publishGame} unpublishGame={unpublishGame} startGame={startGame} endGame={endGame} reopenGame={reopenGame} /> },
-    { label: 'Challenges', content: <ChallengesTab gameId={game.id} challenges={challenges} deleteChallenge={deleteChallenge} reorderChallenges={reorderChallenges} navigate={navigate} /> },
+    { label: 'Sections', content: <SectionsTab sections={sections} challenges={challenges} createSection={createSection} updateSection={updateSection} deleteSection={deleteSection} /> },
+    { label: 'Challenges', content: <ChallengesTab gameId={game.id} challenges={challenges} sections={sections} deleteChallenge={deleteChallenge} reorderChallenges={reorderChallenges} navigate={navigate} /> },
     { label: 'Teams', content: <TeamsTab teams={teams} createTeam={createTeam} deleteTeam={deleteTeam} regeneratePasscode={regeneratePasscode} updateMembers={updateMembers} /> },
     { label: 'Intro', content: <IntroTab game={game} updateGame={updateGame} /> },
     { label: 'Leaderboard', content: <div className="max-w-2xl"><LeaderboardView gameId={game.id} /></div> },
@@ -190,9 +194,10 @@ function SortableChallenge({ challenge, onDelete, onEdit }: { challenge: Challen
   )
 }
 
-function ChallengesTab({ gameId, challenges, deleteChallenge, reorderChallenges, navigate }: {
+function ChallengesTab({ gameId, challenges, sections, deleteChallenge, reorderChallenges, navigate }: {
   gameId: string
   challenges: Challenge[]
+  sections: Section[]
   deleteChallenge: (id: string) => Promise<void>
   reorderChallenges: (ids: string[]) => Promise<void>
   navigate: ReturnType<typeof useNavigate>
@@ -214,18 +219,55 @@ function ChallengesTab({ gameId, challenges, deleteChallenge, reorderChallenges,
     reorderChallenges(newOrder.map((c) => c.id))
   }
 
+  // Group challenges by section, preserving global drag-drop reorder context.
+  // We still wrap ALL challenges in one SortableContext so cross-section drag
+  // works seamlessly (the sort_order is global, sections are visual grouping).
+  const bySection = new Map<string, Challenge[]>()
+  for (const c of challenges) {
+    const list = bySection.get(c.section_id) ?? []
+    list.push(c)
+    bySection.set(c.section_id, list)
+  }
+
   return (
     <div className="space-y-3">
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={challenges.map((c) => c.id)} strategy={verticalListSortingStrategy}>
-          {challenges.map((c) => (
-            <SortableChallenge
-              key={c.id}
-              challenge={c}
-              onDelete={() => deleteChallenge(c.id)}
-              onEdit={() => navigate(`/admin/games/${gameId}/challenges/${c.id}`)}
-            />
-          ))}
+          {sections.map((section) => {
+            const sectionChallenges = bySection.get(section.id) ?? []
+            return (
+              <div key={section.id} className="space-y-1.5">
+                <div className="flex items-center gap-2 pt-2">
+                  <h4 className="font-display text-xs font-bold text-text-muted uppercase tracking-wider">
+                    {section.title}
+                  </h4>
+                  <span className={cn(
+                    'text-[10px] px-1.5 py-0.5 rounded font-mono uppercase',
+                    section.is_open
+                      ? 'bg-lime/10 text-lime border border-lime/30'
+                      : 'bg-surface-overlay text-text-faint border border-surface-overlay',
+                  )}>
+                    {section.is_open ? 'OPEN' : 'CLOSED'}
+                  </span>
+                  <span className="text-xs text-text-faint">
+                    · {sectionChallenges.length} challenge{sectionChallenges.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                {sectionChallenges.length === 0 ? (
+                  <p className="text-xs text-text-faint italic pl-1">No challenges in this section yet.</p>
+                ) : (
+                  sectionChallenges.map((c) => (
+                    <SortableChallenge
+                      key={c.id}
+                      challenge={c}
+                      onDelete={() => deleteChallenge(c.id)}
+                      onEdit={() => navigate(`/admin/games/${gameId}/challenges/${c.id}`)}
+                    />
+                  ))
+                )}
+              </div>
+            )
+          })}
         </SortableContext>
       </DndContext>
 
@@ -247,6 +289,161 @@ function ChallengesTab({ gameId, challenges, deleteChallenge, reorderChallenges,
         >
           <Plus size={16} /> Add Challenge
         </Button>
+      )}
+    </div>
+  )
+}
+
+// ── Sections Tab ──
+function SectionsTab({ sections, challenges, createSection, updateSection, deleteSection }: {
+  sections: Section[]
+  challenges: Challenge[]
+  createSection: ReturnType<typeof useSections>['createSection']
+  updateSection: ReturnType<typeof useSections>['updateSection']
+  deleteSection: ReturnType<typeof useSections>['deleteSection']
+}) {
+  const [newTitle, setNewTitle] = useState('')
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editTitle, setEditTitle] = useState('')
+  const [editDesc, setEditDesc] = useState('')
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+
+  async function handleAdd() {
+    const t = newTitle.trim()
+    if (!t) return
+    await createSection(t, null)
+    setNewTitle('')
+  }
+
+  function startEdit(s: Section) {
+    setEditingId(s.id)
+    setEditTitle(s.title)
+    setEditDesc(s.description ?? '')
+    setDeleteError(null)
+  }
+
+  async function saveEdit(id: string) {
+    await updateSection(id, { title: editTitle.trim(), description: editDesc.trim() || null })
+    setEditingId(null)
+  }
+
+  async function handleDelete(s: Section) {
+    setDeleteError(null)
+    const inUse = challenges.filter((c) => c.section_id === s.id).length
+    if (inUse > 0) {
+      setDeleteError(`Section "${s.title}" still has ${inUse} challenge${inUse !== 1 ? 's' : ''}. Move them to another section first.`)
+      return
+    }
+    if (!confirm(`Verwijder sectie "${s.title}"?`)) return
+    const { error } = await deleteSection(s.id)
+    if (error) setDeleteError(error)
+  }
+
+  return (
+    <div className="space-y-4 max-w-lg">
+      <p className="text-sm text-text-muted">
+        Sections group challenges into chapters. Open a section to make its challenges playable.
+        Locked sections are visible to players but their challenges are not clickable.
+      </p>
+
+      {/* Add */}
+      <div className="flex gap-2">
+        <Input
+          value={newTitle}
+          onChange={(e) => setNewTitle(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAdd() } }}
+          placeholder="New section title..."
+          className="flex-1"
+        />
+        <Button onClick={handleAdd} disabled={!newTitle.trim()}>Add</Button>
+      </div>
+
+      {deleteError && (
+        <Card className="border border-magenta/30 bg-magenta/5">
+          <p className="text-sm text-magenta">{deleteError}</p>
+        </Card>
+      )}
+
+      {/* List */}
+      <div className="space-y-2">
+        {sections.map((s) => {
+          const isEditing = editingId === s.id
+          const count = challenges.filter((c) => c.section_id === s.id).length
+          return (
+            <Card key={s.id} className="space-y-2">
+              {isEditing ? (
+                <>
+                  <Input
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    placeholder="Section title"
+                  />
+                  <Textarea
+                    value={editDesc}
+                    onChange={(e) => setEditDesc(e.target.value)}
+                    placeholder="Optional description shown to players"
+                    rows={2}
+                  />
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={() => saveEdit(s.id)} disabled={!editTitle.trim()}>Save</Button>
+                    <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>Cancel</Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-semibold truncate">{s.title}</p>
+                        <span className={cn(
+                          'text-[10px] px-1.5 py-0.5 rounded font-mono uppercase',
+                          s.is_open
+                            ? 'bg-lime/10 text-lime border border-lime/30'
+                            : 'bg-surface-overlay text-text-faint border border-surface-overlay',
+                        )}>
+                          {s.is_open ? 'OPEN' : 'CLOSED'}
+                        </span>
+                        <span className="text-xs text-text-faint">· {count} challenge{count !== 1 ? 's' : ''}</span>
+                      </div>
+                      {s.description && (
+                        <p className="text-xs text-text-muted mt-1">{s.description}</p>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => startEdit(s)}
+                      className="p-1.5 text-text-faint hover:text-text"
+                      title="Edit"
+                    >
+                      <Edit size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(s)}
+                      className="p-1.5 text-text-faint hover:text-magenta"
+                      title="Delete"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant={s.is_open ? 'ghost' : 'secondary'}
+                    onClick={() => updateSection(s.id, { is_open: !s.is_open })}
+                    className="w-full gap-2"
+                  >
+                    {s.is_open ? <Lock size={14} /> : <Unlock size={14} />}
+                    {s.is_open ? 'Close section' : 'Open section'}
+                  </Button>
+                </>
+              )}
+            </Card>
+          )
+        })}
+      </div>
+
+      {sections.length === 0 && (
+        <p className="text-sm text-text-muted text-center py-4">No sections yet. Add one to start organising challenges.</p>
       )}
     </div>
   )

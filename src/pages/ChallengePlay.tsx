@@ -5,6 +5,7 @@ import { ArrowLeft, Clock, Lightbulb, Trophy, CheckCircle2, XCircle, Loader2 } f
 import { useAuth } from '../providers/AuthProvider'
 import { useChallenge } from '../hooks/useChallenges'
 import { useSubmission } from '../hooks/useSubmissions'
+import { useSections } from '../hooks/useSections'
 import { MediaGallery } from '../components/shared/MediaGallery'
 import { OpenDoorPlay } from '../components/play/OpenDoorPlay'
 import { PuzzlePlay } from '../components/play/PuzzlePlay'
@@ -186,6 +187,7 @@ export function ChallengePlay() {
   const navigate = useNavigate()
   const { teamSession } = useAuth()
   const { challenge, loading: challengeLoading } = useChallenge(id)
+  const { sections } = useSections(teamSession?.game.id)
   const { submission, attemptCount, hasCorrect, loading: submissionLoading, submitting, submitAnswer } = useSubmission(
     teamSession?.team.id,
     id,
@@ -213,6 +215,19 @@ export function ChallengePlay() {
       <div className="py-20 text-center animate-fade-in">
         <p className="text-text-muted">Challenge not found.</p>
         <Button variant="ghost" className="mt-4" onClick={() => navigate('/')}>Go back</Button>
+      </div>
+    )
+  }
+
+  // Section gate: if this challenge's section is closed, redirect home with a notice.
+  // Catches direct-URL access or section being closed by admin while player is on the page.
+  const challengeSection = sections.find((s) => s.id === challenge.section_id)
+  if (challengeSection && !challengeSection.is_open) {
+    return (
+      <div className="py-20 text-center animate-fade-in">
+        <p className="text-text-muted">Deze sectie is gesloten.</p>
+        <p className="text-xs text-text-faint mt-1">"{challengeSection.title}" is nog niet geopend door de admin.</p>
+        <Button variant="ghost" className="mt-4" onClick={() => navigate('/')}>Terug naar home</Button>
       </div>
     )
   }
