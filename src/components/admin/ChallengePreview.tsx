@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Clock, Lightbulb, Trophy, HelpCircle } from 'lucide-react'
+import { Lightbulb, Trophy, HelpCircle } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { MediaGallery } from '../shared/MediaGallery'
 import type {
@@ -25,7 +25,6 @@ interface ChallengePreviewProps {
   mediaItems: MediaItem[]
   scoring: ScoringConfig
   hints: HintsConfig
-  timeLimit: string
 }
 
 // ── Answer Renderers ──
@@ -263,7 +262,6 @@ export function ChallengePreview({
   mediaItems,
   scoring,
   hints,
-  timeLimit,
 }: ChallengePreviewProps) {
   const [revealedHints, setRevealedHints] = useState(0)
 
@@ -389,12 +387,6 @@ export function ChallengePreview({
       <div className="bg-surface px-4 py-3 border-b border-surface-overlay flex items-center justify-between">
         <span className="text-xs text-text-faint font-mono">PLAYER VIEW</span>
         <div className="flex items-center gap-3">
-          {timeLimit && (
-            <div className="flex items-center gap-1 text-amber text-xs font-mono">
-              <Clock size={12} />
-              {timeLimit}s
-            </div>
-          )}
           <div className="flex items-center gap-1 text-neon text-xs font-mono">
             <Trophy size={12} />
             {pointsLabel}

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { ArrowLeft, Clock, Lightbulb, Trophy, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
+import { ArrowLeft, Lightbulb, Trophy, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import { useAuth } from '../providers/AuthProvider'
 import { useChallenge } from '../hooks/useChallenges'
 import { useSubmission } from '../hooks/useSubmissions'
@@ -401,12 +401,6 @@ export function ChallengePlay() {
             {challenge.title}
           </h1>
           <div className="flex items-center gap-2 mt-2 flex-wrap">
-            {challenge.time_limit && (
-              <Badge variant="amber">
-                <Clock size={12} className="mr-1" />
-                {challenge.time_limit}s
-              </Badge>
-            )}
             <Badge variant="neon">
               <Trophy size={12} className="mr-1" />
               {pointsLabel}

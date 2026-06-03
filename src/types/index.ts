@@ -54,7 +54,6 @@ export interface Challenge {
   description: string | null
   type: ChallengeType
   points: number
-  time_limit: number | null
   hint: string | null
   sort_order: number
   media_url: string | null
@@ -325,7 +324,6 @@ export interface ChallengeFormData {
   description: string | null
   type: ChallengeType
   points: number
-  time_limit: number | null
   hint: string | null
   section_id: string
   config: ChallengeConfig

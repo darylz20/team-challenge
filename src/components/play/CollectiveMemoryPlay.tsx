@@ -4,7 +4,6 @@ import { toast } from 'sonner'
 import { cn } from '../../lib/utils'
 import { Button } from '../ui/Button'
 import { Card } from '../ui/Card'
-import { CountdownTimer } from './CountdownTimer'
 import { useChallengeProgress } from '../../hooks/useChallengeProgress'
 import type { Challenge, CollectiveMemoryConfig } from '../../types'
 
@@ -32,12 +31,10 @@ export function CollectiveMemoryPlay({ challenge }: CollectiveMemoryPlayProps) {
     loading,
     finalized,
     error,
-    timeRemaining,
     attemptCollectiveMemory,
     finalize,
   } = useChallengeProgress({
     challengeId: challenge.id,
-    timeLimitSeconds: challenge.time_limit,
   })
 
   const [input, setInput] = useState('')
@@ -52,27 +49,24 @@ export function CollectiveMemoryPlay({ challenge }: CollectiveMemoryPlayProps) {
   const allFound = found.length >= keywords.length && keywords.length > 0
   const noAttemptsLeft = !attempts.unlimited && attemptsRemaining <= 0
 
-  // Auto-finalize
+  // Auto-finalize when all found or attempts exhausted
   const finalizingRef = useRef(false)
   useEffect(() => {
     if (finalized || finalizingRef.current) return
-    const timesUp = timeRemaining !== null && timeRemaining <= 0
-    if (timesUp || allFound || noAttemptsLeft) {
+    if (allFound || noAttemptsLeft) {
       finalizingRef.current = true
       finalize().then((res) => {
         if (res && !res.error) {
           setFinalResult({ points: res.points_awarded, isCorrect: res.is_correct })
           if (allFound) {
             toast.success('Alle 5 trefwoorden gevonden!', { description: `Eindscore: ${res.points_awarded} pt` })
-          } else if (timesUp) {
-            toast(`Tijd voorbij — ${res.points_awarded} pt verdiend`, { duration: 4000 })
           } else {
             toast(`Geen pogingen meer — ${res.points_awarded} pt verdiend`, { duration: 4000 })
           }
         }
       })
     }
-  }, [timeRemaining, allFound, noAttemptsLeft, finalized, finalize])
+  }, [allFound, noAttemptsLeft, finalized, finalize])
 
   useEffect(() => {
     if (!submitting && !finalized && inputRef.current) {
@@ -92,9 +86,7 @@ export function CollectiveMemoryPlay({ challenge }: CollectiveMemoryPlayProps) {
     setSubmitting(false)
 
     if (result.error) {
-      if (result.time_expired) {
-        toast.error('Tijd is voorbij')
-      } else if (result.attempts_exhausted) {
+      if (result.attempts_exhausted) {
         toast.error('Geen pogingen meer over')
       } else {
         toast.error('Submit mislukt', { description: result.error })
@@ -156,13 +148,6 @@ export function CollectiveMemoryPlay({ challenge }: CollectiveMemoryPlayProps) {
 
   return (
     <div className="space-y-4">
-      {challenge.time_limit && !finalized && (
-        <CountdownTimer
-          secondsRemaining={timeRemaining}
-          totalSeconds={challenge.time_limit}
-        />
-      )}
-
       {/* Score + attempts */}
       <div className="flex items-center justify-between text-sm">
         <span className="text-text-muted">
@@ -279,15 +264,13 @@ export function CollectiveMemoryPlay({ challenge }: CollectiveMemoryPlayProps) {
             </p>
           )}
 
-          {!challenge.time_limit && (
-            <button
-              type="button"
-              onClick={handleFinalizeNow}
-              className="flex items-center gap-1.5 text-xs text-text-muted hover:text-text mt-2 mx-auto"
-            >
-              <Flag size={12} /> Klaar — score insturen
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={handleFinalizeNow}
+            className="flex items-center gap-1.5 text-xs text-text-muted hover:text-text mt-2 mx-auto"
+          >
+            <Flag size={12} /> Klaar — score insturen
+          </button>
         </form>
       )}
     </div>

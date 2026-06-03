@@ -6,7 +6,6 @@ export interface ActiveProgress {
   challenge_id: string
   challenge_title: string
   challenge_type: string
-  time_limit: number | null
   started_at: string // ISO
   state: Record<string, unknown>
   finalized: boolean
@@ -108,7 +107,6 @@ export function useLiveMonitor(gameId: string | undefined) {
         challenge_id: p.challenge_id,
         challenge_title: joined?.title ?? meta?.title ?? 'Unknown',
         challenge_type: joined?.type ?? meta?.type ?? 'unknown',
-        time_limit: meta?.time_limit ?? null,
         started_at: p.started_at,
         state: p.state,
         finalized: p.finalized,

@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   ArrowLeft, Loader2, Trophy, Users, Activity, Plus, Minus, Check, RotateCw,
-  Clock, AlertTriangle, CheckCircle2, Power,
+  AlertTriangle, CheckCircle2, Power,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Card } from '../../components/ui/Card'
@@ -22,13 +22,6 @@ export function LiveMonitor() {
   const navigate = useNavigate()
   const { game, refetch: refetchGame } = useGame(gameId)
   const { states, allChallenges, loading, lastUpdate } = useLiveMonitor(gameId)
-
-  // Tick to refresh time-remaining computations every second
-  const [now, setNow] = useState(() => Date.now())
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(t)
-  }, [])
 
   // Modals
   const [adjustTarget, setAdjustTarget] = useState<TeamLiveState | null>(null)
@@ -147,7 +140,6 @@ export function LiveMonitor() {
             <TeamPanel
               key={s.team.id}
               state={s}
-              now={now}
               onAdjust={() => setAdjustTarget(s)}
               onComplete={() => setCompleteTarget(s)}
               onReset={() => setResetTarget(s)}
@@ -227,13 +219,11 @@ export function LiveMonitor() {
 
 function TeamPanel({
   state,
-  now,
   onAdjust,
   onComplete,
   onReset,
 }: {
   state: TeamLiveState
-  now: number
   onAdjust: () => void
   onComplete: () => void
   onReset: () => void
@@ -272,7 +262,7 @@ function TeamPanel({
           : 'border-surface-overlay bg-surface-overlay/30',
       )}>
         {active ? (
-          <ActiveBlock active={active} now={now} />
+          <ActiveBlock active={active} />
         ) : (
           <div className="flex items-center gap-2 text-text-muted">
             <Activity size={14} className="text-text-faint" />
@@ -340,14 +330,7 @@ function TeamPanel({
 
 // ── Active progress block ──
 
-function ActiveBlock({ active, now }: { active: import('../../hooks/useLiveMonitor').ActiveProgress; now: number }) {
-  // Time remaining
-  const startedMs = new Date(active.started_at).getTime()
-  const elapsedSec = Math.floor((now - startedMs) / 1000)
-  const remainingSec = active.time_limit ? Math.max(0, active.time_limit - elapsedSec) : null
-  const fractionLeft = active.time_limit ? remainingSec! / active.time_limit : 1
-
-  // Progress summary per type
+function ActiveBlock({ active }: { active: import('../../hooks/useLiveMonitor').ActiveProgress }) {
   const progressLabel = summariseProgress(active)
 
   return (
@@ -360,32 +343,6 @@ function ActiveBlock({ active, now }: { active: import('../../hooks/useLiveMonit
 
       {progressLabel && (
         <p className="text-xs text-text-muted">{progressLabel}</p>
-      )}
-
-      {remainingSec !== null && (
-        <div>
-          <div className="flex items-center gap-1.5 text-xs mb-1">
-            <Clock size={11} className={cn(
-              remainingSec <= 10 ? 'text-magenta' : remainingSec <= 30 ? 'text-amber' : 'text-text-faint',
-            )} />
-            <span className={cn(
-              'font-mono',
-              remainingSec <= 10 ? 'text-magenta' : remainingSec <= 30 ? 'text-amber' : 'text-text-muted',
-            )}>
-              {formatTime(remainingSec)}
-            </span>
-            <span className="text-text-faint">/ {formatTime(active.time_limit!)}</span>
-          </div>
-          <div className="h-1 bg-surface-overlay rounded-full overflow-hidden">
-            <div
-              className={cn(
-                'h-full transition-all',
-                remainingSec <= 10 ? 'bg-magenta' : remainingSec <= 30 ? 'bg-amber' : 'bg-neon',
-              )}
-              style={{ width: `${fractionLeft * 100}%` }}
-            />
-          </div>
-        </div>
       )}
     </div>
   )
@@ -416,10 +373,4 @@ function summariseProgress(active: import('../../hooks/useLiveMonitor').ActivePr
     default:
       return null
   }
-}
-
-function formatTime(seconds: number): string {
-  const m = Math.floor(seconds / 60)
-  const s = seconds % 60
-  return `${m}:${s.toString().padStart(2, '0')}`
 }

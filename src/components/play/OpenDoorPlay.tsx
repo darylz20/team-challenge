@@ -4,7 +4,6 @@ import { toast } from 'sonner'
 import { cn } from '../../lib/utils'
 import { Button } from '../ui/Button'
 import { Card } from '../ui/Card'
-import { CountdownTimer } from './CountdownTimer'
 import { useChallengeProgress } from '../../hooks/useChallengeProgress'
 import type { Challenge, OpenDoorConfig } from '../../types'
 
@@ -31,12 +30,10 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
     loading,
     finalized,
     error,
-    timeRemaining,
     attemptOpenDoor,
     finalize,
   } = useChallengeProgress({
     challengeId: challenge.id,
-    timeLimitSeconds: challenge.time_limit,
   })
 
   const [input, setInput] = useState('')
@@ -48,26 +45,20 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
   const found = state.found ?? []
   const allFound = found.length >= answers.length
 
-  // Auto-finalize when time runs out OR all 4 found
-  // Use a ref to track if we've already kicked off finalize, to avoid double-calls.
+  // Auto-finalize only when all 4 found
   const finalizingRef = useRef(false)
   useEffect(() => {
     if (finalized || finalizingRef.current) return
-    const timesUp = timeRemaining !== null && timeRemaining <= 0
-    if (timesUp || allFound) {
+    if (allFound) {
       finalizingRef.current = true
       finalize().then((res) => {
         if (res && !res.error) {
           setFinalResult({ points: res.points_awarded, isCorrect: res.is_correct })
-          if (allFound) {
-            toast.success('Alle deuren open!', { description: `Eindscore: ${res.points_awarded} pt` })
-          } else {
-            toast(`Tijd voorbij — ${res.points_awarded} pt verdiend`, { duration: 4000 })
-          }
+          toast.success('Alle deuren open!', { description: `Eindscore: ${res.points_awarded} pt` })
         }
       })
     }
-  }, [timeRemaining, allFound, finalized, finalize])
+  }, [allFound, finalized, finalize])
 
   // Refocus input after submit (mobile keyboard stays up)
   useEffect(() => {
@@ -88,11 +79,7 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
     setSubmitting(false)
 
     if (result.error) {
-      if (result.time_expired) {
-        toast.error('Tijd is voorbij')
-      } else {
-        toast.error('Submit mislukt', { description: result.error })
-      }
+      toast.error('Submit mislukt', { description: result.error })
       return
     }
 
@@ -156,14 +143,6 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
 
   return (
     <div className="space-y-4">
-      {/* Timer */}
-      {challenge.time_limit && !finalized && (
-        <CountdownTimer
-          secondsRemaining={timeRemaining}
-          totalSeconds={challenge.time_limit}
-        />
-      )}
-
       {/* Score so far */}
       <div className="flex items-center justify-between text-sm">
         <span className="text-text-muted">
@@ -280,16 +259,14 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
             <p className="text-xs text-magenta">Geen match — probeer een ander antwoord</p>
           )}
 
-          {/* Manual finalize: only show when no time limit is set */}
-          {!challenge.time_limit && (
-            <button
-              type="button"
-              onClick={handleFinalizeNow}
-              className="flex items-center gap-1.5 text-xs text-text-muted hover:text-text mt-2 mx-auto"
-            >
-              <Flag size={12} /> Klaar — score insturen
-            </button>
-          )}
+          {/* Manual finalize */}
+          <button
+            type="button"
+            onClick={handleFinalizeNow}
+            className="flex items-center gap-1.5 text-xs text-text-muted hover:text-text mt-2 mx-auto"
+          >
+            <Flag size={12} /> Klaar — score insturen
+          </button>
         </form>
       )}
     </div>

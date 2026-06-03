@@ -5,7 +5,6 @@ import type { ChallengeProgressState } from '../types'
 
 interface UseChallengeProgressArgs {
   challengeId: string | undefined
-  timeLimitSeconds: number | null | undefined
 }
 
 export interface OpenDoorAttemptResult {
@@ -14,7 +13,6 @@ export interface OpenDoorAttemptResult {
   points?: number
   place?: number | null // populated when scoring_mode is 'placement'
   error?: string
-  time_expired?: boolean
 }
 
 export interface CollectiveMemoryAttemptResult {
@@ -26,7 +24,6 @@ export interface CollectiveMemoryAttemptResult {
   attempts_exhausted?: boolean
   state?: import('../types').ChallengeProgressState
   error?: string
-  time_expired?: boolean
 }
 
 export interface GalleryAttemptResult {
@@ -38,7 +35,6 @@ export interface GalleryAttemptResult {
   attempts_exhausted?: boolean
   state?: import('../types').ChallengeProgressState
   error?: string
-  time_expired?: boolean
 }
 
 export interface PuzzleAttemptResult {
@@ -51,7 +47,6 @@ export interface PuzzleAttemptResult {
   newly_locked?: number[]
   state?: import('../types').ChallengeProgressState
   error?: string
-  time_expired?: boolean
 }
 
 export interface FinalizeResult {
@@ -66,22 +61,22 @@ export interface FinalizeResult {
  * Progress lifecycle for stateful challenge types (Open Deur etc).
  *
  * - On mount: get_or_init_progress (creates row + started_at on first visit)
- * - Server-authoritative timer based on started_at
  * - attempt() and finalize() are type-specific RPC wrappers
  * - State refreshes on every action so refresh / revisit resumes exactly
+ *
+ * Note: time limits were removed globally. Players finalize manually via the
+ * Klaar button, or auto-finalize when all items are found / attempts run out.
  */
-export function useChallengeProgress({ challengeId, timeLimitSeconds }: UseChallengeProgressArgs) {
+export function useChallengeProgress({ challengeId }: UseChallengeProgressArgs) {
   const { teamSession } = useAuth()
   const teamId = teamSession?.team.id
   const gameId = teamSession?.game.id
   const sessionToken = teamSession?.session_token
 
   const [state, setState] = useState<ChallengeProgressState>({})
-  const [startedAt, setStartedAt] = useState<number | null>(null) // ms since epoch
   const [finalized, setFinalized] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [now, setNow] = useState(() => Date.now())
 
   // Init progress row
   useEffect(() => {
@@ -100,25 +95,12 @@ export function useChallengeProgress({ challengeId, timeLimitSeconds }: UseChall
       if (rpcError) { setError(rpcError.message); setLoading(false); return }
       if (data?.error) { setError(data.error as string); setLoading(false); return }
       setState((data?.state ?? {}) as ChallengeProgressState)
-      setStartedAt(data?.started_at ? new Date(data.started_at).getTime() : null)
       setFinalized(!!data?.finalized)
       setLoading(false)
     })
 
     return () => { cancelled = true }
   }, [challengeId, teamId, gameId, sessionToken])
-
-  // Clock tick (only while timer is active and not finalized)
-  useEffect(() => {
-    if (!timeLimitSeconds || finalized) return
-    const id = setInterval(() => setNow(Date.now()), 250)
-    return () => clearInterval(id)
-  }, [timeLimitSeconds, finalized])
-
-  const timeRemaining: number | null =
-    timeLimitSeconds && startedAt
-      ? Math.max(0, timeLimitSeconds - Math.floor((now - startedAt) / 1000))
-      : null
 
   const attemptOpenDoor = useCallback(
     async (text: string): Promise<OpenDoorAttemptResult> => {
@@ -133,7 +115,7 @@ export function useChallengeProgress({ challengeId, timeLimitSeconds }: UseChall
         p_attempt: text,
       })
       if (rpcError) return { matched: false, error: rpcError.message }
-      if (data?.error) return { matched: false, error: data.error as string, time_expired: data.time_expired }
+      if (data?.error) return { matched: false, error: data.error as string }
       if (data?.matched && data.state) {
         setState(data.state as ChallengeProgressState)
       }
@@ -155,7 +137,7 @@ export function useChallengeProgress({ challengeId, timeLimitSeconds }: UseChall
         p_attempt: text,
       })
       if (rpcError) return { matched: false, error: rpcError.message }
-      if (data?.error) return { matched: false, error: data.error as string, time_expired: data.time_expired, attempts_exhausted: data.attempts_exhausted }
+      if (data?.error) return { matched: false, error: data.error as string, attempts_exhausted: data.attempts_exhausted }
       if (data?.state) {
         setState(data.state as ChallengeProgressState)
       }
@@ -177,7 +159,7 @@ export function useChallengeProgress({ challengeId, timeLimitSeconds }: UseChall
         p_attempt: text,
       })
       if (rpcError) return { matched: false, error: rpcError.message }
-      if (data?.error) return { matched: false, error: data.error as string, time_expired: data.time_expired, attempts_exhausted: data.attempts_exhausted }
+      if (data?.error) return { matched: false, error: data.error as string, attempts_exhausted: data.attempts_exhausted }
       if (data?.state) {
         setState(data.state as ChallengeProgressState)
       }
@@ -199,7 +181,7 @@ export function useChallengeProgress({ challengeId, timeLimitSeconds }: UseChall
         p_attempt: text,
       })
       if (rpcError) return { matched: false, error: rpcError.message }
-      if (data?.error) return { matched: false, error: data.error as string, time_expired: data.time_expired }
+      if (data?.error) return { matched: false, error: data.error as string }
       if (data?.state) {
         setState(data.state as ChallengeProgressState)
       }
@@ -224,11 +206,9 @@ export function useChallengeProgress({ challengeId, timeLimitSeconds }: UseChall
 
   return {
     state,
-    startedAt,
     finalized,
     loading,
     error,
-    timeRemaining, // null if no time limit set
     attemptOpenDoor,
     attemptPuzzle,
     attemptGallery,

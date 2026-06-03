@@ -4,7 +4,6 @@ import { toast } from 'sonner'
 import { cn } from '../../lib/utils'
 import { Button } from '../ui/Button'
 import { Card } from '../ui/Card'
-import { CountdownTimer } from './CountdownTimer'
 import { useChallengeProgress } from '../../hooks/useChallengeProgress'
 import type { Challenge, PuzzleConfig } from '../../types'
 
@@ -41,12 +40,10 @@ export function PuzzlePlay({ challenge }: PuzzlePlayProps) {
     loading,
     finalized,
     error,
-    timeRemaining,
     attemptPuzzle,
     finalize,
   } = useChallengeProgress({
     challengeId: challenge.id,
-    timeLimitSeconds: challenge.time_limit,
   })
 
   const [input, setInput] = useState('')
@@ -67,27 +64,24 @@ export function PuzzlePlay({ challenge }: PuzzlePlayProps) {
   )
   const noneLeft = playableThemes.length === 0
 
-  // Auto-finalize when done
+  // Auto-finalize when all themes resolved (solved or locked)
   const finalizingRef = useRef(false)
   useEffect(() => {
     if (finalized || finalizingRef.current) return
-    const timesUp = timeRemaining !== null && timeRemaining <= 0
-    if (timesUp || allSolved || noneLeft) {
+    if (allSolved || noneLeft) {
       finalizingRef.current = true
       finalize().then((res) => {
         if (res && !res.error) {
           setFinalResult({ points: res.points_awarded, isCorrect: res.is_correct })
           if (allSolved) {
             toast.success('Alle thema\'s gevonden!', { description: `Eindscore: ${res.points_awarded} pt` })
-          } else if (timesUp) {
-            toast(`Tijd voorbij — ${res.points_awarded} pt verdiend`, { duration: 4000 })
           } else {
             toast(`Geen pogingen meer — ${res.points_awarded} pt verdiend`, { duration: 4000 })
           }
         }
       })
     }
-  }, [timeRemaining, allSolved, noneLeft, finalized, finalize])
+  }, [allSolved, noneLeft, finalized, finalize])
 
   // Refocus input after submit (mobile keyboard stays up)
   useEffect(() => {
@@ -108,11 +102,7 @@ export function PuzzlePlay({ challenge }: PuzzlePlayProps) {
     setSubmitting(false)
 
     if (result.error) {
-      if (result.time_expired) {
-        toast.error('Tijd is voorbij')
-      } else {
-        toast.error('Submit mislukt', { description: result.error })
-      }
+      toast.error('Submit mislukt', { description: result.error })
       return
     }
 
@@ -187,13 +177,6 @@ export function PuzzlePlay({ challenge }: PuzzlePlayProps) {
 
   return (
     <div className="space-y-4">
-      {challenge.time_limit && !finalized && (
-        <CountdownTimer
-          secondsRemaining={timeRemaining}
-          totalSeconds={challenge.time_limit}
-        />
-      )}
-
       {/* Score */}
       <div className="flex items-center justify-between text-sm">
         <span className="text-text-muted">
@@ -347,15 +330,13 @@ export function PuzzlePlay({ challenge }: PuzzlePlayProps) {
             </p>
           )}
 
-          {!challenge.time_limit && (
-            <button
-              type="button"
-              onClick={handleFinalizeNow}
-              className="flex items-center gap-1.5 text-xs text-text-muted hover:text-text mt-2 mx-auto"
-            >
-              <Flag size={12} /> Klaar — score insturen
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={handleFinalizeNow}
+            className="flex items-center gap-1.5 text-xs text-text-muted hover:text-text mt-2 mx-auto"
+          >
+            <Flag size={12} /> Klaar — score insturen
+          </button>
         </form>
       )}
     </div>

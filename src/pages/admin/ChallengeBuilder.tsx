@@ -30,7 +30,6 @@ export function ChallengeBuilder() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [type, setType] = useState<ChallengeType>('multiple_choice')
-  const [timeLimit, setTimeLimit] = useState<string>('')
   const [sectionId, setSectionId] = useState<string>('')
   const [config, setConfig] = useState<ChallengeConfig>(DEFAULT_CHALLENGE_CONFIGS.multiple_choice)
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([])
@@ -54,7 +53,6 @@ export function ChallengeBuilder() {
       setTitle(challenge.title)
       setDescription(challenge.description ?? '')
       setType(challenge.type)
-      setTimeLimit(challenge.time_limit?.toString() ?? '')
       setSectionId(challenge.section_id)
       setConfig(challenge.config)
 
@@ -129,7 +127,6 @@ export function ChallengeBuilder() {
       description: description.trim() || null,
       type,
       points: topLevelPoints,
-      time_limit: timeLimit ? parseInt(timeLimit) : null,
       hint: hints.items[0]?.text ?? null,
       section_id: sectionId,
       config: { ...config, scoring, hints, attempts, display, media: mediaItems },
@@ -195,7 +192,6 @@ export function ChallengeBuilder() {
             mediaItems={mediaItems}
             scoring={scoring}
             hints={hints}
-            timeLimit={timeLimit}
           />
         </div>
       )}
@@ -315,21 +311,6 @@ export function ChallengeBuilder() {
             <DisplaySettingsEditor display={display} onChange={setDisplay} />
           </Card>
         )}
-
-        {/* Time Limit */}
-        <Card className="space-y-4">
-          <h3 className="font-display text-sm font-bold text-text-muted uppercase tracking-wider">
-            Time Limit
-          </h3>
-          <Input
-            id="time-limit"
-            label="Time Limit (seconds)"
-            type="number"
-            value={timeLimit}
-            onChange={(e) => setTimeLimit(e.target.value)}
-            placeholder="No limit"
-          />
-        </Card>
 
         {/* Save */}
         <Button onClick={handleSave} disabled={!title.trim() || !sectionId || saving} className="w-full gap-2" size="lg">
