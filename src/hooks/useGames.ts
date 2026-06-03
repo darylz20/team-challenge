@@ -76,7 +76,16 @@ export function useGame(id: string | undefined) {
   }
 
   async function endGame() {
-    return updateGame({ status: 'finished' } as Partial<Game>)
+    // Use the admin_end_game RPC which also finalizes any in-progress
+    // challenge_progress rows (writes a submission based on current state)
+    // before flipping status to finished.
+    const targetId = id ?? game?.id
+    if (!targetId) return { data: null, error: 'No game id' }
+    const { data, error } = await supabase.rpc('admin_end_game', { p_game_id: targetId })
+    if (error) return { data: null, error: error.message }
+    if (data?.error) return { data: null, error: data.error as string }
+    await fetch()
+    return { data, error: null }
   }
 
   async function reopenGame() {

@@ -21,6 +21,7 @@ import { GameList } from './pages/admin/GameList'
 import { GameEditor } from './pages/admin/GameEditor'
 import { ChallengeBuilder } from './pages/admin/ChallengeBuilder'
 import { Notes } from './pages/admin/Notes'
+import { LiveMonitor } from './pages/admin/LiveMonitor'
 
 function App() {
   return (
@@ -53,6 +54,7 @@ function App() {
                   <Route path="games/:id" element={<GameEditor />} />
                   <Route path="games/:id/challenges/new" element={<ChallengeBuilder />} />
                   <Route path="games/:id/challenges/:cid" element={<ChallengeBuilder />} />
+                  <Route path="games/:id/live" element={<LiveMonitor />} />
                   <Route path="notes" element={<Notes />} />
                 </Routes>
               </AdminShell>

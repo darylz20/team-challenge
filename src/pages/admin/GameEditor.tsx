@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Copy, Check, Plus, Trash2, GripVertical, RefreshCw, X, ChevronUp, ChevronDown, ImagePlus, Loader2, Edit, Lock, Unlock } from 'lucide-react'
+import { ArrowLeft, Copy, Check, Plus, Trash2, GripVertical, RefreshCw, X, ChevronUp, ChevronDown, ImagePlus, Loader2, Edit, Lock, Unlock, Activity } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Card } from '../../components/ui/Card'
@@ -38,7 +38,7 @@ import { LeaderboardView } from '../Leaderboard'
 export function GameEditor() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { game, loading, updateGame, publishGame, unpublishGame, startGame, endGame, reopenGame } = useGame(id)
+  const { game, loading, updateGame, publishGame, unpublishGame, startGame, reopenGame } = useGame(id)
   const { challenges, deleteChallenge, reorderChallenges } = useChallenges(id)
   const { teams, createTeam, deleteTeam, regeneratePasscode, updateMembers } = useTeams(id)
   const { sections, createSection, updateSection, deleteSection } = useSections(id)
@@ -52,7 +52,7 @@ export function GameEditor() {
   }
 
   const tabs = [
-    { label: 'Details', content: <DetailsTab game={game} updateGame={updateGame} publishGame={publishGame} unpublishGame={unpublishGame} startGame={startGame} endGame={endGame} reopenGame={reopenGame} /> },
+    { label: 'Details', content: <DetailsTab game={game} updateGame={updateGame} publishGame={publishGame} unpublishGame={unpublishGame} startGame={startGame} reopenGame={reopenGame} /> },
     { label: 'Sections', content: <SectionsTab sections={sections} challenges={challenges} createSection={createSection} updateSection={updateSection} deleteSection={deleteSection} /> },
     { label: 'Challenges', content: <ChallengesTab gameId={game.id} challenges={challenges} sections={sections} deleteChallenge={deleteChallenge} reorderChallenges={reorderChallenges} navigate={navigate} /> },
     { label: 'Teams', content: <TeamsTab teams={teams} createTeam={createTeam} deleteTeam={deleteTeam} regeneratePasscode={regeneratePasscode} updateMembers={updateMembers} /> },
@@ -72,13 +72,14 @@ export function GameEditor() {
 }
 
 // ── Details Tab ──
-function DetailsTab({ game, updateGame, publishGame, unpublishGame, startGame, endGame, reopenGame }: {
+// Note: endGame is intentionally not used here; it lives in the Live Monitor
+// page with a proper confirm dialog (since it has destructive consequences).
+function DetailsTab({ game, updateGame, publishGame, unpublishGame, startGame, reopenGame }: {
   game: NonNullable<ReturnType<typeof useGame>['game']>
   updateGame: ReturnType<typeof useGame>['updateGame']
   publishGame: ReturnType<typeof useGame>['publishGame']
   unpublishGame: ReturnType<typeof useGame>['unpublishGame']
   startGame: ReturnType<typeof useGame>['startGame']
-  endGame: ReturnType<typeof useGame>['endGame']
   reopenGame: ReturnType<typeof useGame>['reopenGame']
 }) {
   const [title, setTitle] = useState(game.title)
@@ -135,22 +136,18 @@ function DetailsTab({ game, updateGame, publishGame, unpublishGame, startGame, e
           </>
         )}
 
-        {game.status === 'active' && (
-          <Button
-            variant="ghost"
-            onClick={() => {
-              if (confirm('Game beëindigen? Teams kunnen daarna geen challenges meer doen.')) {
-                endGame()
-              }
-            }}
-          >
-            End game
-          </Button>
-        )}
-
         {game.status === 'finished' && (
           <Button variant="ghost" onClick={reopenGame}>Reopen game</Button>
         )}
+
+        {/* Live monitoring — always available */}
+        <Button
+          variant="secondary"
+          onClick={() => window.location.assign(`/admin/games/${game.id}/live`)}
+          className="gap-2 ml-auto"
+        >
+          <Activity size={16} /> Live monitor
+        </Button>
       </div>
 
       {/* Status flow hint */}

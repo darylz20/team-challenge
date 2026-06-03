@@ -22,7 +22,7 @@ export interface LeaderboardEntry {
 
 interface SubmissionRow {
   team_id: string
-  challenge_id: string
+  challenge_id: string | null // null = admin point adjustment
   points_awarded: number | null
   is_correct: boolean | null
   submitted_at: string
@@ -81,16 +81,21 @@ export function useLeaderboard(gameId: string | undefined) {
       // Supabase returns nested relations as object (single fk) — handle both shapes defensively
       const ch = Array.isArray(sub.challenges) ? sub.challenges[0] : sub.challenges
       const pts = sub.points_awarded ?? 0
+      // Admin point adjustments have NULL challenge_id — they count toward
+      // total points but not toward challenges_solved or the solved list.
+      const isAdminAdjustment = !sub.challenge_id
 
       entry.total_points += pts
-      entry.challenges_solved += 1
-      entry.solved_challenges.push({
-        challenge_id: sub.challenge_id,
-        title: ch?.title ?? 'Onbekend',
-        points: pts,
-        submitted_at: sub.submitted_at,
-        sort_order: ch?.sort_order ?? 0,
-      })
+      if (!isAdminAdjustment && sub.challenge_id) {
+        entry.challenges_solved += 1
+        entry.solved_challenges.push({
+          challenge_id: sub.challenge_id,
+          title: ch?.title ?? 'Onbekend',
+          points: pts,
+          submitted_at: sub.submitted_at,
+          sort_order: ch?.sort_order ?? 0,
+        })
+      }
 
       if (!entry.last_submission_at || sub.submitted_at > entry.last_submission_at) {
         entry.last_submission_at = sub.submitted_at
