@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Copy, Check, Plus, Trash2, GripVertical, RefreshCw, X, ChevronUp, ChevronDown, ImagePlus, Loader2, Edit, Lock, Unlock, Activity } from 'lucide-react'
+import { ArrowLeft, Copy, Check, Plus, Trash2, GripVertical, RefreshCw, X, ChevronUp, ChevronDown, ImagePlus, Loader2, Edit, Lock, Unlock, Activity, AlertTriangle } from 'lucide-react'
+import { toast } from 'sonner'
 import { cn } from '../../lib/utils'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Card } from '../../components/ui/Card'
@@ -9,6 +10,7 @@ import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
 import { Badge } from '../../components/ui/Badge'
 import { Tabs } from '../../components/ui/Tabs'
+import { Modal } from '../../components/ui/Modal'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { useGame } from '../../hooks/useGames'
 import { useChallenges } from '../../hooks/useChallenges'
@@ -38,7 +40,7 @@ import { LeaderboardView } from '../Leaderboard'
 export function GameEditor() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { game, loading, updateGame, publishGame, unpublishGame, startGame, reopenGame } = useGame(id)
+  const { game, loading, updateGame, publishGame, unpublishGame, startGame, reopenGame, resetGame } = useGame(id)
   const { challenges, deleteChallenge, reorderChallenges } = useChallenges(id)
   const { teams, createTeam, deleteTeam, regeneratePasscode, updateMembers } = useTeams(id)
   const { sections, createSection, updateSection, deleteSection } = useSections(id)
@@ -52,7 +54,7 @@ export function GameEditor() {
   }
 
   const tabs = [
-    { label: 'Details', content: <DetailsTab game={game} updateGame={updateGame} publishGame={publishGame} unpublishGame={unpublishGame} startGame={startGame} reopenGame={reopenGame} /> },
+    { label: 'Details', content: <DetailsTab game={game} updateGame={updateGame} publishGame={publishGame} unpublishGame={unpublishGame} startGame={startGame} reopenGame={reopenGame} resetGame={resetGame} /> },
     { label: 'Sections', content: <SectionsTab sections={sections} challenges={challenges} createSection={createSection} updateSection={updateSection} deleteSection={deleteSection} /> },
     { label: 'Challenges', content: <ChallengesTab gameId={game.id} challenges={challenges} sections={sections} deleteChallenge={deleteChallenge} reorderChallenges={reorderChallenges} navigate={navigate} /> },
     { label: 'Teams', content: <TeamsTab teams={teams} createTeam={createTeam} deleteTeam={deleteTeam} regeneratePasscode={regeneratePasscode} updateMembers={updateMembers} /> },
@@ -74,23 +76,38 @@ export function GameEditor() {
 // ── Details Tab ──
 // Note: endGame is intentionally not used here; it lives in the Live Monitor
 // page with a proper confirm dialog (since it has destructive consequences).
-function DetailsTab({ game, updateGame, publishGame, unpublishGame, startGame, reopenGame }: {
+function DetailsTab({ game, updateGame, publishGame, unpublishGame, startGame, reopenGame, resetGame }: {
   game: NonNullable<ReturnType<typeof useGame>['game']>
   updateGame: ReturnType<typeof useGame>['updateGame']
   publishGame: ReturnType<typeof useGame>['publishGame']
   unpublishGame: ReturnType<typeof useGame>['unpublishGame']
   startGame: ReturnType<typeof useGame>['startGame']
   reopenGame: ReturnType<typeof useGame>['reopenGame']
+  resetGame: ReturnType<typeof useGame>['resetGame']
 }) {
   const [title, setTitle] = useState(game.title)
   const [description, setDescription] = useState(game.description ?? '')
   const [saving, setSaving] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [resetOpen, setResetOpen] = useState(false)
+  const [resetting, setResetting] = useState(false)
 
   async function handleSave() {
     setSaving(true)
     await updateGame({ title, description })
     setSaving(false)
+  }
+
+  async function handleReset() {
+    setResetting(true)
+    const { error } = await resetGame()
+    setResetting(false)
+    setResetOpen(false)
+    if (error) {
+      toast.error('Reset mislukt', { description: error })
+      return
+    }
+    toast.success('Game gereset', { description: 'Alle scores gewist. Status terug naar draft.' })
   }
 
   function copyCode() {
@@ -150,6 +167,19 @@ function DetailsTab({ game, updateGame, publishGame, unpublishGame, startGame, r
         </Button>
       </div>
 
+      {/* Reuse: reset & re-run. Only meaningful once the game has left draft. */}
+      {game.status !== 'draft' && (
+        <div className="pt-1">
+          <button
+            type="button"
+            onClick={() => setResetOpen(true)}
+            className="flex items-center gap-1.5 text-xs text-text-muted hover:text-magenta transition-colors"
+          >
+            <RefreshCw size={12} /> Reset game (wis scores, terug naar draft)
+          </button>
+        </div>
+      )}
+
       {/* Status flow hint */}
       <div className="text-xs text-text-faint pt-1">
         <span className="font-mono">draft → published → active → finished</span>
@@ -160,6 +190,31 @@ function DetailsTab({ game, updateGame, publishGame, unpublishGame, startGame, r
           {game.status === 'finished' && '• Game is closed. Leaderboard remains visible.'}
         </span>
       </div>
+
+      {/* Reset confirm */}
+      <Modal open={resetOpen} onClose={() => !resetting && setResetOpen(false)} title="Reset game?">
+        <div className="space-y-4">
+          <div className="flex items-start gap-2 p-3 rounded-lg bg-magenta/5 border border-magenta/30">
+            <AlertTriangle size={16} className="text-magenta shrink-0 mt-0.5" />
+            <div className="text-sm space-y-1">
+              <p className="text-magenta font-medium">Dit kan niet ongedaan worden gemaakt.</p>
+              <p className="text-text-muted">
+                Alle scores, submissions en voortgang worden gewist. Teams moeten de intro opnieuw
+                doorlopen. Challenges, secties en teams (incl. passcodes) blijven behouden. De status
+                gaat terug naar <span className="font-mono">draft</span> zodat je kunt bewerken en opnieuw publiceren.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={handleReset} disabled={resetting} className="flex-1">
+              {resetting ? <Loader2 size={16} className="animate-spin" /> : 'Ja, reset game'}
+            </Button>
+            <Button variant="ghost" onClick={() => setResetOpen(false)} disabled={resetting}>
+              Annuleren
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }

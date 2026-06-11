@@ -92,5 +92,17 @@ export function useGame(id: string | undefined) {
     return updateGame({ status: 'active' } as Partial<Game>)
   }
 
-  return { game, loading, updateGame, publishGame, unpublishGame, startGame, endGame, reopenGame, refetch: fetch }
+  async function resetGame() {
+    // Wipes all play data (submissions, progress, intro acks, sessions),
+    // resets sections to default open-state, and sets status back to draft.
+    const targetId = id ?? game?.id
+    if (!targetId) return { data: null, error: 'No game id' }
+    const { data, error } = await supabase.rpc('reset_game', { p_game_id: targetId })
+    if (error) return { data: null, error: error.message }
+    if (data?.error) return { data: null, error: data.error as string }
+    await fetch()
+    return { data, error: null }
+  }
+
+  return { game, loading, updateGame, publishGame, unpublishGame, startGame, endGame, reopenGame, resetGame, refetch: fetch }
 }
