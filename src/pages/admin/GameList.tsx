@@ -28,6 +28,7 @@ export function GameList() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [creating, setCreating] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null)
 
   const filtered = filter === 'all' ? games : games.filter((g) => g.status === filter)
 
@@ -97,7 +98,7 @@ export function GameList() {
                   {game.status}
                 </Badge>
                 <button
-                  onClick={(e) => { e.stopPropagation(); deleteGame(game.id) }}
+                  onClick={(e) => { e.stopPropagation(); setDeleteTarget({ id: game.id, title: game.title }) }}
                   className="p-1.5 text-text-faint hover:text-magenta transition-colors"
                 >
                   <Trash2 size={14} />
@@ -117,6 +118,24 @@ export function GameList() {
           onAction={() => setShowCreate(true)}
         />
       )}
+
+      {/* Delete Confirmation Modal */}
+      <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Delete Game">
+        <div className="flex flex-col gap-4">
+          <p className="text-text-muted text-sm">
+            Are you sure you want to delete <span className="text-text font-semibold">{deleteTarget?.title}</span>? This cannot be undone.
+          </p>
+          <div className="flex gap-2 justify-end">
+            <Button variant="ghost" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+            <Button
+              variant="danger"
+              onClick={() => { deleteGame(deleteTarget!.id); setDeleteTarget(null) }}
+            >
+              Delete
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Create Modal */}
       <Modal open={showCreate} onClose={() => setShowCreate(false)} title="Create Game">
