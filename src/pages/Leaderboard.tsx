@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Trophy, Star, Loader2, ChevronDown, ChevronUp, CheckCircle2 } from 'lucide-react'
+import { Trophy, Star, Loader2, ChevronDown, ChevronUp, CheckCircle2, Gift } from 'lucide-react'
 import { PageHeader } from '../components/layout/PageHeader'
 import { Card } from '../components/ui/Card'
 import { useAuth } from '../providers/AuthProvider'
@@ -60,7 +60,7 @@ export function LeaderboardView({ gameId, currentTeamId }: LeaderboardViewProps)
           const isFirst = i === 0
           const barWidth = topScore > 0 ? (entry.total_points / topScore) * 100 : 0
           const isOpen = expanded.has(entry.team_id)
-          const canExpand = entry.solved_challenges.length > 0
+          const canExpand = entry.solved_challenges.length > 0 || entry.bonuses.length > 0
 
           return (
             <Card
@@ -153,8 +153,8 @@ export function LeaderboardView({ gameId, currentTeamId }: LeaderboardViewProps)
                 </div>
               </div>
 
-              {/* Expanded solved-challenges list */}
-              {isOpen && entry.solved_challenges.length > 0 && (
+              {/* Expanded solved-challenges + bonus list */}
+              {isOpen && canExpand && (
                 <div className="mt-3 pt-3 border-t border-surface-overlay space-y-1">
                   {entry.solved_challenges.map((c) => (
                     <div
@@ -166,6 +166,20 @@ export function LeaderboardView({ gameId, currentTeamId }: LeaderboardViewProps)
                       <span className="font-mono text-text-muted shrink-0">+{c.points} pt</span>
                     </div>
                   ))}
+                  {entry.bonuses.map((b, bi) => {
+                    const positive = b.points >= 0
+                    return (
+                      <div key={`bonus-${bi}`} className="flex items-center gap-2 text-xs">
+                        <Gift size={12} className={cn('shrink-0', positive ? 'text-lime' : 'text-magenta')} />
+                        <span className="flex-1 truncate text-text">
+                          {b.reason || (positive ? 'Bonuspunten' : 'Puntenaftrek')}
+                        </span>
+                        <span className={cn('font-mono shrink-0', positive ? 'text-text-muted' : 'text-magenta')}>
+                          {positive ? '+' : ''}{b.points} pt
+                        </span>
+                      </div>
+                    )
+                  })}
                 </div>
               )}
             </Card>

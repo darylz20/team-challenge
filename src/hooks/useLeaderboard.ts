@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
+import { livePointsFromState } from '../lib/utils'
 
 export interface SolvedChallenge {
   challenge_id: string
@@ -7,6 +8,11 @@ export interface SolvedChallenge {
   points: number
   submitted_at: string
   sort_order: number
+}
+
+export interface BonusAdjustment {
+  reason: string | null
+  points: number
 }
 
 export interface LeaderboardEntry {
@@ -17,6 +23,7 @@ export interface LeaderboardEntry {
   total_points: number
   challenges_solved: number
   solved_challenges: SolvedChallenge[]
+  bonuses: BonusAdjustment[]
   last_submission_at: string | null
 }
 
@@ -26,6 +33,7 @@ interface SubmissionRow {
   points_awarded: number | null
   is_correct: boolean | null
   submitted_at: string
+  answer: { reason?: string } | null
   challenges: { title: string; sort_order: number } | { title: string; sort_order: number }[] | null
 }
 
@@ -40,7 +48,7 @@ export function useLeaderboard(gameId: string | undefined) {
     // Submissions with embedded challenge title + sort_order
     const { data: submissions } = await supabase
       .from('submissions')
-      .select('team_id, challenge_id, points_awarded, is_correct, submitted_at, challenges(title, sort_order)')
+      .select('team_id, challenge_id, points_awarded, is_correct, submitted_at, answer, challenges(title, sort_order)')
       .eq('game_id', gameId)
 
     if (!submissions) {
@@ -69,6 +77,7 @@ export function useLeaderboard(gameId: string | undefined) {
         total_points: 0,
         challenges_solved: 0,
         solved_challenges: [],
+        bonuses: [],
         last_submission_at: null,
       })
     }
@@ -86,7 +95,9 @@ export function useLeaderboard(gameId: string | undefined) {
       const isAdminAdjustment = !sub.challenge_id
 
       entry.total_points += pts
-      if (!isAdminAdjustment && sub.challenge_id) {
+      if (isAdminAdjustment) {
+        entry.bonuses.push({ reason: sub.answer?.reason ?? null, points: pts })
+      } else if (sub.challenge_id) {
         entry.challenges_solved += 1
         entry.solved_challenges.push({
           challenge_id: sub.challenge_id,
@@ -100,6 +111,21 @@ export function useLeaderboard(gameId: string | undefined) {
       if (!entry.last_submission_at || sub.submitted_at > entry.last_submission_at) {
         entry.last_submission_at = sub.submitted_at
       }
+    }
+
+    // Live points: add collected-but-not-yet-finalized points from in-progress
+    // challenges. Finalized rows already have a submission counted above, so
+    // we skip them to avoid double-counting.
+    const { data: progressRows } = await supabase
+      .from('challenge_progress')
+      .select('team_id, state, finalized')
+      .eq('game_id', gameId)
+
+    for (const p of progressRows ?? []) {
+      if (p.finalized) continue
+      const entry = statsMap.get(p.team_id)
+      if (!entry) continue
+      entry.total_points += livePointsFromState(p.state)
     }
 
     // Per team: sort solved challenges by sort_order (challenge order in the game)
@@ -136,6 +162,19 @@ export function useLeaderboard(gameId: string | undefined) {
           event: '*',
           schema: 'public',
           table: 'submissions',
+          filter: `game_id=eq.${gameId}`,
+        },
+        () => {
+          fetch()
+        },
+      )
+      // Also refresh as teams collect live points mid-challenge
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'challenge_progress',
           filter: `game_id=eq.${gameId}`,
         },
         () => {
