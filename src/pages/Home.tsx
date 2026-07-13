@@ -15,8 +15,20 @@ export function Home() {
   const { submissions } = useTeamSubmissions(teamSession?.team.id, teamSession?.game.id)
   const { sections } = useSections(teamSession?.game.id)
 
-  // Map of challenge_id → submission for quick lookup
-  const submissionMap = new Map(submissions.map((s) => [s.challenge_id, s]))
+  // Map of challenge_id → best submission for quick lookup.
+  // Prefer a correct submission, then the highest points, so retries and
+  // admin point-adjustment rows (challenge_id null) never mask a solve.
+  const submissionMap = new Map<string, (typeof submissions)[number]>()
+  for (const s of submissions) {
+    if (!s.challenge_id) continue // skip admin adjustments
+    const existing = submissionMap.get(s.challenge_id)
+    const better =
+      !existing ||
+      (!!s.is_correct && !existing.is_correct) ||
+      (!!s.is_correct === !!existing.is_correct && s.points_awarded > existing.points_awarded)
+    if (better) submissionMap.set(s.challenge_id, s)
+  }
+  const solvedCount = [...submissionMap.values()].filter((s) => s.is_correct).length
 
   if (!teamSession) return null
 
@@ -61,7 +73,7 @@ export function Home() {
           {teamSession.game.title}
         </h1>
         <p className="text-sm text-text-muted mt-1">
-          {submissions.length}/{challenges.length} completed
+          {solvedCount}/{challenges.length} solved
         </p>
       </div>
 
@@ -102,8 +114,8 @@ export function Home() {
                 <div className="flex flex-col gap-3">
                   {sectionChallenges.map((challenge, i) => {
                     const sub = submissionMap.get(challenge.id)
-                    const completed = !!sub
-                    const correct = sub?.is_correct
+                    const solved = sub?.is_correct === true
+                    const attempted = !!sub && !solved
                     const locked = !section.is_open
 
                     return (
@@ -121,22 +133,27 @@ export function Home() {
                           <span className="w-8 h-8 rounded-lg bg-surface-overlay flex items-center justify-center shrink-0">
                             <Lock size={14} className="text-text-faint" />
                           </span>
-                        ) : completed ? (
-                          <CheckCircle2
-                            size={20}
-                            className={correct ? 'text-lime shrink-0' : 'text-magenta shrink-0'}
-                          />
+                        ) : solved ? (
+                          <CheckCircle2 size={20} className="text-lime shrink-0" />
                         ) : (
-                          <span className="w-8 h-8 rounded-lg bg-surface-overlay flex items-center justify-center text-sm font-mono text-text-faint shrink-0">
+                          <span className={cn(
+                            'w-8 h-8 rounded-lg flex items-center justify-center text-sm font-mono shrink-0',
+                            attempted
+                              ? 'bg-magenta/10 text-magenta'
+                              : 'bg-surface-overlay text-text-faint',
+                          )}>
                             {i + 1}
                           </span>
                         )}
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold truncate">{challenge.title}</p>
-                          <p className="text-xs text-text-muted capitalize">{challenge.type.replace('_', ' ')}</p>
+                          <p className="text-xs text-text-muted capitalize">
+                            {challenge.type.replace('_', ' ')}
+                            {attempted && !locked && <span className="text-magenta"> · opnieuw proberen</span>}
+                          </p>
                         </div>
-                        {completed && !locked ? (
-                          <Badge variant={correct ? 'lime' : 'magenta'}>{sub.points_awarded} pts</Badge>
+                        {solved && !locked ? (
+                          <Badge variant="lime">{sub!.points_awarded} pts</Badge>
                         ) : (
                           <Badge variant={locked ? 'muted' : 'neon'}>{challenge.points} pts</Badge>
                         )}

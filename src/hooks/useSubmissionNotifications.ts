@@ -41,6 +41,8 @@ export function useSubmissionNotifications(
           // Only care about OTHER teams' correct submissions
           if (!sub.is_correct) return
           if (sub.team_id === currentTeamId) return
+          // Admin point adjustments have no challenge_id — not a real solve
+          if (!sub.challenge_id) return
 
           // Fetch team & challenge names to enrich the toast
           const [{ data: team }, { data: challenge }] = await Promise.all([

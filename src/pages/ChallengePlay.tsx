@@ -277,6 +277,7 @@ export function ChallengePlay() {
 
     switch (challenge.type) {
       case 'multiple_choice':
+        if (selectedOptions.length === 0) return
         answer = { selected: selectedOptions }
         break
       case 'free_text':
@@ -307,6 +308,14 @@ export function ChallengePlay() {
   }
 
   const isCompact = display.compact
+
+  // Whether the current answer input has enough to submit
+  const hasAnswer =
+    challenge.type === 'multiple_choice'
+      ? selectedOptions.length > 0
+      : challenge.type === 'free_text'
+        ? freeText.trim().length > 0
+        : true
 
   // ── Render description + media based on display config ──
   const descriptionBlock = challenge.description ? (
@@ -512,7 +521,7 @@ export function ChallengePlay() {
             className="w-full"
             size="lg"
             onClick={handleSubmit}
-            disabled={submitting}
+            disabled={submitting || !hasAnswer}
           >
             {submitting ? (
               <>

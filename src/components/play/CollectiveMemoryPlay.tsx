@@ -113,6 +113,7 @@ export function CollectiveMemoryPlay({ challenge }: CollectiveMemoryPlayProps) {
 
   async function handleFinalizeNow() {
     if (finalized || finalizingRef.current) return
+    if (!window.confirm('Score nu insturen? Je kunt daarna niet meer verder met deze challenge.')) return
     finalizingRef.current = true
     const res = await finalize()
     if (res && !res.error) {
