@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { LogOut, ChevronRight, CheckCircle2, Lock, Gift } from 'lucide-react'
 import { Card } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
+import { ThemeToggle } from '../components/ui/ThemeToggle'
 import { useAuth } from '../providers/AuthProvider'
 import { useChallenges } from '../hooks/useChallenges'
 import { useTeamSubmissions } from '../hooks/useSubmissions'
@@ -95,13 +96,16 @@ export function Home() {
             <p className="text-xs text-text-muted">{teamSession.game.title}</p>
           </div>
         </div>
-        <button
-          onClick={signOut}
-          className="p-2 text-text-faint hover:text-text-muted transition-colors"
-          title="Sign out"
-        >
-          <LogOut size={18} />
-        </button>
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+          <button
+            onClick={signOut}
+            className="p-2 text-text-faint hover:text-text-muted transition-colors"
+            title="Sign out"
+          >
+            <LogOut size={18} />
+          </button>
+        </div>
       </div>
 
       {/* Game title + live total */}
