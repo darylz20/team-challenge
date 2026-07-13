@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Trophy, Star, Loader2, ChevronDown, ChevronUp, CheckCircle2, Gift } from 'lucide-react'
+import { Trophy, Star, Loader2, ChevronDown, ChevronUp, CheckCircle2, Gift, RefreshCw } from 'lucide-react'
 import { PageHeader } from '../components/layout/PageHeader'
 import { Card } from '../components/ui/Card'
 import { useAuth } from '../providers/AuthProvider'
@@ -20,10 +20,18 @@ interface LeaderboardViewProps {
  * - Admin can embed without a current team (just omit currentTeamId).
  */
 export function LeaderboardView({ gameId, currentTeamId }: LeaderboardViewProps) {
-  const { entries, loading } = useLeaderboard(gameId)
+  const { entries, loading, refetch } = useLeaderboard(gameId)
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const [refreshing, setRefreshing] = useState(false)
 
   const topScore = entries[0]?.total_points ?? 0
+
+  async function handleRefresh() {
+    if (refreshing) return
+    setRefreshing(true)
+    await refetch()
+    setRefreshing(false)
+  }
 
   function toggleExpand(teamId: string) {
     setExpanded((prev) => {
@@ -48,6 +56,15 @@ export function LeaderboardView({ gameId, currentTeamId }: LeaderboardViewProps)
         <Trophy size={32} className="text-text-faint mx-auto mb-3" />
         <p className="text-text-muted font-medium">No teams yet</p>
         <p className="text-xs text-text-faint mt-1">Add teams to see them here.</p>
+        <button
+          type="button"
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="mx-auto mt-4 flex items-center gap-1.5 text-xs text-text-muted hover:text-neon transition-colors disabled:opacity-60"
+        >
+          <RefreshCw size={12} className={cn(refreshing && 'animate-spin')} />
+          Ververs
+        </button>
       </Card>
     )
   }
@@ -187,10 +204,21 @@ export function LeaderboardView({ gameId, currentTeamId }: LeaderboardViewProps)
         })}
       </div>
 
-      {/* Realtime indicator */}
-      <div className="flex items-center justify-center gap-1.5 mt-6">
-        <span className="w-1.5 h-1.5 rounded-full bg-lime animate-pulse" />
-        <span className="text-xs text-text-faint">Updates live</span>
+      {/* Realtime indicator + manual refresh */}
+      <div className="flex items-center justify-center gap-4 mt-6">
+        <div className="flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-lime animate-pulse" />
+          <span className="text-xs text-text-faint">Updates live</span>
+        </div>
+        <button
+          type="button"
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="flex items-center gap-1.5 text-xs text-text-muted hover:text-neon transition-colors disabled:opacity-60"
+        >
+          <RefreshCw size={12} className={cn(refreshing && 'animate-spin')} />
+          Ververs
+        </button>
       </div>
     </>
   )
