@@ -11,6 +11,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet" />
     <title>TeamChallenge</title>
+    <script>
+      // Apply saved theme before first paint to avoid a flash of the wrong theme
+      (function () {
+        try {
+          if (localStorage.getItem('tc_theme') === 'light') {
+            document.documentElement.classList.add('light')
+          }
+        } catch (e) { /* ignore */ }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
