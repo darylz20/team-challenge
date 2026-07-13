@@ -14,7 +14,8 @@ import { CollectiveMemoryPlay } from '../components/play/CollectiveMemoryPlay'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
-import { cn } from '../lib/utils'
+import { PlacementBadge } from '../components/shared/PlacementBadge'
+import { cn, isPlacementBased } from '../lib/utils'
 import { DEFAULT_DISPLAY, TYPE_CAPABILITIES } from '../types'
 import type {
   MultipleChoiceConfig,
@@ -158,6 +159,11 @@ function InteractiveChallengeView({ challenge }: { challenge: NonNullable<Return
           <h1 className="font-display text-lg font-bold text-text leading-snug break-words">
             {challenge.title}
           </h1>
+          {isPlacementBased(challenge) && (
+            <div className="mt-2">
+              <PlacementBadge showLabel />
+            </div>
+          )}
         </div>
       </div>
 
@@ -414,6 +420,7 @@ export function ChallengePlay() {
               <Trophy size={12} className="mr-1" />
               {pointsLabel}
             </Badge>
+            {isPlacementBased(challenge) && <PlacementBadge showLabel />}
           </div>
         </div>
       </div>

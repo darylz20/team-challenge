@@ -1,8 +1,27 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import type { Challenge } from '../types'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
+}
+
+/**
+ * Whether a challenge awards points based on placement (order teams solve it),
+ * rather than a fixed amount. Being first is worth more, so speed matters.
+ * Two storage shapes exist: interactive types (open_door/puzzle/gallery/
+ * collective_memory) keep `scoring_mode` on the config directly, while
+ * multiple_choice/free_text keep a global ScoringConfig under `config.scoring`.
+ */
+export function isPlacementBased(challenge: Challenge): boolean {
+  const config = challenge.config as
+    | { scoring_mode?: string; scoring?: { mode?: string } }
+    | null
+    | undefined
+  if (!config) return false
+  if (config.scoring_mode === 'placement') return true
+  if (config.scoring?.mode === 'placement') return true
+  return false
 }
 
 /**

@@ -8,7 +8,8 @@ import { useChallenges } from '../hooks/useChallenges'
 import { useTeamSubmissions } from '../hooks/useSubmissions'
 import { useSections } from '../hooks/useSections'
 import { useGameProgress } from '../hooks/useGameProgress'
-import { cn, livePointsFromState } from '../lib/utils'
+import { cn, livePointsFromState, isPlacementBased } from '../lib/utils'
+import { PlacementBadge } from '../components/shared/PlacementBadge'
 
 type ChallengeStatus = 'solved' | 'inprogress' | 'retry' | 'done' | 'new'
 
@@ -197,7 +198,10 @@ export function Home() {
                           </span>
                         )}
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold truncate">{challenge.title}</p>
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <p className="font-semibold truncate">{challenge.title}</p>
+                            {isPlacementBased(challenge) && <PlacementBadge />}
+                          </div>
                           <p className="text-xs text-text-muted capitalize">
                             {challenge.type.replace('_', ' ')}
                             {status === 'inprogress' && <span className="text-amber"> · bezig</span>}
