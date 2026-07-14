@@ -5,10 +5,11 @@ import { Badge } from '../components/ui/Badge'
 import { ThemeToggle } from '../components/ui/ThemeToggle'
 import { useAuth } from '../providers/AuthProvider'
 import { useChallenges } from '../hooks/useChallenges'
-import { useTeamSubmissions } from '../hooks/useSubmissions'
+import { useTeamSubmissions, useChallengeSolvers } from '../hooks/useSubmissions'
 import { useSections } from '../hooks/useSections'
 import { useGameProgress } from '../hooks/useGameProgress'
 import { cn, livePointsFromState, isPlacementBased } from '../lib/utils'
+import { placementRemainingForTeam } from '../lib/placement'
 import { PlacementBadge } from '../components/shared/PlacementBadge'
 
 type ChallengeStatus = 'solved' | 'inprogress' | 'retry' | 'done' | 'new'
@@ -20,8 +21,25 @@ export function Home() {
   const { submissions } = useTeamSubmissions(teamSession?.team.id, teamSession?.game.id)
   const { sections } = useSections(teamSession?.game.id)
   const { progress } = useGameProgress(teamSession?.game.id)
+  const { solversByChallenge } = useChallengeSolvers(teamSession?.game.id)
 
   if (!teamSession) return null
+
+  const myTeamId = teamSession.team.id
+
+  // Points a placement challenge can still yield for this team right now
+  // (full max when untouched, reduced once rivals claim the top spots).
+  function placementRemaining(challenge: (typeof challenges)[number]): number {
+    if (!isPlacementBased(challenge)) return 0
+    const solvers = solversByChallenge.get(challenge.id) ?? []
+    const othersSolvedCount = solvers.filter((s) => s.team_id !== myTeamId).length
+    const iSolved = solvers.some((s) => s.team_id === myTeamId)
+    return placementRemainingForTeam(challenge, myTeamId, {
+      allProgress: progress,
+      othersSolvedCount,
+      iSolved,
+    })
+  }
 
   // Best real submission per challenge (correct preferred, then highest points).
   // Rows with a null challenge_id are admin adjustments — handled separately.
@@ -178,6 +196,11 @@ export function Home() {
                 <div className="flex flex-col gap-3">
                   {sectionChallenges.map((challenge, i) => {
                     const { status, collected } = evaluate(challenge.id)
+                    const placement = isPlacementBased(challenge)
+                    const remaining = placement ? placementRemaining(challenge) : 0
+                    // Show "still claimable" while a placement challenge is open.
+                    const showRemaining =
+                      placement && (status === 'new' || status === 'retry' || status === 'inprogress')
 
                     return (
                       <Card
@@ -207,6 +230,9 @@ export function Home() {
                             {status === 'inprogress' && <span className="text-amber"> · bezig</span>}
                             {status === 'retry' && <span className="text-magenta"> · opnieuw proberen</span>}
                             {status === 'done' && <span className="text-text-faint"> · afgerond</span>}
+                            {status === 'inprogress' && showRemaining && remaining > 0 && (
+                              <span className="text-amber"> · nog {remaining} pt te halen</span>
+                            )}
                           </p>
                         </div>
                         {status === 'solved' ? (
@@ -215,6 +241,10 @@ export function Home() {
                           <Badge variant="amber">{collected} pts</Badge>
                         ) : status === 'done' ? (
                           <Badge variant="muted">{collected} pts</Badge>
+                        ) : showRemaining ? (
+                          // Placement: points this team can still claim (max, or
+                          // reduced once rivals took the higher spots; 0 = gone).
+                          <Badge variant={remaining > 0 ? 'neon' : 'muted'}>{remaining} pts</Badge>
                         ) : (
                           <Badge variant="neon">{challenge.points} pts</Badge>
                         )}

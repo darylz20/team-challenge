@@ -4,9 +4,11 @@ import { toast } from 'sonner'
 import { ArrowLeft, Lightbulb, Trophy, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import { useAuth } from '../providers/AuthProvider'
 import { useChallenge } from '../hooks/useChallenges'
-import { useSubmission } from '../hooks/useSubmissions'
+import { useSubmission, useChallengeSolvers } from '../hooks/useSubmissions'
+import type { ChallengeSolver } from '../hooks/useSubmissions'
 import { useSections } from '../hooks/useSections'
 import { MediaGallery } from '../components/shared/MediaGallery'
+import { SolvedByTeams } from '../components/shared/SolvedByTeams'
 import { OpenDoorPlay } from '../components/play/OpenDoorPlay'
 import { PuzzlePlay } from '../components/play/PuzzlePlay'
 import { GalleryPlay } from '../components/play/GalleryPlay'
@@ -108,7 +110,13 @@ function FreeTextInput({
 // ── Interactive challenge view (open_door etc) ──
 // Renders the prompt (title, media, description) + dispatches to the
 // type-specific Play component which manages its own progress and submit.
-function InteractiveChallengeView({ challenge }: { challenge: NonNullable<ReturnType<typeof useChallenge>['challenge']> }) {
+function InteractiveChallengeView({
+  challenge,
+  solvers,
+}: {
+  challenge: NonNullable<ReturnType<typeof useChallenge>['challenge']>
+  solvers: ChallengeSolver[]
+}) {
   const navigate = useNavigate()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fullConfig = challenge.config as any
@@ -167,6 +175,8 @@ function InteractiveChallengeView({ challenge }: { challenge: NonNullable<Return
         </div>
       </div>
 
+      {solvers.length > 0 && <SolvedByTeams solvers={solvers} className="mb-4" />}
+
       <div className="space-y-4">
         {/* Description + media */}
         {(descriptionBlock || mediaBlock) && (
@@ -194,6 +204,7 @@ export function ChallengePlay() {
   const { teamSession } = useAuth()
   const { challenge, loading: challengeLoading } = useChallenge(id)
   const { sections } = useSections(teamSession?.game.id)
+  const { solversByChallenge } = useChallengeSolvers(teamSession?.game.id)
   const { submission, attemptCount, hasCorrect, loading: submissionLoading, submitting, submitAnswer } = useSubmission(
     teamSession?.team.id,
     id,
@@ -238,12 +249,17 @@ export function ChallengePlay() {
     )
   }
 
+  // Rival teams that already solved this challenge — a nudge to be quick.
+  const otherSolvers = (solversByChallenge.get(challenge.id) ?? []).filter(
+    (s) => s.team_id !== teamSession.team.id,
+  )
+
   // ── Interactive types (uses_progress) use a parallel flow ──
   // Skip the entire single-submission scaffolding (useSubmission state, hint
   // deductions, manual submit button). The per-type Play component owns
   // attempts, progress, scoring, and finalization through useChallengeProgress.
   if (TYPE_CAPABILITIES[challenge.type].uses_progress) {
-    return <InteractiveChallengeView challenge={challenge} />
+    return <InteractiveChallengeView challenge={challenge} solvers={otherSolvers} />
   }
 
   // Parse config fields with defaults
@@ -424,6 +440,8 @@ export function ChallengePlay() {
           </div>
         </div>
       </div>
+
+      {otherSolvers.length > 0 && <SolvedByTeams solvers={otherSolvers} className="mb-4" />}
 
       {/* Content */}
       <div className={isCompact ? 'space-y-3' : 'space-y-5'}>
