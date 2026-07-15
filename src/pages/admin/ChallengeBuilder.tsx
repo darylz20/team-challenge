@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Save, Eye, EyeOff } from 'lucide-react'
+import { ArrowLeft, Save, Eye, EyeOff, Lock } from 'lucide-react'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
@@ -32,6 +32,7 @@ export function ChallengeBuilder() {
   const [type, setType] = useState<ChallengeType>('multiple_choice')
   const [sectionId, setSectionId] = useState<string>('')
   const [config, setConfig] = useState<ChallengeConfig>(DEFAULT_CHALLENGE_CONFIGS.multiple_choice)
+  const [explanation, setExplanation] = useState('')
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([])
   const [scoring, setScoring] = useState<ScoringConfig>(DEFAULT_SCORING)
   const [hints, setHints] = useState<HintsConfig>({ items: [] })
@@ -77,6 +78,7 @@ export function ChallengeBuilder() {
       })
       setAttempts((cfg.attempts as AttemptsConfig) ?? DEFAULT_ATTEMPTS)
       setDisplay({ ...DEFAULT_DISPLAY, ...(cfg.display as Partial<DisplayConfig> ?? {}) })
+      setExplanation((cfg.explanation as string) ?? '')
     }
   }, [challenge])
 
@@ -129,7 +131,7 @@ export function ChallengeBuilder() {
       points: topLevelPoints,
       hint: hints.items[0]?.text ?? null,
       section_id: sectionId,
-      config: { ...config, scoring, hints, attempts, display, media: mediaItems },
+      config: { ...config, scoring, hints, attempts, display, media: mediaItems, explanation: explanation.trim() || null },
       media_url: mediaItems[0]?.url ?? null,
       media_type: mediaItems[0]?.type ?? null,
     }
@@ -272,6 +274,28 @@ export function ChallengeBuilder() {
             Answer Configuration
           </h3>
           <AnswerConfigEditor type={type} config={config} onChange={setConfig} gameId={gameId} />
+        </Card>
+
+        {/* Answer Explanation — never rendered on player screens */}
+        <Card className="space-y-4">
+          <div className="flex items-center gap-2">
+            <h3 className="font-display text-sm font-bold text-text-muted uppercase tracking-wider">
+              Answer Explanation
+            </h3>
+            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber/15 text-amber text-[10px] font-medium uppercase tracking-wider">
+              <Lock size={10} /> Admin only
+            </span>
+          </div>
+          <Textarea
+            id="challenge-explanation"
+            value={explanation}
+            onChange={(e) => setExplanation(e.target.value)}
+            placeholder="Why is this the correct answer? e.g. background, trivia, or the reasoning to read out loud."
+            rows={4}
+          />
+          <p className="text-xs text-text-faint">
+            Reference material for you during the game. Players never see this.
+          </p>
         </Card>
 
         {/* Scoring (hidden for interactive types — they score per item via answer config) */}
