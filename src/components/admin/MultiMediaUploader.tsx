@@ -1,5 +1,21 @@
 import { useRef, useState, type DragEvent } from 'react'
 import { Upload, X, FileAudio, FileVideo, GripVertical } from 'lucide-react'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { cn } from '../../lib/utils'
 import { uploadChallengeMedia, deleteChallengeMedia } from '../../lib/storage'
 import type { MediaItem, MediaType } from '../../types'
@@ -17,17 +33,34 @@ function getMediaType(file: File): MediaType | null {
   return null
 }
 
-function MediaPreview({ item, onRemove }: { item: MediaItem; onRemove: () => void }) {
+function SortableMediaItem({ item, position, onRemove }: { item: MediaItem; position: number; onRemove: () => void }) {
   const isImage = item.type === 'image'
   const isAudio = item.type === 'audio'
   const isVideo = item.type === 'video'
   const filename = item.url.split('/').pop()?.split('?')[0] ?? 'file'
 
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id: item.url })
+  const style = { transform: CSS.Transform.toString(transform), transition }
+
   return (
-    <div className="relative group flex items-center gap-2 bg-surface rounded-lg border border-surface-overlay p-2">
-      <div className="text-text-faint cursor-grab">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        'relative group flex items-center gap-2 bg-surface rounded-lg border border-surface-overlay p-2',
+        isDragging && 'opacity-50 z-10',
+      )}
+    >
+      <button
+        type="button"
+        ref={setActivatorNodeRef}
+        {...attributes}
+        {...listeners}
+        className="flex items-center gap-1 text-text-faint hover:text-text cursor-grab active:cursor-grabbing p-1 touch-none shrink-0"
+      >
         <GripVertical size={14} />
-      </div>
+        <span className="text-xs font-mono">{position}</span>
+      </button>
       <div className="flex-1 min-w-0">
         {isImage && (
           <img src={item.url} alt="" className="h-16 w-full object-cover rounded" />
@@ -60,6 +93,23 @@ export function MultiMediaUploader({ gameId, items, onChange }: MultiMediaUpload
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [dragOver, setDragOver] = useState(false)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    const oldIndex = items.findIndex((it) => it.url === active.id)
+    const newIndex = items.findIndex((it) => it.url === over.id)
+    const newOrder = [...items]
+    const [moved] = newOrder.splice(oldIndex, 1)
+    newOrder.splice(newIndex, 0, moved)
+    onChange(newOrder)
+  }
 
   async function handleFiles(files: FileList | File[]) {
     const fileArray = Array.from(files)
@@ -110,13 +160,27 @@ export function MultiMediaUploader({ gameId, items, onChange }: MultiMediaUpload
     <div className="flex flex-col gap-2">
       <span className="text-sm text-text-muted">Media Attachments (optional)</span>
 
-      {/* Existing items */}
+      {/* Existing items — drag the handle to change the order players see them in */}
       {items.length > 0 && (
-        <div className="space-y-2">
-          {items.map((item, i) => (
-            <MediaPreview key={item.url} item={item} onRemove={() => handleRemove(i)} />
-          ))}
-        </div>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={items.map((it) => it.url)} strategy={verticalListSortingStrategy}>
+            <div className="space-y-2">
+              {items.map((item, i) => (
+                <SortableMediaItem
+                  key={item.url}
+                  item={item}
+                  position={i + 1}
+                  onRemove={() => handleRemove(i)}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+      )}
+      {items.length > 1 && (
+        <p className="text-xs text-text-faint">
+          Drag the handle to reorder. Players see them in this order.
+        </p>
       )}
 
       {/* Upload zone */}
