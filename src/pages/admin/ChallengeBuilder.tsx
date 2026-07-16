@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import { ArrowLeft, Save, Eye, EyeOff, Lock } from 'lucide-react'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Card } from '../../components/ui/Card'
@@ -136,13 +137,22 @@ export function ChallengeBuilder() {
       media_type: mediaItems[0]?.type ?? null,
     }
 
-    if (isEditing && cid) {
-      await updateChallenge(cid, formData)
-    } else {
-      await createChallenge(formData)
-    }
+    const { error } = isEditing && cid
+      ? await updateChallenge(cid, formData)
+      : await createChallenge(formData)
 
     setSaving(false)
+
+    // Surface the failure and stay on the form — navigating away on a rejected
+    // write made a failed save look identical to a successful one.
+    if (error) {
+      toast.error(isEditing ? 'Opslaan mislukt' : 'Aanmaken mislukt', {
+        description: error.message,
+        duration: 10000,
+      })
+      return
+    }
+
     navigate(`/admin/games/${gameId}`)
   }
 

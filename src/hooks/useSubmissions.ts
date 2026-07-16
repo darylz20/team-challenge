@@ -118,6 +118,106 @@ export function useChallengeSolvers(gameId: string | undefined) {
   return { solversByChallenge, loading, refetch: fetch }
 }
 
+export interface PhotoReview {
+  submission_id: string
+  team_id: string
+  team_name: string
+  team_color: string
+  challenge_id: string
+  challenge_title: string
+  challenge_points: number // configured max — prefills the award field
+  photo_url: string
+  submitted_at: string
+  reviewed: boolean
+  points_awarded: number
+  review_note: string | null
+}
+
+/**
+ * Every photo_upload submission in a game, newest first, joined with its team
+ * and challenge. Pending ones (not yet reviewed) come first so the admin can
+ * work through a queue. Subscribes to realtime so photos appear as teams send
+ * them and disappear from the queue as they're awarded.
+ */
+export function usePhotoReviews(gameId: string | undefined) {
+  const [reviews, setReviews] = useState<PhotoReview[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetch = useCallback(async () => {
+    if (!gameId) return
+
+    const [{ data: subs }, { data: teams }, { data: challenges }] = await Promise.all([
+      supabase
+        .from('submissions')
+        .select('id, team_id, challenge_id, answer, points_awarded, is_correct, submitted_at')
+        .eq('game_id', gameId)
+        .order('submitted_at', { ascending: false }),
+      supabase.from('teams').select('id, name, color').eq('game_id', gameId),
+      supabase.from('challenges').select('id, title, points, type').eq('game_id', gameId),
+    ])
+
+    const teamMap = new Map((teams ?? []).map((t) => [t.id, t]))
+    const photoChallenges = new Map(
+      (challenges ?? []).filter((c) => c.type === 'photo_upload').map((c) => [c.id, c]),
+    )
+
+    const rows: PhotoReview[] = []
+    for (const s of subs ?? []) {
+      if (!s.challenge_id) continue
+      const challenge = photoChallenges.get(s.challenge_id)
+      if (!challenge) continue
+      const team = teamMap.get(s.team_id)
+      if (!team) continue
+
+      const answer = (s.answer ?? {}) as { photo_url?: string; reviewed?: boolean; review_note?: string | null }
+      if (!answer.photo_url) continue
+
+      rows.push({
+        submission_id: s.id,
+        team_id: team.id,
+        team_name: team.name,
+        team_color: team.color,
+        challenge_id: challenge.id,
+        challenge_title: challenge.title,
+        challenge_points: challenge.points,
+        photo_url: answer.photo_url,
+        submitted_at: s.submitted_at,
+        reviewed: answer.reviewed === true,
+        points_awarded: s.points_awarded ?? 0,
+        review_note: answer.review_note ?? null,
+      })
+    }
+
+    // Pending first, then most recently submitted.
+    rows.sort((a, b) => {
+      if (a.reviewed !== b.reviewed) return a.reviewed ? 1 : -1
+      return b.submitted_at.localeCompare(a.submitted_at)
+    })
+
+    setReviews(rows)
+    setLoading(false)
+  }, [gameId])
+
+  useEffect(() => { fetch() }, [fetch])
+
+  useEffect(() => {
+    if (!gameId) return
+    const channel = supabase
+      .channel(`photo-reviews:${gameId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'submissions', filter: `game_id=eq.${gameId}` },
+        () => { fetch() },
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [gameId, fetch])
+
+  const pendingCount = reviews.filter((r) => !r.reviewed).length
+
+  return { reviews, pendingCount, loading, refetch: fetch }
+}
+
 export function useTeamSubmissions(teamId: string | undefined, gameId: string | undefined) {
   const [submissions, setSubmissions] = useState<Submission[]>([])
   const [loading, setLoading] = useState(true)

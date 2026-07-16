@@ -38,7 +38,40 @@ export function AnswerConfigEditor({ type, config, onChange, gameId }: AnswerCon
       return <GalleryEditor config={config as GalleryConfig} onChange={onChange} gameId={gameId} />
     case 'collective_memory':
       return <CollectiveMemoryEditor config={config as CollectiveMemoryConfig} onChange={onChange} />
+    case 'photo_upload':
+      return <PhotoUploadEditor />
   }
+}
+
+// No answer key to configure: the team uploads one photo and the admin judges it
+// by eye. This panel just makes the (unusual) flow explicit in the builder.
+function PhotoUploadEditor() {
+  return (
+    <div className="space-y-3">
+      <p className="text-sm text-text-muted">
+        Het team uploadt <span className="text-text">één foto</span>. Er is geen goed antwoord om in te
+        stellen — jij bepaalt de punten met de hand.
+      </p>
+      <ol className="space-y-2 text-sm text-text-muted">
+        {[
+          'Team kiest of maakt een foto en verstuurt die.',
+          'Het team ziet "wacht op beoordeling" — nog geen punten.',
+          'Jij bekijkt de foto in de Live Monitor en kent punten toe.',
+          'Pas dan ziet het team de punten en telt het mee in het klassement.',
+        ].map((step, i) => (
+          <li key={i} className="flex gap-2.5">
+            <span className="font-display text-neon font-bold shrink-0">{i + 1}</span>
+            <span>{step}</span>
+          </li>
+        ))}
+      </ol>
+      <p className="text-xs text-text-faint">
+        De punten die je hieronder bij <span className="text-text-muted">Scoring</span> instelt zijn een
+        richtlijn: dat getal staat straks alvast ingevuld bij het beoordelen, en je kunt het per foto
+        aanpassen. Eén foto per team — opnieuw insturen kan niet.
+      </p>
+    </div>
+  )
 }
 
 function MultipleChoiceEditor({ config, onChange, gameId }: { config: MultipleChoiceConfig; onChange: (c: ChallengeConfig) => void; gameId?: string }) {

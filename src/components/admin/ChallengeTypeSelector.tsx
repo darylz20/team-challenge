@@ -1,4 +1,4 @@
-import { ListChecks, Type, DoorOpen, Grid3x3, Images, Brain } from 'lucide-react'
+import { ListChecks, Type, DoorOpen, Grid3x3, Images, Brain, Camera } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import type { ChallengeType } from '../../types'
 
@@ -9,6 +9,7 @@ const types: { value: ChallengeType; label: string; icon: typeof ListChecks; des
   { value: 'puzzle', label: 'Puzzel', icon: Grid3x3, description: '12 termen, 3 thema\'s raden' },
   { value: 'gallery', label: 'Galerij', icon: Images, description: 'Antwoord per foto onder thema' },
   { value: 'collective_memory', label: 'Collectief Geheugen', icon: Brain, description: 'Beeldfragment + 5 trefwoorden' },
+  { value: 'photo_upload', label: 'Foto Upload', icon: Camera, description: 'Team uploadt 1 foto, jij geeft punten' },
 ]
 
 interface ChallengeTypeSelectorProps {

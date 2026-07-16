@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Lightbulb, Trophy, HelpCircle } from 'lucide-react'
+import { Lightbulb, Trophy, HelpCircle, Camera } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { MediaGallery } from '../shared/MediaGallery'
 import type {
@@ -78,6 +78,21 @@ function FreeTextPreview() {
         placeholder="Type your answer..."
         className="w-full bg-surface-raised border border-surface-overlay rounded-lg px-4 py-3 text-text placeholder:text-text-faint outline-none"
       />
+    </div>
+  )
+}
+
+function PhotoUploadPreview() {
+  return (
+    <div className="space-y-2">
+      <div className="w-full flex flex-col items-center gap-2 p-6 rounded-lg border-2 border-dashed border-surface-overlay">
+        <Camera size={24} className="text-text-faint" />
+        <span className="text-sm text-text-muted">Kies of maak een foto</span>
+        <span className="text-xs text-text-faint">Je kunt er één insturen</span>
+      </div>
+      <p className="text-xs text-text-faint text-center">
+        Na insturen: "wacht op beoordeling" tot jij punten toekent.
+      </p>
     </div>
   )
 }
@@ -378,6 +393,8 @@ export function ChallengePreview({
         return <GalleryPreview config={config as GalleryConfig} />
       case 'collective_memory':
         return <CollectiveMemoryPreview config={config as CollectiveMemoryConfig} />
+      case 'photo_upload':
+        return <PhotoUploadPreview />
     }
   }
 

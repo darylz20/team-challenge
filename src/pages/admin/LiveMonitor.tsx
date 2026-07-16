@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   ArrowLeft, Loader2, Trophy, Users, Activity, Plus, Minus, Check, RotateCw,
-  AlertTriangle, CheckCircle2, Power,
+  AlertTriangle, CheckCircle2, Power, Camera,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Card } from '../../components/ui/Card'
@@ -11,9 +11,11 @@ import { Badge } from '../../components/ui/Badge'
 import { Modal } from '../../components/ui/Modal'
 import { useGame } from '../../hooks/useGames'
 import { useLiveMonitor, type TeamLiveState } from '../../hooks/useLiveMonitor'
+import { usePhotoReviews, type PhotoReview } from '../../hooks/useSubmissions'
 import { AdjustPointsModal } from '../../components/admin/live/AdjustPointsModal'
 import { ManualCompleteModal } from '../../components/admin/live/ManualCompleteModal'
 import { ResetChallengeModal } from '../../components/admin/live/ResetChallengeModal'
+import { ReviewPhotoModal } from '../../components/admin/live/ReviewPhotoModal'
 import { supabase } from '../../lib/supabase'
 import { cn } from '../../lib/utils'
 
@@ -22,8 +24,10 @@ export function LiveMonitor() {
   const navigate = useNavigate()
   const { game, refetch: refetchGame } = useGame(gameId)
   const { states, allChallenges, loading, lastUpdate } = useLiveMonitor(gameId)
+  const { reviews: photoReviews, pendingCount, refetch: refetchPhotos } = usePhotoReviews(gameId)
 
   // Modals
+  const [reviewTarget, setReviewTarget] = useState<PhotoReview | null>(null)
   const [adjustTarget, setAdjustTarget] = useState<TeamLiveState | null>(null)
   const [completeTarget, setCompleteTarget] = useState<TeamLiveState | null>(null)
   const [resetTarget, setResetTarget] = useState<TeamLiveState | null>(null)
@@ -125,6 +129,64 @@ export function LiveMonitor() {
         </Card>
       </div>
 
+      {/* Photo review queue — only rendered when the game has photo challenges */}
+      {photoReviews.length > 0 && (
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-2 px-1">
+            <Camera size={16} className="text-neon" />
+            <h2 className="font-display text-sm font-bold uppercase tracking-wider text-text">
+              Foto's beoordelen
+            </h2>
+            {pendingCount > 0 ? (
+              <Badge variant="amber">{pendingCount} wacht{pendingCount !== 1 ? 'en' : ''}</Badge>
+            ) : (
+              <Badge variant="muted">alles beoordeeld</Badge>
+            )}
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {photoReviews.map((r) => (
+              <button
+                key={r.submission_id}
+                type="button"
+                onClick={() => setReviewTarget(r)}
+                className={cn(
+                  'group text-left rounded-lg overflow-hidden border-2 transition-all',
+                  r.reviewed
+                    ? 'border-surface-overlay opacity-70 hover:opacity-100'
+                    : 'border-amber/50 hover:border-amber shadow-glow-soft',
+                )}
+              >
+                <img
+                  src={r.photo_url}
+                  alt={`Inzending van ${r.team_name}`}
+                  loading="lazy"
+                  className="w-full h-28 object-cover bg-void"
+                />
+                <div className="p-2 bg-surface-raised">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span
+                      className="w-2 h-2 rounded-full shrink-0"
+                      style={{ backgroundColor: r.team_color }}
+                    />
+                    <span className="text-xs font-medium text-text truncate">{r.team_name}</span>
+                  </div>
+                  <p className="text-[10px] text-text-muted truncate mt-0.5">{r.challenge_title}</p>
+                  <p className="text-[10px] mt-1">
+                    {r.reviewed ? (
+                      <span className={r.points_awarded > 0 ? 'text-lime' : 'text-text-faint'}>
+                        {r.points_awarded} pt toegekend
+                      </span>
+                    ) : (
+                      <span className="text-amber">Wacht op beoordeling</span>
+                    )}
+                  </p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {loading ? (
         <div className="flex items-center justify-center py-16">
           <Loader2 size={28} className="text-neon animate-spin" />
@@ -179,6 +241,13 @@ export function LiveMonitor() {
           </div>
         </div>
       </Modal>
+
+      {/* Photo review */}
+      <ReviewPhotoModal
+        review={reviewTarget}
+        onClose={() => setReviewTarget(null)}
+        onDone={refetchPhotos}
+      />
 
       {/* Per-team action modals */}
       {adjustTarget && gameId && (

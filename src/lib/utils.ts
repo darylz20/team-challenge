@@ -14,6 +14,9 @@ export function cn(...inputs: ClassValue[]) {
  * multiple_choice/free_text keep a global ScoringConfig under `config.scoring`.
  */
 export function isPlacementBased(challenge: Challenge): boolean {
+  // photo_upload points are set by hand at review time, so no placement race
+  // applies even if a scoring mode is left on the config.
+  if (challenge.type === 'photo_upload') return false
   const config = challenge.config as
     | { scoring_mode?: string; scoring?: { mode?: string } }
     | null

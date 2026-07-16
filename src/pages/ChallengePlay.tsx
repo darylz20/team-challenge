@@ -13,6 +13,7 @@ import { OpenDoorPlay } from '../components/play/OpenDoorPlay'
 import { PuzzlePlay } from '../components/play/PuzzlePlay'
 import { GalleryPlay } from '../components/play/GalleryPlay'
 import { CollectiveMemoryPlay } from '../components/play/CollectiveMemoryPlay'
+import { PhotoUploadPlay } from '../components/play/PhotoUploadPlay'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
@@ -148,6 +149,8 @@ function InteractiveChallengeView({
         return <GalleryPlay challenge={challenge} />
       case 'collective_memory':
         return <CollectiveMemoryPlay challenge={challenge} />
+      case 'photo_upload':
+        return <PhotoUploadPlay challenge={challenge} />
       default:
         return <p className="text-sm text-text-muted">Onbekend type</p>
     }
@@ -254,11 +257,13 @@ export function ChallengePlay() {
     (s) => s.team_id !== teamSession.team.id,
   )
 
-  // ── Interactive types (uses_progress) use a parallel flow ──
+  // ── Types that own their flow use a parallel view ──
   // Skip the entire single-submission scaffolding (useSubmission state, hint
   // deductions, manual submit button). The per-type Play component owns
   // attempts, progress, scoring, and finalization through useChallengeProgress.
-  if (TYPE_CAPABILITIES[challenge.type].uses_progress) {
+  // photo_upload has no progress row but is the same shape of deal: it manages
+  // its own single submission and has no hints or retries to scaffold.
+  if (TYPE_CAPABILITIES[challenge.type].uses_progress || challenge.type === 'photo_upload') {
     return <InteractiveChallengeView challenge={challenge} solvers={otherSolvers} />
   }
 

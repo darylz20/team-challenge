@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { LogOut, ChevronRight, CheckCircle2, Lock, Gift } from 'lucide-react'
+import { LogOut, ChevronRight, CheckCircle2, Lock, Gift, Hourglass } from 'lucide-react'
 import { Card } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
 import { ThemeToggle } from '../components/ui/ThemeToggle'
@@ -12,7 +12,7 @@ import { cn, livePointsFromState, isPlacementBased } from '../lib/utils'
 import { placementRemainingForTeam } from '../lib/placement'
 import { PlacementBadge } from '../components/shared/PlacementBadge'
 
-type ChallengeStatus = 'solved' | 'inprogress' | 'retry' | 'done' | 'new'
+type ChallengeStatus = 'solved' | 'inprogress' | 'retry' | 'done' | 'pending' | 'new'
 
 export function Home() {
   const navigate = useNavigate()
@@ -69,10 +69,15 @@ export function Home() {
     const submittedP = sub ? sub.points_awarded : 0
     const collected = solved ? submittedP : Math.max(submittedP, liveP)
 
+    // A photo sits at is_correct=NULL until an admin reviews it. That's not a
+    // failed attempt — there's nothing to retry, so don't say "opnieuw proberen".
+    const awaitingReview = !!sub && sub.is_correct === null && !(sub.answer as { reviewed?: boolean } | null)?.reviewed
+
     let status: ChallengeStatus
     if (solved) status = 'solved'
     else if (prog && !finalized) status = 'inprogress'
     else if (finalized) status = 'done' // finalized without a full solve
+    else if (awaitingReview) status = 'pending'
     else if (sub) status = 'retry' // classic wrong attempt, can try again
     else status = 'new'
     return { status, collected }
@@ -215,9 +220,10 @@ export function Home() {
                             'w-8 h-8 rounded-lg flex items-center justify-center text-sm font-mono shrink-0',
                             status === 'inprogress' ? 'bg-amber/10 text-amber' :
                             status === 'retry' ? 'bg-magenta/10 text-magenta' :
+                            status === 'pending' ? 'bg-amber/10 text-amber' :
                             'bg-surface-overlay text-text-faint',
                           )}>
-                            {i + 1}
+                            {status === 'pending' ? <Hourglass size={14} /> : i + 1}
                           </span>
                         )}
                         <div className="flex-1 min-w-0">
@@ -229,6 +235,7 @@ export function Home() {
                             {challenge.type.replace('_', ' ')}
                             {status === 'inprogress' && <span className="text-amber"> · bezig</span>}
                             {status === 'retry' && <span className="text-magenta"> · opnieuw proberen</span>}
+                            {status === 'pending' && <span className="text-amber"> · wacht op beoordeling</span>}
                             {status === 'done' && <span className="text-text-faint"> · afgerond</span>}
                             {status === 'inprogress' && showRemaining && remaining > 0 && (
                               <span className="text-amber"> · nog {remaining} pt te halen</span>
@@ -241,6 +248,9 @@ export function Home() {
                           <Badge variant="amber">{collected} pts</Badge>
                         ) : status === 'done' ? (
                           <Badge variant="muted">{collected} pts</Badge>
+                        ) : status === 'pending' ? (
+                          // Points are unknown to the team until the admin awards them.
+                          <Badge variant="amber">? pts</Badge>
                         ) : showRemaining ? (
                           // Placement: points this team can still claim (max, or
                           // reduced once rivals took the higher spots; 0 = gone).

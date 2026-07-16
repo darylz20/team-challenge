@@ -39,6 +39,7 @@ export type ChallengeType =
   | 'puzzle'
   | 'gallery'
   | 'collective_memory'
+  | 'photo_upload'
 export type MediaType = 'image' | 'audio' | 'video'
 
 export interface MediaItem {
@@ -166,6 +167,28 @@ export interface CollectiveMemoryConfig {
   fuzzy: boolean
 }
 
+// ── Photo Upload (manually reviewed) ──
+// No answer key to configure: the team uploads exactly one photo, and the admin
+// awards points by eye from the Live Monitor. The global scoring config supplies
+// the number that prefills the award field.
+// The submission sits at is_correct=NULL / 0 pts until admin_review_photo runs,
+// which is what keeps the score hidden from the team until it's awarded.
+// The marker field carries no information beyond challenge.type — it exists so
+// ChallengeConfig stays a sound union. An empty object type here would make
+// every other config member assignable to this one.
+export interface PhotoUploadConfig {
+  photo_upload: true
+}
+
+// Shape of submissions.answer for a photo_upload challenge.
+export interface PhotoSubmissionAnswer {
+  photo_url: string
+  // Set by admin_review_photo once an admin has judged it.
+  reviewed?: boolean
+  review_note?: string | null
+  reviewed_at?: string
+}
+
 export type ChallengeConfig =
   | MultipleChoiceConfig
   | FreeTextConfig
@@ -173,6 +196,7 @@ export type ChallengeConfig =
   | PuzzleConfig
   | GalleryConfig
   | CollectiveMemoryConfig
+  | PhotoUploadConfig
 
 // ── Type capabilities registry ──
 // Drives builder UI visibility + player flow routing.
@@ -190,6 +214,8 @@ export const TYPE_CAPABILITIES: Record<ChallengeType, TypeCapabilities> = {
   puzzle:            { uses_global_scoring: false, uses_global_attempts: false, uses_progress: true,  uses_display_config: false },
   gallery:           { uses_global_scoring: false, uses_global_attempts: false, uses_progress: true,  uses_display_config: true  },
   collective_memory: { uses_global_scoring: false, uses_global_attempts: false, uses_progress: true,  uses_display_config: true  },
+  // Attempts are fixed at one photo (enforced in submit_answer), so no attempts card.
+  photo_upload:      { uses_global_scoring: true,  uses_global_attempts: false, uses_progress: false, uses_display_config: true  },
 }
 
 // ── Challenge Progress (interactive types) ──
@@ -394,6 +420,7 @@ export const DEFAULT_CHALLENGE_CONFIGS: Record<ChallengeType, ChallengeConfig> =
     attempts: { unlimited: false, max: 5 },
     fuzzy: true,
   },
+  photo_upload: { photo_upload: true },
 }
 
 export const DEFAULT_SCORING: ScoringConfig = {
