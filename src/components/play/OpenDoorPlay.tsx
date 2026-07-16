@@ -21,6 +21,7 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
   const answers = config.answers ?? []
   const scoringMode = config.scoring_mode ?? 'fixed'
   const placements = config.placements ?? []
+  const attempts = config.attempts ?? { unlimited: true, max: 0 }
   // Max points awardable per answer (used for display on unfound doors)
   const maxPerAnswerForMode = (i: number) =>
     scoringMode === 'placement' ? (placements[0]?.points ?? 0) : (answers[i]?.points ?? 0)
@@ -44,21 +45,28 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
 
   const found = state.found ?? []
   const allFound = found.length >= answers.length
+  const attemptsUsed = state.attempts_used ?? 0
+  const attemptsRemaining = attempts.unlimited ? Infinity : Math.max(0, attempts.max - attemptsUsed)
+  const noAttemptsLeft = !attempts.unlimited && attemptsRemaining <= 0
 
-  // Auto-finalize only when all 4 found
+  // Auto-finalize when all 4 found or the attempt budget runs out
   const finalizingRef = useRef(false)
   useEffect(() => {
     if (finalized || finalizingRef.current) return
-    if (allFound) {
+    if (allFound || noAttemptsLeft) {
       finalizingRef.current = true
       finalize().then((res) => {
         if (res && !res.error) {
           setFinalResult({ points: res.points_awarded, isCorrect: res.is_correct })
-          toast.success('Alle deuren open!', { description: `Eindscore: ${res.points_awarded} pt` })
+          if (allFound) {
+            toast.success('Alle deuren open!', { description: `Eindscore: ${res.points_awarded} pt` })
+          } else {
+            toast(`Geen pogingen meer — ${res.points_awarded} pt verdiend`, { duration: 4000 })
+          }
         }
       })
     }
-  }, [allFound, finalized, finalize])
+  }, [allFound, noAttemptsLeft, finalized, finalize])
 
   // Refocus input after submit (mobile keyboard stays up)
   useEffect(() => {
@@ -79,7 +87,11 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
     setSubmitting(false)
 
     if (result.error) {
-      toast.error('Submit mislukt', { description: result.error })
+      if (result.attempts_exhausted) {
+        toast.error('Geen pogingen meer over')
+      } else {
+        toast.error('Submit mislukt', { description: result.error })
+      }
       return
     }
 
@@ -149,10 +161,18 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
         <span className="text-text-muted">
           {found.length} / {answers.length} gevonden
         </span>
-        <span className="font-mono">
-          <span className="text-neon font-bold">{earnedSoFar}</span>
-          <span className="text-text-faint"> / {totalPossible} pt</span>
-        </span>
+        <div className="flex items-center gap-3">
+          {!attempts.unlimited && (
+            <span className="text-xs text-text-muted">
+              <span className={cn('font-mono', attemptsRemaining <= 1 && 'text-magenta')}>{attemptsRemaining}</span>
+              <span className="text-text-faint"> pog.</span>
+            </span>
+          )}
+          <span className="font-mono">
+            <span className="text-neon font-bold">{earnedSoFar}</span>
+            <span className="text-text-faint"> / {totalPossible} pt</span>
+          </span>
+        </div>
       </div>
 
       {/* 4 doors */}
@@ -217,7 +237,11 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
           )}
           <div className="flex-1">
             <p className="font-semibold text-sm">
-              {allFound ? 'Alle deuren open!' : 'Challenge afgerond'}
+              {allFound
+                ? 'Alle deuren open!'
+                : noAttemptsLeft
+                  ? 'Geen pogingen meer'
+                  : 'Challenge afgerond'}
             </p>
             <p className="text-xs text-text-muted">
               {finalResult ? `${finalResult.points} punten` : `${earnedSoFar} punten`} • {found.length}/{answers.length} antwoorden
@@ -227,7 +251,7 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
       )}
 
       {/* Input + finalize */}
-      {!finalized && !allFound && (
+      {!finalized && !allFound && !noAttemptsLeft && (
         <form onSubmit={handleSubmit} className="space-y-2">
           <div className="flex gap-2">
             <input
@@ -257,7 +281,9 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
             </Button>
           </div>
           {feedback?.type === 'miss' && (
-            <p className="text-xs text-magenta">Geen match — probeer een ander antwoord</p>
+            <p className="text-xs text-magenta">
+              Geen match{!attempts.unlimited ? ` — ${attemptsRemaining} pog. over` : ' — probeer een ander antwoord'}
+            </p>
           )}
 
           {/* Manual finalize */}

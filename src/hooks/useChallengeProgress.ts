@@ -12,6 +12,9 @@ export interface OpenDoorAttemptResult {
   index?: number
   points?: number
   place?: number | null // populated when scoring_mode is 'placement'
+  attempts_used?: number
+  attempts_exhausted?: boolean
+  state?: import('../types').ChallengeProgressState
   error?: string
 }
 
@@ -115,8 +118,9 @@ export function useChallengeProgress({ challengeId }: UseChallengeProgressArgs) 
         p_attempt: text,
       })
       if (rpcError) return { matched: false, error: rpcError.message }
-      if (data?.error) return { matched: false, error: data.error as string }
-      if (data?.matched && data.state) {
+      if (data?.error) return { matched: false, error: data.error as string, attempts_exhausted: data.attempts_exhausted }
+      // Sync on misses too — a miss is what increments attempts_used.
+      if (data?.state) {
         setState(data.state as ChallengeProgressState)
       }
       return data as OpenDoorAttemptResult

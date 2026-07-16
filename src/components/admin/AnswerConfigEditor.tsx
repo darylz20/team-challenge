@@ -227,6 +227,7 @@ function OpenDoorEditor({ config, onChange }: { config: OpenDoorConfig; onChange
     { place: 2, points: 20 },
     { place: 3, points: 10 },
   ]
+  const attempts = config.attempts ?? { unlimited: true, max: 10 }
 
   function updateAnswer(i: number, patch: Partial<{ text: string; points: number }>) {
     const next = [...answers]
@@ -351,6 +352,32 @@ function OpenDoorEditor({ config, onChange }: { config: OpenDoorConfig; onChange
           </p>
         </div>
       )}
+
+      {/* Attempts */}
+      <div className="space-y-2 p-3 rounded-lg bg-surface-overlay/20 border border-surface-overlay">
+        <p className="text-xs font-medium text-text-muted uppercase tracking-wider">Pogingen</p>
+        <Toggle
+          label="Onbeperkt"
+          description="Speler kan blijven proberen tot alle 4 gevonden zijn"
+          checked={attempts.unlimited}
+          onChange={(v) => onChange({ ...config, attempts: { ...attempts, unlimited: v } })}
+        />
+        {!attempts.unlimited && (
+          <div>
+            <label className="text-xs text-text-muted">Max foute pogingen (totaal)</label>
+            <Input
+              type="number"
+              min={1}
+              value={attempts.max}
+              onChange={(e) => onChange({ ...config, attempts: { ...attempts, max: Math.max(1, parseInt(e.target.value) || 1) } })}
+            />
+            <p className="text-xs text-text-faint mt-1">
+              Goede antwoorden kosten geen poging. Na {attempts.max} foute pogingen wordt de
+              challenge automatisch afgerond met de punten die al verdiend zijn.
+            </p>
+          </div>
+        )}
+      </div>
 
       <p className="text-xs text-text-faint">
         Maximaal mogelijk per team:{' '}

@@ -5,7 +5,7 @@ import type { ChallengeType } from '../../types'
 const types: { value: ChallengeType; label: string; icon: typeof ListChecks; description: string }[] = [
   { value: 'multiple_choice', label: 'Multiple Choice', icon: ListChecks, description: 'Pick from options' },
   { value: 'free_text', label: 'Free Text', icon: Type, description: 'Type an answer' },
-  { value: 'open_door', label: 'Open Deur', icon: DoorOpen, description: '4 antwoorden, tegen de klok' },
+  { value: 'open_door', label: 'Open Deur', icon: DoorOpen, description: 'We zoeken 4 antwoorden' },
   { value: 'puzzle', label: 'Puzzel', icon: Grid3x3, description: '12 termen, 3 thema\'s raden' },
   { value: 'gallery', label: 'Galerij', icon: Images, description: 'Antwoord per foto onder thema' },
   { value: 'collective_memory', label: 'Collectief Geheugen', icon: Brain, description: 'Beeldfragment + 5 trefwoorden' },

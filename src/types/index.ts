@@ -105,6 +105,7 @@ export interface OpenDoorConfig {
   // Used in 'placement' mode — applied independently PER answer:
   // 1st team to find answer X gets placements[place=1].points, 2nd team gets placements[place=2].points, etc.
   placements: PlacementReward[]
+  attempts: AttemptsConfig // total wrong-attempt counter across the whole challenge
   fuzzy: boolean
 }
 
@@ -373,6 +374,7 @@ export const DEFAULT_CHALLENGE_CONFIGS: Record<ChallengeType, ChallengeConfig> =
       { place: 2, points: 20 },
       { place: 3, points: 10 },
     ],
+    attempts: { unlimited: true, max: 10 },
     fuzzy: true,
   },
   puzzle: {
