@@ -280,8 +280,6 @@ DECLARE
   v_points_per_find jsonb;
   v_matched_idx integer := -1;
   v_matched_points integer := 0;
-  v_time_limit integer;
-  v_elapsed integer;
   v_other_finds integer;
   v_place integer;
   v_state_out jsonb;
@@ -327,13 +325,6 @@ BEGIN
     RETURN json_build_object('error', 'Challenge already finalized');
   END IF;
 
-  v_time_limit := v_challenge.time_limit;
-  IF v_time_limit IS NOT NULL THEN
-    v_elapsed := EXTRACT(EPOCH FROM (now() - v_progress.started_at))::integer;
-    IF v_elapsed > v_time_limit THEN
-      RETURN json_build_object('error', 'Time expired', 'time_expired', true);
-    END IF;
-  END IF;
 
   v_attempts_used := COALESCE((v_progress.state->>'attempts_used')::integer, 0);
 
@@ -460,8 +451,6 @@ DECLARE
   v_points_per_find jsonb;
   v_matched_idx integer := -1;
   v_matched_points integer := 0;
-  v_time_limit integer;
-  v_elapsed integer;
   v_other_finds integer;
   v_place integer;
   v_state_out jsonb;
@@ -507,13 +496,6 @@ BEGIN
     RETURN json_build_object('error', 'Challenge already finalized');
   END IF;
 
-  v_time_limit := v_challenge.time_limit;
-  IF v_time_limit IS NOT NULL THEN
-    v_elapsed := EXTRACT(EPOCH FROM (now() - v_progress.started_at))::integer;
-    IF v_elapsed > v_time_limit THEN
-      RETURN json_build_object('error', 'Time expired', 'time_expired', true);
-    END IF;
-  END IF;
 
   v_attempts_used := COALESCE((v_progress.state->>'attempts_used')::integer, 0);
 
