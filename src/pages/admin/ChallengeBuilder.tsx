@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { ArrowLeft, Save, Eye, EyeOff, Lock } from 'lucide-react'
+import { tidyAlternatives } from '../../lib/utils'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
@@ -132,7 +133,12 @@ export function ChallengeBuilder() {
       points: topLevelPoints,
       hint: hints.items[0]?.text ?? null,
       section_id: sectionId,
-      config: { ...config, scoring, hints, attempts, display, media: mediaItems, explanation: explanation.trim() || null },
+      config: {
+        ...tidyAlternatives(type, config),
+        scoring, hints, attempts, display,
+        media: mediaItems,
+        explanation: explanation.trim() || null,
+      },
       media_url: mediaItems[0]?.url ?? null,
       media_type: mediaItems[0]?.type ?? null,
     }

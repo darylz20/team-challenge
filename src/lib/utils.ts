@@ -1,9 +1,51 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-import type { Challenge } from '../types'
+import type {
+  Challenge,
+  ChallengeType,
+  ChallengeConfig,
+  FreeTextConfig,
+  OpenDoorConfig,
+  GalleryConfig,
+  CollectiveMemoryConfig,
+} from '../types'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
+}
+
+/** Trim and drop blank rows; undefined when nothing is left, so the key stays out of the config. */
+function tidy(alts: string[] | undefined): string[] | undefined {
+  const cleaned = (alts ?? []).map((a) => a.trim()).filter(Boolean)
+  return cleaned.length > 0 ? cleaned : undefined
+}
+
+/**
+ * Strip the empty alternative rows the editor keeps around while typing, so
+ * they never reach the database. Only the types where a player types a free
+ * answer carry alternatives; the rest pass through untouched.
+ */
+export function tidyAlternatives(type: ChallengeType, config: ChallengeConfig): ChallengeConfig {
+  switch (type) {
+    case 'free_text': {
+      const c = config as FreeTextConfig
+      return { ...c, alternatives: tidy(c.alternatives) }
+    }
+    case 'open_door': {
+      const c = config as OpenDoorConfig
+      return { ...c, answers: c.answers.map((a) => ({ ...a, alternatives: tidy(a.alternatives) })) }
+    }
+    case 'gallery': {
+      const c = config as GalleryConfig
+      return { ...c, items: (c.items ?? []).map((i) => ({ ...i, alternatives: tidy(i.alternatives) })) }
+    }
+    case 'collective_memory': {
+      const c = config as CollectiveMemoryConfig
+      return { ...c, keywords: c.keywords.map((k) => ({ ...k, alternatives: tidy(k.alternatives) })) }
+    }
+    default:
+      return config
+  }
 }
 
 /**

@@ -98,14 +98,24 @@ export interface MultipleChoiceConfig {
   allow_multiple: boolean
 }
 
+// Extra spellings that also count as correct, alongside the main answer.
+// The main answer stays the one shown to players on a reveal.
+// Matching ignores case, accents and whitespace server-side, so only add
+// genuinely different wordings here — not "Van Gogh" vs "van gogh".
+export type AnswerAlternatives = string[]
+
 export interface FreeTextConfig {
   correct_answer: string
-  case_sensitive: boolean
+  alternatives?: AnswerAlternatives
+  // Typo tolerance. Absent means off, which keeps challenges made before
+  // alternatives existed matching exactly as they did.
+  fuzzy?: boolean
 }
 
 // ── Open Deur (De Slimste Mens) ──
 export interface OpenDoorAnswer {
   text: string
+  alternatives?: AnswerAlternatives
   points: number // used in 'fixed' scoring mode
 }
 
@@ -149,6 +159,7 @@ export interface PuzzleConfig {
 export interface GalleryItem {
   media: MediaItem
   answer: string
+  alternatives?: AnswerAlternatives
   points: number // used in 'fixed' scoring mode
 }
 
@@ -169,6 +180,7 @@ export interface GalleryConfig {
 // Media is supplied via the standard challenge media (config.media[0]).
 export interface CollectiveMemoryKeyword {
   text: string
+  alternatives?: AnswerAlternatives
   points: number // used in 'fixed' scoring mode (typical: 10/20/30/40/50)
 }
 
@@ -372,7 +384,7 @@ export interface ChallengeFormData {
 
 export const DEFAULT_CHALLENGE_CONFIGS: Record<ChallengeType, ChallengeConfig> = {
   multiple_choice: { options: [{ text: '', is_correct: false }, { text: '', is_correct: false }], allow_multiple: false },
-  free_text: { correct_answer: '', case_sensitive: false },
+  free_text: { correct_answer: '', alternatives: [], fuzzy: true },
   open_door: {
     answers: [
       { text: '', points: 10 },

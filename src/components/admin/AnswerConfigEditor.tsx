@@ -3,6 +3,7 @@ import { Input } from '../ui/Input'
 import { Toggle } from '../ui/Toggle'
 import { Button } from '../ui/Button'
 import { cn } from '../../lib/utils'
+import { AlternativesEditor } from './AlternativesEditor'
 import { uploadChallengeMedia, deleteChallengeMedia } from '../../lib/storage'
 import type {
   ChallengeType,
@@ -10,10 +11,12 @@ import type {
   MultipleChoiceConfig,
   FreeTextConfig,
   OpenDoorConfig,
+  OpenDoorAnswer,
   PuzzleConfig,
   GalleryConfig,
   GalleryItem,
   CollectiveMemoryConfig,
+  CollectiveMemoryKeyword,
   PlacementReward,
 } from '../../types'
 
@@ -201,11 +204,21 @@ function FreeTextEditor({ config, onChange }: { config: FreeTextConfig; onChange
         onChange={(e) => onChange({ ...config, correct_answer: e.target.value })}
         placeholder="Het verwachte antwoord"
       />
+      <div className="pl-1">
+        <AlternativesEditor
+          value={config.alternatives}
+          onChange={(alternatives) => onChange({ ...config, alternatives })}
+        />
+      </div>
+      <p className="text-xs text-text-faint">
+        Hoofdletters, accenten en spaties maken niet uit — "Van Gogh" en "vangogh" tellen allebei.
+        Zet hier alleen écht andere antwoorden bij.
+      </p>
       <Toggle
-        label="Hoofdlettergevoelig"
-        description="Hoofdletters moeten exact overeenkomen"
-        checked={config.case_sensitive}
-        onChange={(v) => onChange({ ...config, case_sensitive: v })}
+        label="Typo's toestaan (fuzzy matching)"
+        description="Klein verschil tussen invoer en juist antwoord wordt geaccepteerd (1-2 typo's afhankelijk van lengte)"
+        checked={config.fuzzy ?? false}
+        onChange={(v) => onChange({ ...config, fuzzy: v })}
       />
     </div>
   )
@@ -229,7 +242,7 @@ function OpenDoorEditor({ config, onChange }: { config: OpenDoorConfig; onChange
   ]
   const attempts = config.attempts ?? { unlimited: true, max: 10 }
 
-  function updateAnswer(i: number, patch: Partial<{ text: string; points: number }>) {
+  function updateAnswer(i: number, patch: Partial<OpenDoorAnswer>) {
     const next = [...answers]
     next[i] = { ...next[i], ...patch }
     onChange({ ...config, answers: next })
@@ -287,26 +300,38 @@ function OpenDoorEditor({ config, onChange }: { config: OpenDoorConfig; onChange
         {answers.map((answer, i) => (
           <div key={i} className="flex gap-2 items-start p-2.5 rounded-lg bg-surface-overlay/30">
             <span className="font-display text-neon font-bold w-6 text-center pt-2.5">{i + 1}</span>
-            <Input
-              value={answer.text}
-              onChange={(e) => updateAnswer(i, { text: e.target.value })}
-              placeholder={`Antwoord ${i + 1}`}
-              className="flex-1"
-            />
-            {scoringMode === 'fixed' && (
-              <div className="w-24">
+            <div className="flex-1 min-w-0 space-y-1.5">
+              <div className="flex gap-2 items-start">
                 <Input
-                  type="number"
-                  min={0}
-                  value={answer.points}
-                  onChange={(e) => updateAnswer(i, { points: parseInt(e.target.value) || 0 })}
-                  placeholder="Pt"
+                  value={answer.text}
+                  onChange={(e) => updateAnswer(i, { text: e.target.value })}
+                  placeholder={`Antwoord ${i + 1}`}
+                  className="flex-1"
                 />
+                {scoringMode === 'fixed' && (
+                  <div className="w-24">
+                    <Input
+                      type="number"
+                      min={0}
+                      value={answer.points}
+                      onChange={(e) => updateAnswer(i, { points: parseInt(e.target.value) || 0 })}
+                      placeholder="Pt"
+                    />
+                  </div>
+                )}
               </div>
-            )}
+              <AlternativesEditor
+                value={answer.alternatives}
+                onChange={(alternatives) => updateAnswer(i, { alternatives })}
+              />
+            </div>
           </div>
         ))}
       </div>
+      <p className="text-xs text-text-faint">
+        Hoofdletters, accenten en spaties maken niet uit. Gebruik "ook goed rekenen" voor écht
+        andere antwoorden, bijvoorbeeld "JFK" naast "John F. Kennedy".
+      </p>
 
       {/* Placement table */}
       {scoringMode === 'placement' && (
@@ -832,6 +857,10 @@ function GalleryEditor({ config, onChange, gameId }: { config: GalleryConfig; on
                   onChange={(e) => updateItem(i, { answer: e.target.value })}
                   placeholder={`Antwoord ${i + 1}`}
                 />
+                <AlternativesEditor
+                  value={item.alternatives}
+                  onChange={(alternatives) => updateItem(i, { alternatives })}
+                />
                 <div className="flex gap-2 items-center">
                   {scoringMode === 'fixed' && (
                     <div className="w-24">
@@ -959,7 +988,7 @@ function GalleryEditor({ config, onChange, gameId }: { config: GalleryConfig; on
 
 function CollectiveMemoryEditor({ config, onChange }: { config: CollectiveMemoryConfig; onChange: (c: ChallengeConfig) => void }) {
   // Defensive: always exactly 5 keywords
-  const keywords = config.keywords.length === 5
+  const keywords: CollectiveMemoryKeyword[] = config.keywords.length === 5
     ? config.keywords
     : [
         ...config.keywords.slice(0, 5),
@@ -977,7 +1006,7 @@ function CollectiveMemoryEditor({ config, onChange }: { config: CollectiveMemory
   ]
   const attempts = config.attempts ?? { unlimited: false, max: 5 }
 
-  function updateKeyword(i: number, patch: Partial<{ text: string; points: number }>) {
+  function updateKeyword(i: number, patch: Partial<CollectiveMemoryKeyword>) {
     const next = [...keywords]
     next[i] = { ...next[i], ...patch }
     onChange({ ...config, keywords: next })
@@ -1030,23 +1059,31 @@ function CollectiveMemoryEditor({ config, onChange }: { config: CollectiveMemory
         {keywords.map((kw, i) => (
           <div key={i} className="flex gap-2 items-start p-2.5 rounded-lg bg-surface-overlay/30">
             <span className="font-display text-neon font-bold w-6 text-center pt-2.5">{i + 1}</span>
-            <Input
-              value={kw.text}
-              onChange={(e) => updateKeyword(i, { text: e.target.value })}
-              placeholder={`Trefwoord ${i + 1}`}
-              className="flex-1"
-            />
-            {scoringMode === 'fixed' && (
-              <div className="w-24">
+            <div className="flex-1 min-w-0 space-y-1.5">
+              <div className="flex gap-2 items-start">
                 <Input
-                  type="number"
-                  min={0}
-                  value={kw.points}
-                  onChange={(e) => updateKeyword(i, { points: parseInt(e.target.value) || 0 })}
-                  placeholder="Pt"
+                  value={kw.text}
+                  onChange={(e) => updateKeyword(i, { text: e.target.value })}
+                  placeholder={`Trefwoord ${i + 1}`}
+                  className="flex-1"
                 />
+                {scoringMode === 'fixed' && (
+                  <div className="w-24">
+                    <Input
+                      type="number"
+                      min={0}
+                      value={kw.points}
+                      onChange={(e) => updateKeyword(i, { points: parseInt(e.target.value) || 0 })}
+                      placeholder="Pt"
+                    />
+                  </div>
+                )}
               </div>
-            )}
+              <AlternativesEditor
+                value={kw.alternatives}
+                onChange={(alternatives) => updateKeyword(i, { alternatives })}
+              />
+            </div>
           </div>
         ))}
       </div>
