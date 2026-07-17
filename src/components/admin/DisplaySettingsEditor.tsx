@@ -1,5 +1,6 @@
 import { Select } from '../ui/Select'
 import { Toggle } from '../ui/Toggle'
+import { MEDIA_POSITION_OPTIONS } from '../../lib/mediaOptions'
 import type { DisplayConfig, MediaPosition, MediaLayout, MediaSize } from '../../types'
 
 interface DisplaySettingsEditorProps {
@@ -12,14 +13,6 @@ const COLUMN_OPTIONS = [
   { value: '2', label: '2 kolommen' },
   { value: '3', label: '3 kolommen' },
   { value: '4', label: '4 kolommen' },
-]
-
-const MEDIA_POSITION_OPTIONS = [
-  { value: 'above', label: 'Boven de beschrijving' },
-  { value: 'below', label: 'Onder de beschrijving' },
-  { value: 'left', label: 'Links van de beschrijving' },
-  { value: 'right', label: 'Rechts van de beschrijving' },
-  { value: 'background', label: 'Als achtergrond' },
 ]
 
 const MEDIA_LAYOUT_OPTIONS = [

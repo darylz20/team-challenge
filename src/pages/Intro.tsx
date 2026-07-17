@@ -31,6 +31,44 @@ export function Intro() {
   const isLast = pageIdx === introPages.length - 1
   const isFirst = pageIdx === 0
 
+  // 'background' only makes sense for a still image; a video there falls
+  // back to 'above' rather than silently disappearing.
+  const rawPosition = page?.media_position ?? 'above'
+  const mediaPosition = rawPosition === 'background' && page?.media?.type !== 'image' ? 'above' : rawPosition
+
+  const mediaBlock = page?.media?.url ? (
+    <div className={cn(
+      'rounded-xl overflow-hidden border border-surface-overlay',
+      mediaPosition === 'background' ? 'absolute inset-0' : 'shrink-0',
+    )}>
+      {page.media.type === 'video' ? (
+        <video
+          src={page.media.url}
+          controls
+          playsInline
+          className="w-full max-h-[50vh] object-contain bg-void"
+        />
+      ) : (
+        <img
+          src={page.media.url}
+          alt=""
+          className={cn(
+            'w-full bg-void',
+            mediaPosition === 'background' ? 'h-full object-cover' : 'max-h-[50vh] object-contain',
+          )}
+        />
+      )}
+    </div>
+  ) : null
+
+  const textBlock = (
+    <div className="bg-surface-raised border border-surface-overlay rounded-xl p-5 min-h-[140px]">
+      <p className="text-text leading-relaxed whitespace-pre-wrap">
+        {page?.text || <span className="text-text-faint italic">Geen tekst</span>}
+      </p>
+    </div>
+  )
+
   async function handleStart() {
     setAcking(true)
     const res = await acknowledge()
@@ -50,32 +88,28 @@ export function Intro() {
         </h1>
       </div>
 
-      {/* Media */}
-      {page?.media?.url && (
-        <div className="mb-4 rounded-xl overflow-hidden border border-surface-overlay">
-          {page.media.type === 'video' ? (
-            <video
-              src={page.media.url}
-              controls
-              playsInline
-              className="w-full max-h-[50vh] object-contain bg-void"
-            />
-          ) : (
-            <img
-              src={page.media.url}
-              alt=""
-              className="w-full max-h-[50vh] object-contain bg-void"
-            />
-          )}
+      {/* Media + text, arranged per page.media_position */}
+      {!mediaBlock ? (
+        textBlock
+      ) : mediaPosition === 'background' ? (
+        <div className="relative rounded-xl overflow-hidden min-h-[220px] flex items-end">
+          {mediaBlock}
+          <div className="absolute inset-0 bg-gradient-to-t from-void/90 via-void/50 to-transparent" />
+          <div className="relative z-10 p-4 w-full">{textBlock}</div>
+        </div>
+      ) : mediaPosition === 'left' || mediaPosition === 'right' ? (
+        <div className="flex gap-3 items-start">
+          {mediaPosition === 'left' && <div className="w-2/5">{mediaBlock}</div>}
+          <div className="flex-1 min-w-0">{textBlock}</div>
+          {mediaPosition === 'right' && <div className="w-2/5">{mediaBlock}</div>}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {mediaPosition === 'above' && mediaBlock}
+          {textBlock}
+          {mediaPosition === 'below' && mediaBlock}
         </div>
       )}
-
-      {/* Text */}
-      <div className="bg-surface-raised border border-surface-overlay rounded-xl p-5 min-h-[140px]">
-        <p className="text-text leading-relaxed whitespace-pre-wrap">
-          {page?.text || <span className="text-text-faint italic">Geen tekst</span>}
-        </p>
-      </div>
 
       {/* Dot indicator */}
       <div className="flex justify-center gap-1.5 my-5">

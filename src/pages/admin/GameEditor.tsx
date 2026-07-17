@@ -12,6 +12,8 @@ import { Badge } from '../../components/ui/Badge'
 import { Tabs } from '../../components/ui/Tabs'
 import { Modal } from '../../components/ui/Modal'
 import { EmptyState } from '../../components/ui/EmptyState'
+import { Select } from '../../components/ui/Select'
+import { MEDIA_POSITION_OPTIONS } from '../../lib/mediaOptions'
 import { useGame } from '../../hooks/useGames'
 import { useChallenges } from '../../hooks/useChallenges'
 import { useTeams } from '../../hooks/useTeams'
@@ -31,7 +33,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import type { Challenge, IntroPage, Game, Section } from '../../types'
+import type { Challenge, IntroPage, Game, Section, MediaPosition } from '../../types'
 import { useSections } from '../../hooks/useSections'
 import { uploadChallengeMedia, deleteChallengeMedia } from '../../lib/storage'
 import { supabase } from '../../lib/supabase'
@@ -689,7 +691,7 @@ function IntroTab({ game, updateGame }: {
   }
 
   function addPage() {
-    setPages((prev) => [...prev, { text: '', media: null }])
+    setPages((prev) => [...prev, { text: '', media: null, media_position: 'above' }])
   }
 
   function removePage(i: number) {
@@ -815,7 +817,23 @@ function IntroTab({ game, updateGame }: {
                     <X size={12} />
                   </button>
                 </div>
-              ) : (
+              ) : null}
+
+              {page.media?.url && (
+                <div className="mt-2 max-w-xs">
+                  <Select
+                    id={`intro-media-position-${i}`}
+                    label="Mediapositie"
+                    options={MEDIA_POSITION_OPTIONS}
+                    value={page.media_position ?? 'above'}
+                    onChange={(e) =>
+                      updatePage(i, { media_position: e.target.value as MediaPosition })
+                    }
+                  />
+                </div>
+              )}
+
+              {!page.media?.url && (
                 <label className="flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-dashed border-surface-overlay text-sm text-text-muted hover:border-text-faint cursor-pointer w-fit transition-colors">
                   <ImagePlus size={14} />
                   Upload afbeelding of video

@@ -16,6 +16,9 @@ export type GameStatus = 'draft' | 'published' | 'active' | 'finished'
 export interface IntroPage {
   text: string
   media: MediaItem | null
+  // Optional so pages saved before this field existed keep rendering as
+  // they did (media above the text) — see Intro.tsx's `?? 'above'` fallback.
+  media_position?: MediaPosition
 }
 
 export interface Game {
