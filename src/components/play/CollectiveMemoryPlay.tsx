@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { CheckCircle2, XCircle, Loader2, Send, Flag, HelpCircle } from 'lucide-react'
+import { CheckCircle2, XCircle, Loader2, Send, HelpCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '../../lib/utils'
 import { Button } from '../ui/Button'
@@ -109,16 +109,6 @@ export function CollectiveMemoryPlay({ challenge }: CollectiveMemoryPlayProps) {
     }
 
     setTimeout(() => setFeedback(null), 1800)
-  }
-
-  async function handleFinalizeNow() {
-    if (finalized || finalizingRef.current) return
-    if (!window.confirm('Score nu insturen? Je kunt daarna niet meer verder met deze challenge.')) return
-    finalizingRef.current = true
-    const res = await finalize()
-    if (res && !res.error) {
-      setFinalResult({ points: res.points_awarded, isCorrect: res.is_correct })
-    }
   }
 
   if (loading) {
@@ -264,14 +254,6 @@ export function CollectiveMemoryPlay({ challenge }: CollectiveMemoryPlayProps) {
               Geen match{!attempts.unlimited ? ` — ${attemptsRemaining} pog. over` : ''}
             </p>
           )}
-
-          <button
-            type="button"
-            onClick={handleFinalizeNow}
-            className="flex items-center gap-1.5 text-xs text-text-muted hover:text-text mt-2 mx-auto"
-          >
-            <Flag size={12} /> Klaar — score insturen
-          </button>
         </form>
       )}
     </div>

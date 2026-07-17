@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { DoorOpen, DoorClosed, CheckCircle2, XCircle, Loader2, Send, Flag } from 'lucide-react'
+import { DoorOpen, DoorClosed, CheckCircle2, XCircle, Loader2, Send } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '../../lib/utils'
 import { Button } from '../ui/Button'
@@ -113,16 +113,6 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
 
     // Auto-clear feedback after a moment
     setTimeout(() => setFeedback(null), 1800)
-  }
-
-  async function handleFinalizeNow() {
-    if (finalized || finalizingRef.current) return
-    if (!window.confirm('Score nu insturen? Je kunt daarna niet meer verder met deze challenge.')) return
-    finalizingRef.current = true
-    const res = await finalize()
-    if (res && !res.error) {
-      setFinalResult({ points: res.points_awarded, isCorrect: res.is_correct })
-    }
   }
 
   if (loading) {
@@ -285,15 +275,6 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
               Geen match{!attempts.unlimited ? ` — ${attemptsRemaining} pog. over` : ' — probeer een ander antwoord'}
             </p>
           )}
-
-          {/* Manual finalize */}
-          <button
-            type="button"
-            onClick={handleFinalizeNow}
-            className="flex items-center gap-1.5 text-xs text-text-muted hover:text-text mt-2 mx-auto"
-          >
-            <Flag size={12} /> Klaar — score insturen
-          </button>
         </form>
       )}
     </div>
