@@ -171,7 +171,6 @@ export function PhotoUploadPlay({ challenge }: { challenge: Challenge }) {
         ref={inputRef}
         type="file"
         accept="image/*"
-        capture="environment"
         className="hidden"
         onChange={(e) => {
           const picked = e.target.files?.[0]
