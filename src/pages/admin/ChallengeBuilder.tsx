@@ -78,7 +78,16 @@ export function ChallengeBuilder() {
       setHints((cfg.hints as HintsConfig) ?? {
         items: challenge.hint ? [{ text: challenge.hint, deduction: 0 }] : [],
       })
-      setAttempts((cfg.attempts as AttemptsConfig) ?? DEFAULT_ATTEMPTS)
+      // open_door/gallery/collective_memory keep their own `attempts` key inside
+      // their type config (set by their own editor) — this outer state is only
+      // the source of truth for types with uses_global_attempts. Reading their
+      // config.attempts into it here would make it look correct until save,
+      // where it gets spread back in and clobbers the real value (see below).
+      setAttempts(
+        TYPE_CAPABILITIES[challenge.type].uses_global_attempts
+          ? (cfg.attempts as AttemptsConfig) ?? DEFAULT_ATTEMPTS
+          : DEFAULT_ATTEMPTS
+      )
       setDisplay({ ...DEFAULT_DISPLAY, ...(cfg.display as Partial<DisplayConfig> ?? {}) })
       setExplanation((cfg.explanation as string) ?? '')
     }
@@ -135,7 +144,12 @@ export function ChallengeBuilder() {
       section_id: sectionId,
       config: {
         ...tidyAlternatives(type, config),
-        scoring, hints, attempts, display,
+        scoring, hints, display,
+        // open_door/gallery/collective_memory carry their own `attempts` key
+        // inside config (set by their own editor above) — spreading this
+        // outer state for them would clobber it back to the unrelated
+        // multiple_choice/free_text "Pogingen" card's value.
+        ...(TYPE_CAPABILITIES[type].uses_global_attempts ? { attempts } : {}),
         media: mediaItems,
         explanation: explanation.trim() || null,
       },
