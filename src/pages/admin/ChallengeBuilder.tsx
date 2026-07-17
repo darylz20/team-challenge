@@ -170,13 +170,13 @@ export function ChallengeBuilder() {
         onClick={() => navigate(`/admin/games/${gameId}`)}
         className="flex items-center gap-1 text-sm text-text-muted hover:text-neon transition-colors mb-4"
       >
-        <ArrowLeft size={16} /> Back to Game
+        <ArrowLeft size={16} /> Terug naar spel
       </button>
 
       <div className="flex items-start justify-between gap-4">
         <PageHeader
-          title={isEditing ? 'Edit Challenge' : 'New Challenge'}
-          subtitle={isEditing ? `Editing: ${challenge?.title}` : 'Configure your challenge'}
+          title={isEditing ? 'Challenge bewerken' : 'Nieuwe challenge'}
+          subtitle={isEditing ? `Je bewerkt: ${challenge?.title}` : 'Stel je challenge in'}
         />
         <button
           type="button"
@@ -188,7 +188,7 @@ export function ChallengeBuilder() {
           }`}
         >
           {showPreview ? <EyeOff size={16} /> : <Eye size={16} />}
-          {showPreview ? 'Hide Preview' : 'Preview'}
+          {showPreview ? 'Preview verbergen' : 'Preview'}
         </button>
       </div>
 
@@ -212,15 +212,15 @@ export function ChallengeBuilder() {
         {/* Section assignment */}
         <Card className="space-y-3">
           <h3 className="font-display text-sm font-bold text-text-muted uppercase tracking-wider">
-            Section
+            Sectie
           </h3>
           {sections.length === 0 ? (
             <p className="text-xs text-amber">
-              No sections in this game yet. Create one first in the Game Editor → Sections tab.
+              Dit spel heeft nog geen secties. Maak er eerst een aan via Spel bewerken → tab Secties.
             </p>
           ) : (
             <>
-              <label htmlFor="section-picker" className="text-sm text-text-muted">Belongs to section</label>
+              <label htmlFor="section-picker" className="text-sm text-text-muted">Hoort bij sectie</label>
               <select
                 id="section-picker"
                 value={sectionId}
@@ -229,7 +229,7 @@ export function ChallengeBuilder() {
               >
                 {sections.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.title} {s.is_open ? '· open' : '· closed'}
+                    {s.title} {s.is_open ? '· open' : '· gesloten'}
                   </option>
                 ))}
               </select>
@@ -240,21 +240,21 @@ export function ChallengeBuilder() {
         {/* Challenge Prompt */}
         <Card className="space-y-4">
           <h3 className="font-display text-sm font-bold text-text-muted uppercase tracking-wider">
-            Challenge Prompt
+            Challenge-opdracht
           </h3>
           <Input
             id="challenge-title"
-            label="Title"
+            label="Titel"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. The Hidden Code"
+            placeholder="bv. De verborgen code"
           />
           <Textarea
             id="challenge-desc"
-            label="Description"
+            label="Beschrijving"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Describe the challenge..."
+            placeholder="Beschrijf de challenge..."
           />
           {gameId && (
             <div>
@@ -264,7 +264,7 @@ export function ChallengeBuilder() {
                 onChange={setMediaItems}
               />
               <p className="text-xs text-text-faint mt-1.5">
-                This media will be shown to players alongside the challenge description.
+                Deze media wordt aan spelers getoond naast de beschrijving van de challenge.
               </p>
             </div>
           )}
@@ -273,7 +273,7 @@ export function ChallengeBuilder() {
         {/* Answer Type */}
         <Card className="space-y-4">
           <h3 className="font-display text-sm font-bold text-text-muted uppercase tracking-wider">
-            Answer Type
+            Antwoordtype
           </h3>
           <ChallengeTypeSelector value={type} onChange={handleTypeChange} />
         </Card>
@@ -281,7 +281,7 @@ export function ChallengeBuilder() {
         {/* Answer Configuration */}
         <Card className="space-y-4">
           <h3 className="font-display text-sm font-bold text-text-muted uppercase tracking-wider">
-            Answer Configuration
+            Antwoordinstellingen
           </h3>
           <AnswerConfigEditor type={type} config={config} onChange={setConfig} gameId={gameId} />
         </Card>
@@ -290,21 +290,21 @@ export function ChallengeBuilder() {
         <Card className="space-y-4">
           <div className="flex items-center gap-2">
             <h3 className="font-display text-sm font-bold text-text-muted uppercase tracking-wider">
-              Answer Explanation
+              Antwoordtoelichting
             </h3>
             <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber/15 text-amber text-[10px] font-medium uppercase tracking-wider">
-              <Lock size={10} /> Admin only
+              <Lock size={10} /> Alleen admin
             </span>
           </div>
           <Textarea
             id="challenge-explanation"
             value={explanation}
             onChange={(e) => setExplanation(e.target.value)}
-            placeholder="Why is this the correct answer? e.g. background, trivia, or the reasoning to read out loud."
+            placeholder="Waarom is dit het juiste antwoord? Bijv. achtergrond, weetjes of de uitleg om voor te lezen."
             rows={4}
           />
           <p className="text-xs text-text-faint">
-            Reference material for you during the game. Players never see this.
+            Naslag voor jezelf tijdens het spel. Spelers zien dit nooit.
           </p>
         </Card>
 
@@ -330,7 +330,7 @@ export function ChallengeBuilder() {
         {TYPE_CAPABILITIES[type].uses_global_attempts && (
           <Card className="space-y-4">
             <h3 className="font-display text-sm font-bold text-text-muted uppercase tracking-wider">
-              Attempts
+              Pogingen
             </h3>
             <AttemptsEditor attempts={attempts} onChange={setAttempts} />
           </Card>
@@ -340,7 +340,7 @@ export function ChallengeBuilder() {
         {TYPE_CAPABILITIES[type].uses_display_config && (
           <Card className="space-y-4">
             <h3 className="font-display text-sm font-bold text-text-muted uppercase tracking-wider">
-              Display
+              Weergave
             </h3>
             <DisplaySettingsEditor display={display} onChange={setDisplay} />
           </Card>
@@ -349,7 +349,7 @@ export function ChallengeBuilder() {
         {/* Save */}
         <Button onClick={handleSave} disabled={!title.trim() || !sectionId || saving} className="w-full gap-2" size="lg">
           <Save size={18} />
-          {saving ? 'Saving...' : isEditing ? 'Update Challenge' : 'Create Challenge'}
+          {saving ? 'Bezig met opslaan...' : isEditing ? 'Challenge bijwerken' : 'Challenge aanmaken'}
         </Button>
       </div>
     </div>

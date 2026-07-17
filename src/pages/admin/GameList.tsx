@@ -112,21 +112,21 @@ export function GameList() {
       {!loading && filtered.length === 0 && (
         <EmptyState
           icon={Gamepad2}
-          title="No games yet"
-          description="Create your first game to get started"
-          actionLabel="Create Game"
+          title="Nog geen spellen"
+          description="Maak je eerste spel aan om te beginnen"
+          actionLabel="Spel aanmaken"
           onAction={() => setShowCreate(true)}
         />
       )}
 
       {/* Delete Confirmation Modal */}
-      <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Delete Game">
+      <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Spel verwijderen">
         <div className="flex flex-col gap-4">
           <p className="text-text-muted text-sm">
             Are you sure you want to delete <span className="text-text font-semibold">{deleteTarget?.title}</span>? This cannot be undone.
           </p>
           <div className="flex gap-2 justify-end">
-            <Button variant="ghost" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+            <Button variant="ghost" onClick={() => setDeleteTarget(null)}>Annuleren</Button>
             <Button
               variant="danger"
               onClick={() => { deleteGame(deleteTarget!.id); setDeleteTarget(null) }}
@@ -142,17 +142,17 @@ export function GameList() {
         <div className="flex flex-col gap-4">
           <Input
             id="game-title"
-            label="Game Title"
+            label="Titel van het spel"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. Weekend Escape Room"
           />
           <Textarea
             id="game-desc"
-            label="Description (optional)"
+            label="Beschrijving (optioneel)"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="What's this game about?"
+            placeholder="Waar gaat dit spel over?"
           />
           <Button onClick={handleCreate} disabled={!title.trim() || creating} className="w-full">
             {creating ? 'Creating...' : 'Create Game'}

@@ -158,7 +158,7 @@ export function MultiMediaUploader({ gameId, items, onChange }: MultiMediaUpload
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-sm text-text-muted">Media Attachments (optional)</span>
+      <span className="text-sm text-text-muted">Mediabijlagen (optioneel)</span>
 
       {/* Existing items — drag the handle to change the order players see them in */}
       {items.length > 0 && (
@@ -187,7 +187,7 @@ export function MultiMediaUploader({ gameId, items, onChange }: MultiMediaUpload
       {uploading ? (
         <div className="flex items-center gap-3 p-4 rounded-lg border-2 border-dashed border-surface-overlay">
           <div className="w-5 h-5 border-2 border-neon border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm text-text-muted">Uploading...</span>
+          <span className="text-sm text-text-muted">Bezig met uploaden...</span>
         </div>
       ) : (
         <button
@@ -205,9 +205,9 @@ export function MultiMediaUploader({ gameId, items, onChange }: MultiMediaUpload
         >
           <Upload size={20} className="text-text-faint" />
           <span className="text-sm text-text-muted">
-            {items.length > 0 ? 'Add more files' : 'Drop files here or click to browse'}
+            {items.length > 0 ? 'Meer bestanden toevoegen' : 'Sleep bestanden hierheen of klik om te bladeren'}
           </span>
-          <span className="text-xs text-text-faint">Images, audio, and video supported</span>
+          <span className="text-xs text-text-faint">Afbeeldingen, audio en video worden ondersteund</span>
         </button>
       )}
 

@@ -105,7 +105,7 @@ export function PhotoUploadPlay({ challenge }: { challenge: Challenge }) {
             <CheckCircle2 size={18} className="text-lime shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-lime">
-                Beoordeeld · +{submission.points_awarded} pt
+                Beoordeeld · +{submission.points_awarded} ptn
               </p>
               {answer.review_note && (
                 <p className="text-xs text-text-muted break-words">"{answer.review_note}"</p>

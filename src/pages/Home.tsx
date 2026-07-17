@@ -9,6 +9,7 @@ import { useTeamSubmissions, useChallengeSolvers } from '../hooks/useSubmissions
 import { useSections } from '../hooks/useSections'
 import { useGameProgress } from '../hooks/useGameProgress'
 import { cn, livePointsFromState, isPlacementBased } from '../lib/utils'
+import { CHALLENGE_TYPE_LABELS } from '../types'
 import { placementRemainingForTeam } from '../lib/placement'
 import { PlacementBadge } from '../components/shared/PlacementBadge'
 
@@ -125,7 +126,7 @@ export function Home() {
           <button
             onClick={signOut}
             className="p-2 text-text-faint hover:text-text-muted transition-colors"
-            title="Sign out"
+            title="Uitloggen"
           >
             <LogOut size={18} />
           </button>
@@ -150,8 +151,8 @@ export function Home() {
         </div>
       ) : challenges.length === 0 && sections.length === 0 ? (
         <Card className="text-center py-8">
-          <p className="text-text-muted">No challenges available yet.</p>
-          <p className="text-xs text-text-faint mt-1">Check back when the game starts!</p>
+          <p className="text-text-muted">Nog geen challenges beschikbaar.</p>
+          <p className="text-xs text-text-faint mt-1">Kom terug zodra het spel begint!</p>
         </Card>
       ) : (
         <div className="flex flex-col gap-5">
@@ -231,32 +232,32 @@ export function Home() {
                             <p className="font-semibold truncate">{challenge.title}</p>
                             {isPlacementBased(challenge) && <PlacementBadge />}
                           </div>
-                          <p className="text-xs text-text-muted capitalize">
-                            {challenge.type.replace('_', ' ')}
+                          <p className="text-xs text-text-muted">
+                            {CHALLENGE_TYPE_LABELS[challenge.type]}
                             {status === 'inprogress' && <span className="text-amber"> · bezig</span>}
                             {status === 'retry' && <span className="text-magenta"> · opnieuw proberen</span>}
                             {status === 'pending' && <span className="text-amber"> · wacht op beoordeling</span>}
                             {status === 'done' && <span className="text-text-faint"> · afgerond</span>}
                             {status === 'inprogress' && showRemaining && remaining > 0 && (
-                              <span className="text-amber"> · nog {remaining} pt te halen</span>
+                              <span className="text-amber"> · nog {remaining} ptn te halen</span>
                             )}
                           </p>
                         </div>
                         {status === 'solved' ? (
-                          <Badge variant="lime">{collected} pts</Badge>
+                          <Badge variant="lime">{collected} ptn</Badge>
                         ) : status === 'inprogress' ? (
-                          <Badge variant="amber">{collected} pts</Badge>
+                          <Badge variant="amber">{collected} ptn</Badge>
                         ) : status === 'done' ? (
-                          <Badge variant="muted">{collected} pts</Badge>
+                          <Badge variant="muted">{collected} ptn</Badge>
                         ) : status === 'pending' ? (
                           // Points are unknown to the team until the admin awards them.
-                          <Badge variant="amber">? pts</Badge>
+                          <Badge variant="amber">? ptn</Badge>
                         ) : showRemaining ? (
                           // Placement: points this team can still claim (max, or
                           // reduced once rivals took the higher spots; 0 = gone).
-                          <Badge variant={remaining > 0 ? 'neon' : 'muted'}>{remaining} pts</Badge>
+                          <Badge variant={remaining > 0 ? 'neon' : 'muted'}>{remaining} ptn</Badge>
                         ) : (
-                          <Badge variant="neon">{challenge.points} pts</Badge>
+                          <Badge variant="neon">{challenge.points} ptn</Badge>
                         )}
                         <ChevronRight size={16} className="text-text-faint shrink-0" />
                       </Card>
@@ -291,7 +292,7 @@ export function Home() {
                         {reason || (positive ? 'Bonuspunten' : 'Puntenaftrek')}
                       </p>
                       <Badge variant={positive ? 'lime' : 'magenta'}>
-                        {positive ? '+' : ''}{b.points_awarded} pts
+                        {positive ? '+' : ''}{b.points_awarded} ptn
                       </Badge>
                     </Card>
                   )

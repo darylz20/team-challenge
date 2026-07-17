@@ -15,15 +15,15 @@ export function AttemptsEditor({ attempts, onChange }: AttemptsEditorProps) {
   return (
     <div className="space-y-3">
       <Toggle
-        label="Unlimited attempts"
-        description="Players can retry as many times as they want"
+        label="Onbeperkte pogingen"
+        description="Spelers mogen zo vaak proberen als ze willen"
         checked={attempts.unlimited}
         onChange={(checked) => onChange({ ...attempts, unlimited: checked })}
       />
       {!attempts.unlimited && (
         <Input
           id="max-attempts"
-          label="Maximum attempts"
+          label="Maximaal aantal pogingen"
           type="number"
           min={1}
           value={attempts.max.toString()}

@@ -65,7 +65,7 @@ export function Login() {
             <br />
             CHALLENGE
           </h1>
-          <p className="mt-2 text-text-muted text-sm">Sign in to continue</p>
+          <p className="mt-2 text-text-muted text-sm">Log in om verder te gaan</p>
         </div>
 
         {/* Mode selector */}
@@ -81,7 +81,7 @@ export function Login() {
             )}
           >
             <Users size={16} />
-            Player
+            Speler
           </button>
           <button
             type="button"
@@ -103,19 +103,19 @@ export function Login() {
             <form onSubmit={handlePlayerSubmit} className="flex flex-col gap-4">
               <Input
                 id="team-name"
-                label="Team Name"
+                label="Teamnaam"
                 value={teamName}
                 onChange={(e) => setTeamName(e.target.value)}
-                placeholder="Enter your team name"
+                placeholder="Vul je teamnaam in"
                 required
                 autoComplete="off"
               />
               <Input
                 id="passcode"
-                label="Passcode"
+                label="Toegangscode"
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value.toUpperCase())}
-                placeholder="e.g. A3F8B2"
+                placeholder="bv. A3F8B2"
                 required
                 autoComplete="off"
                 className="font-mono tracking-widest"
@@ -125,14 +125,14 @@ export function Login() {
 
               <Button type="submit" disabled={submitting} className="w-full gap-2 mt-2">
                 <LogIn size={16} />
-                {submitting ? 'Joining...' : 'Join Game'}
+                {submitting ? 'Bezig met inloggen...' : 'Meedoen'}
               </Button>
             </form>
           ) : (
             <form onSubmit={handleAdminSubmit} className="flex flex-col gap-4">
               <Input
                 id="email"
-                label="Email"
+                label="E-mail"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -142,11 +142,11 @@ export function Login() {
               />
               <Input
                 id="password"
-                label="Password"
+                label="Wachtwoord"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
+                placeholder="Vul je wachtwoord in"
                 required
                 autoComplete="current-password"
               />
@@ -155,7 +155,7 @@ export function Login() {
 
               <Button type="submit" disabled={submitting} className="w-full gap-2 mt-2">
                 <LogIn size={16} />
-                {submitting ? 'Signing in...' : 'Sign In'}
+                {submitting ? 'Bezig met inloggen...' : 'Inloggen'}
               </Button>
             </form>
           )}

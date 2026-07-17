@@ -59,9 +59,9 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
         if (res && !res.error) {
           setFinalResult({ points: res.points_awarded, isCorrect: res.is_correct })
           if (allFound) {
-            toast.success('Alle deuren open!', { description: `Eindscore: ${res.points_awarded} pt` })
+            toast.success('Alle deuren open!', { description: `Eindscore: ${res.points_awarded} ptn` })
           } else {
-            toast(`Geen pogingen meer — ${res.points_awarded} pt verdiend`, { duration: 4000 })
+            toast(`Geen pogingen meer — ${res.points_awarded} ptn verdiend`, { duration: 4000 })
           }
         }
       })
@@ -90,7 +90,7 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
       if (result.attempts_exhausted) {
         toast.error('Geen pogingen meer over')
       } else {
-        toast.error('Submit mislukt', { description: result.error })
+        toast.error('Insturen mislukt', { description: result.error })
       }
       return
     }
@@ -106,7 +106,7 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
       const placeLabel = result.place
         ? ` (${result.place}e team)`
         : ''
-      toast.success(`+${result.points} pt${placeLabel}`, { description: answer?.text })
+      toast.success(`+${result.points} ptn${placeLabel}`, { description: answer?.text })
     } else {
       setFeedback({ type: 'miss' })
     }
@@ -170,7 +170,7 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
           )}
           <span className="font-mono">
             <span className="text-neon font-bold">{earnedSoFar}</span>
-            <span className="text-text-faint"> / {totalPossible} pt</span>
+            <span className="text-text-faint"> / {totalPossible} ptn</span>
           </span>
         </div>
       </div>
@@ -211,10 +211,10 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
                   isFound ? 'text-lime' : 'text-text-faint',
                 )}>
                   {isFound
-                    ? `+${awarded} pt`
+                    ? `+${awarded} ptn`
                     : scoringMode === 'placement'
-                      ? `tot ${maxForUnfound} pt`
-                      : `${maxForUnfound} pt`}
+                      ? `tot ${maxForUnfound} ptn`
+                      : `${maxForUnfound} ptn`}
                 </p>
               </div>
             </div>

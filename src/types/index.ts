@@ -42,6 +42,18 @@ export type ChallengeType =
   | 'photo_upload'
 export type MediaType = 'image' | 'audio' | 'video'
 
+// Dutch display names per type. Single source for the builder's type picker
+// and anywhere a challenge's type is shown to a player.
+export const CHALLENGE_TYPE_LABELS: Record<ChallengeType, string> = {
+  multiple_choice: 'Meerkeuze',
+  free_text: 'Vrije tekst',
+  open_door: 'Open Deur',
+  puzzle: 'Puzzel',
+  gallery: 'Galerij',
+  collective_memory: 'Collectief Geheugen',
+  photo_upload: 'Foto Upload',
+}
+
 export interface MediaItem {
   url: string
   type: MediaType

@@ -8,10 +8,8 @@ interface ScoringEditorProps {
   onChange: (scoring: ScoringConfig) => void
 }
 
-const ORDINALS = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th']
-
 function ordinal(n: number) {
-  return ORDINALS[n - 1] ?? `${n}th`
+  return `${n}e`
 }
 
 export function ScoringEditor({ scoring, onChange }: ScoringEditorProps) {
@@ -60,7 +58,7 @@ export function ScoringEditor({ scoring, onChange }: ScoringEditorProps) {
           }`}
         >
           <Hash size={14} />
-          Fixed Points
+          Vaste punten
         </button>
         <button
           type="button"
@@ -72,7 +70,7 @@ export function ScoringEditor({ scoring, onChange }: ScoringEditorProps) {
           }`}
         >
           <Trophy size={14} />
-          Placement-based
+          Placement
         </button>
       </div>
 
@@ -80,7 +78,7 @@ export function ScoringEditor({ scoring, onChange }: ScoringEditorProps) {
       {scoring.mode === 'fixed' && (
         <Input
           id="fixed-points"
-          label="Points"
+          label="Punten"
           type="number"
           value={scoring.fixed_points}
           onChange={(e) => setFixedPoints(parseInt(e.target.value) || 0)}
@@ -90,7 +88,7 @@ export function ScoringEditor({ scoring, onChange }: ScoringEditorProps) {
       {/* Placement mode */}
       {scoring.mode === 'placement' && (
         <div className="space-y-2">
-          <p className="text-sm text-text-muted">Points awarded by finishing order</p>
+          <p className="text-sm text-text-muted">Punten toegekend op volgorde van binnenkomst</p>
           {scoring.placements.map((p, i) => (
             <div key={i} className="flex items-center gap-2">
               <span className="w-10 text-sm font-mono text-text-faint text-right shrink-0">
@@ -102,7 +100,7 @@ export function ScoringEditor({ scoring, onChange }: ScoringEditorProps) {
                 onChange={(e) => updatePlacement(i, parseInt(e.target.value) || 0)}
                 className="flex-1"
               />
-              <span className="text-xs text-text-faint shrink-0">pts</span>
+              <span className="text-xs text-text-faint shrink-0">ptn</span>
               <button
                 type="button"
                 onClick={() => removePlacement(i)}
@@ -114,7 +112,7 @@ export function ScoringEditor({ scoring, onChange }: ScoringEditorProps) {
             </div>
           ))}
           <Button type="button" variant="ghost" size="sm" className="gap-1" onClick={addPlacement}>
-            <Plus size={14} /> Add Placement
+            <Plus size={14} /> Plaats toevoegen
           </Button>
         </div>
       )}

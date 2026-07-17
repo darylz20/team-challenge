@@ -83,12 +83,12 @@ export function ManualCompleteModal({
     })
     setSaving(false)
     if (error || data?.error) {
-      toast.error('Complete failed', { description: error?.message ?? data?.error })
+      toast.error('Afronden mislukt', { description: error?.message ?? data?.error })
       return
     }
     const challengeName = available.find((c) => c.id === challengeId)?.title ?? 'Challenge'
     toast.success(`"${challengeName}" toegekend aan ${teamName}`, {
-      description: `+${ptsNum} pt`,
+      description: `+${ptsNum} ptn`,
     })
     setNote('')
     onDone?.()
@@ -111,7 +111,7 @@ export function ManualCompleteModal({
             >
               {available.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.title} (default {c.points} pt)
+                  {c.title} (standaard {c.points} ptn)
                 </option>
               ))}
             </select>

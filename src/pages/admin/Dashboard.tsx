@@ -14,7 +14,7 @@ export function Dashboard() {
 
   return (
     <div className="animate-fade-in">
-      <PageHeader title="Dashboard" subtitle="Manage your games" />
+      <PageHeader title="Dashboard" subtitle="Beheer je spellen" />
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 mb-6">

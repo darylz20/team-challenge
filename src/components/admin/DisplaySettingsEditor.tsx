@@ -8,47 +8,47 @@ interface DisplaySettingsEditorProps {
 }
 
 const COLUMN_OPTIONS = [
-  { value: '1', label: '1 column' },
-  { value: '2', label: '2 columns' },
-  { value: '3', label: '3 columns' },
-  { value: '4', label: '4 columns' },
+  { value: '1', label: '1 kolom' },
+  { value: '2', label: '2 kolommen' },
+  { value: '3', label: '3 kolommen' },
+  { value: '4', label: '4 kolommen' },
 ]
 
 const MEDIA_POSITION_OPTIONS = [
-  { value: 'above', label: 'Above description' },
-  { value: 'below', label: 'Below description' },
-  { value: 'left', label: 'Left of description' },
-  { value: 'right', label: 'Right of description' },
-  { value: 'background', label: 'Background' },
+  { value: 'above', label: 'Boven de beschrijving' },
+  { value: 'below', label: 'Onder de beschrijving' },
+  { value: 'left', label: 'Links van de beschrijving' },
+  { value: 'right', label: 'Rechts van de beschrijving' },
+  { value: 'background', label: 'Als achtergrond' },
 ]
 
 const MEDIA_LAYOUT_OPTIONS = [
-  { value: 'vertical', label: 'Stacked (vertical)' },
-  { value: 'grid-2', label: '2-column grid' },
-  { value: 'grid-3', label: '3-column grid' },
-  { value: 'carousel', label: 'Carousel (swipe)' },
+  { value: 'vertical', label: 'Onder elkaar' },
+  { value: 'grid-2', label: 'Raster van 2' },
+  { value: 'grid-3', label: 'Raster van 3' },
+  { value: 'carousel', label: 'Carrousel (swipen)' },
 ]
 
 const MEDIA_SIZE_OPTIONS = [
-  { value: 'small', label: 'Small' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'large', label: 'Large (default)' },
-  { value: 'full', label: 'Full width' },
+  { value: 'small', label: 'Klein' },
+  { value: 'medium', label: 'Middel' },
+  { value: 'large', label: 'Groot (standaard)' },
+  { value: 'full', label: 'Volledige breedte' },
 ]
 
 const DESCRIPTION_ALIGN_OPTIONS = [
-  { value: 'left', label: 'Left' },
-  { value: 'center', label: 'Center' },
+  { value: 'left', label: 'Links' },
+  { value: 'center', label: 'Gecentreerd' },
 ]
 
 export function DisplaySettingsEditor({ display, onChange }: DisplaySettingsEditorProps) {
   return (
     <div className="space-y-3">
-      <p className="text-xs text-text-faint">Controls how the challenge appears to players</p>
+      <p className="text-xs text-text-faint">Bepaalt hoe de challenge er voor spelers uitziet</p>
       <div className="grid grid-cols-2 gap-3">
         <Select
           id="columns"
-          label="Answer Columns"
+          label="Antwoordkolommen"
           options={COLUMN_OPTIONS}
           value={String(display.columns)}
           onChange={(e) =>
@@ -57,7 +57,7 @@ export function DisplaySettingsEditor({ display, onChange }: DisplaySettingsEdit
         />
         <Select
           id="media-position"
-          label="Media Position"
+          label="Mediapositie"
           options={MEDIA_POSITION_OPTIONS}
           value={display.media_position}
           onChange={(e) =>
@@ -66,7 +66,7 @@ export function DisplaySettingsEditor({ display, onChange }: DisplaySettingsEdit
         />
         <Select
           id="media-layout"
-          label="Media Layout"
+          label="Media-indeling"
           options={MEDIA_LAYOUT_OPTIONS}
           value={display.media_layout}
           onChange={(e) =>
@@ -75,7 +75,7 @@ export function DisplaySettingsEditor({ display, onChange }: DisplaySettingsEdit
         />
         <Select
           id="media-size"
-          label="Media Size"
+          label="Mediaformaat"
           options={MEDIA_SIZE_OPTIONS}
           value={display.media_size}
           onChange={(e) =>
@@ -84,7 +84,7 @@ export function DisplaySettingsEditor({ display, onChange }: DisplaySettingsEdit
         />
         <Select
           id="description-align"
-          label="Description Alignment"
+          label="Uitlijning beschrijving"
           options={DESCRIPTION_ALIGN_OPTIONS}
           value={display.description_align}
           onChange={(e) =>
@@ -93,8 +93,8 @@ export function DisplaySettingsEditor({ display, onChange }: DisplaySettingsEdit
         />
       </div>
       <Toggle
-        label="Compact mode"
-        description="Reduce spacing for content-heavy challenges"
+        label="Compacte weergave"
+        description="Minder witruimte voor challenges met veel inhoud"
         checked={display.compact}
         onChange={(checked) => onChange({ ...display, compact: checked })}
       />

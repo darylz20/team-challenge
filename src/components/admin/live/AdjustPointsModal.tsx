@@ -51,10 +51,10 @@ export function AdjustPointsModal({ open, onClose, teamId, teamName, gameId, onD
     })
     setSaving(false)
     if (error || data?.error) {
-      toast.error('Adjustment failed', { description: error?.message ?? data?.error })
+      toast.error('Punten aanpassen mislukt', { description: error?.message ?? data?.error })
       return
     }
-    toast.success(`${direction === 'plus' ? '+' : '−'}${value} pt voor ${teamName}`, {
+    toast.success(`${direction === 'plus' ? '+' : '−'}${value} ptn voor ${teamName}`, {
       description: reason.trim() || undefined,
     })
     onDone?.()

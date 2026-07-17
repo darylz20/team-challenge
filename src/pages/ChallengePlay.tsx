@@ -102,7 +102,7 @@ function FreeTextInput({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}
-      placeholder="Type your answer..."
+      placeholder="Typ je antwoord..."
       className="w-full bg-surface-raised border border-surface-overlay rounded-lg px-4 py-3 text-text placeholder:text-text-faint outline-none focus:border-neon transition-colors disabled:opacity-60"
     />
   )
@@ -233,8 +233,8 @@ export function ChallengePlay() {
   if (!challenge) {
     return (
       <div className="py-20 text-center animate-fade-in">
-        <p className="text-text-muted">Challenge not found.</p>
-        <Button variant="ghost" className="mt-4" onClick={() => navigate('/')}>Go back</Button>
+        <p className="text-text-muted">Challenge niet gevonden.</p>
+        <Button variant="ghost" className="mt-4" onClick={() => navigate('/')}>Terug</Button>
       </div>
     )
   }
@@ -291,8 +291,8 @@ export function ChallengePlay() {
 
   const pointsLabel =
     scoring.mode === 'fixed'
-      ? `${scoring.fixed_points} pts`
-      : scoring.placements.map((p) => `${p.points}`).join('/') + ' pts'
+      ? `${scoring.fixed_points} ptn`
+      : scoring.placements.map((p) => `${p.points}`).join('/') + ' ptn'
 
   // Total hint deduction so far
   const hintDeduction = hints.items.slice(0, revealedHints).reduce((sum, h) => sum + h.deduction, 0)
@@ -319,16 +319,16 @@ export function ChallengePlay() {
     const { error, result } = await submitAnswer(teamSession!.game.id, answer)
     if (error) {
       setSubmitError(error)
-      toast.error('Submission failed', { description: error })
+      toast.error('Insturen mislukt', { description: error })
     } else if (result) {
       setSubmitResult({ correct: result.is_correct, points: result.points_awarded })
       if (result.is_correct) {
-        toast.success('Correct!', {
-          description: `+${result.points_awarded} pts awarded`,
+        toast.success('Goed!', {
+          description: `+${result.points_awarded} ptn toegekend`,
         })
       } else {
-        toast.error('Incorrect answer', {
-          description: 'Try again or use a hint',
+        toast.error('Fout antwoord', {
+          description: 'Probeer het opnieuw of gebruik een hint',
         })
       }
     }
@@ -471,13 +471,13 @@ export function ChallengePlay() {
             )}
             <div>
               <p className="font-semibold text-sm">
-                {(submission?.is_correct ?? submitResult?.correct) ? 'Correct!' : 'Incorrect'}
+                {(submission?.is_correct ?? submitResult?.correct) ? 'Goed!' : 'Fout'}
               </p>
               <p className="text-xs text-text-muted">
                 {submission
-                  ? `${submission.points_awarded} points awarded`
+                  ? `${submission.points_awarded} punten toegekend`
                   : submitResult
-                    ? `${submitResult.points} points awarded`
+                    ? `${submitResult.points} punten toegekend`
                     : ''}
               </p>
             </div>
@@ -488,17 +488,17 @@ export function ChallengePlay() {
         {attemptCount > 0 && !isSolved && (
           <p className="text-xs text-text-muted text-center">
             {isLocked
-              ? `No attempts remaining (${attemptCount}/${attemptsConfig.max} used)`
+              ? `Geen pogingen meer over (${attemptCount}/${attemptsConfig.max} gebruikt)`
               : attemptsConfig.unlimited
-                ? `${attemptCount} attempt${attemptCount !== 1 ? 's' : ''} used`
-                : `${attemptsRemaining} of ${attemptsConfig.max} attempt${attemptsConfig.max !== 1 ? 's' : ''} remaining`}
+                ? `${attemptCount} poging${attemptCount !== 1 ? 'en' : ''} gebruikt`
+                : `${attemptsRemaining} van ${attemptsConfig.max} poging${attemptsConfig.max !== 1 ? 'en' : ''} over`}
           </p>
         )}
 
         {/* Locked banner */}
         {isLocked && (
           <Card className="border border-surface-overlay text-center py-3">
-            <p className="text-sm text-text-muted">You've used all your attempts for this challenge.</p>
+            <p className="text-sm text-text-muted">Je hebt al je pogingen voor deze challenge gebruikt.</p>
           </Card>
         )}
 
@@ -521,8 +521,8 @@ export function ChallengePlay() {
             >
               <Lightbulb size={14} />
               {revealedHints >= hints.items.length
-                ? 'No more hints'
-                : `Get hint (−${hints.items[revealedHints]?.deduction ?? 0} pts)`}
+                ? 'Geen hints meer'
+                : `Hint tonen (−${hints.items[revealedHints]?.deduction ?? 0} ptn)`}
             </button>
             {revealedHints > 0 && (
               <div className="space-y-1.5">
@@ -533,7 +533,7 @@ export function ChallengePlay() {
                   </div>
                 ))}
                 {hintDeduction > 0 && (
-                  <p className="text-xs text-amber/70 pl-6">Total hint deduction: −{hintDeduction} pts</p>
+                  <p className="text-xs text-amber/70 pl-6">Totale hintaftrek: −{hintDeduction} ptn</p>
                 )}
               </div>
             )}
@@ -556,12 +556,12 @@ export function ChallengePlay() {
             {submitting ? (
               <>
                 <Loader2 size={16} className="animate-spin mr-2" />
-                Submitting...
+                Bezig met insturen...
               </>
             ) : attemptCount > 0 ? (
-              'Try Again'
+              'Probeer opnieuw'
             ) : (
-              'Submit Answer'
+              'Antwoord insturen'
             )}
           </Button>
         )}

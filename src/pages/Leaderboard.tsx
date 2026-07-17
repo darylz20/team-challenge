@@ -54,8 +54,8 @@ export function LeaderboardView({ gameId, currentTeamId }: LeaderboardViewProps)
     return (
       <Card className="text-center py-10">
         <Trophy size={32} className="text-text-faint mx-auto mb-3" />
-        <p className="text-text-muted font-medium">No teams yet</p>
-        <p className="text-xs text-text-faint mt-1">Add teams to see them here.</p>
+        <p className="text-text-muted font-medium">Nog geen teams</p>
+        <p className="text-xs text-text-faint mt-1">Voeg teams toe om ze hier te zien.</p>
         <button
           type="button"
           onClick={handleRefresh}
@@ -111,7 +111,7 @@ export function LeaderboardView({ gameId, currentTeamId }: LeaderboardViewProps)
                     <p className={cn('font-semibold truncate', isCurrentTeam && 'text-neon')}>
                       {entry.team_name}
                       {isCurrentTeam && (
-                        <span className="ml-1.5 text-xs font-normal text-text-faint">(you)</span>
+                        <span className="ml-1.5 text-xs font-normal text-text-faint">(jij)</span>
                       )}
                     </p>
                     {isFirst && entry.total_points > 0 && (
@@ -149,7 +149,7 @@ export function LeaderboardView({ gameId, currentTeamId }: LeaderboardViewProps)
                     )}
                   >
                     <span>
-                      {entry.challenges_solved} challenge{entry.challenges_solved !== 1 ? 's' : ''} solved
+                      {entry.challenges_solved} challenge{entry.challenges_solved !== 1 ? 's' : ''} opgelost
                     </span>
                     {canExpand && (isOpen ? <ChevronUp size={11} /> : <ChevronDown size={11} />)}
                   </button>
@@ -166,7 +166,7 @@ export function LeaderboardView({ gameId, currentTeamId }: LeaderboardViewProps)
                       {entry.total_points}
                     </span>
                   </div>
-                  <p className="text-xs text-text-faint">pts</p>
+                  <p className="text-xs text-text-faint">ptn</p>
                 </div>
               </div>
 
@@ -180,7 +180,7 @@ export function LeaderboardView({ gameId, currentTeamId }: LeaderboardViewProps)
                     >
                       <CheckCircle2 size={12} className="text-lime shrink-0" />
                       <span className="flex-1 truncate text-text">{c.title}</span>
-                      <span className="font-mono text-text-muted shrink-0">+{c.points} pt</span>
+                      <span className="font-mono text-text-muted shrink-0">+{c.points} ptn</span>
                     </div>
                   ))}
                   {entry.bonuses.map((b, bi) => {
@@ -192,7 +192,7 @@ export function LeaderboardView({ gameId, currentTeamId }: LeaderboardViewProps)
                           {b.reason || (positive ? 'Bonuspunten' : 'Puntenaftrek')}
                         </span>
                         <span className={cn('font-mono shrink-0', positive ? 'text-text-muted' : 'text-magenta')}>
-                          {positive ? '+' : ''}{b.points} pt
+                          {positive ? '+' : ''}{b.points} ptn
                         </span>
                       </div>
                     )
@@ -208,7 +208,7 @@ export function LeaderboardView({ gameId, currentTeamId }: LeaderboardViewProps)
       <div className="flex items-center justify-center gap-4 mt-6">
         <div className="flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-lime animate-pulse" />
-          <span className="text-xs text-text-faint">Updates live</span>
+          <span className="text-xs text-text-faint">Wordt live bijgewerkt</span>
         </div>
         <button
           type="button"
@@ -230,7 +230,7 @@ export function Leaderboard() {
 
   return (
     <div className="animate-fade-in">
-      <PageHeader title="Leaderboard" subtitle="Live team rankings" />
+      <PageHeader title="Leaderboard" subtitle="Live stand van de teams" />
       <LeaderboardView gameId={teamSession?.game.id} currentTeamId={teamSession?.team.id} />
     </div>
   )

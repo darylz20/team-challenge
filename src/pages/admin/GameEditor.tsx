@@ -134,27 +134,27 @@ function DetailsTab({ game, updateGame, publishGame, unpublishGame, startGame, r
         </button>
       </div>
 
-      <Input id="title" label="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
-      <Textarea id="desc" label="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
+      <Input id="title" label="Titel" value={title} onChange={(e) => setTitle(e.target.value)} />
+      <Textarea id="desc" label="Beschrijving" value={description} onChange={(e) => setDescription(e.target.value)} />
 
       <div className="flex flex-wrap gap-3 pt-2">
         <Button onClick={handleSave} disabled={saving}>
-          {saving ? 'Saving...' : 'Save Changes'}
+          {saving ? 'Bezig met opslaan...' : 'Wijzigingen opslaan'}
         </Button>
 
         {game.status === 'draft' && (
-          <Button variant="secondary" onClick={publishGame}>Publish</Button>
+          <Button variant="secondary" onClick={publishGame}>Publiceren</Button>
         )}
 
         {game.status === 'published' && (
           <>
-            <Button variant="secondary" onClick={startGame}>Start game</Button>
-            <Button variant="ghost" onClick={unpublishGame}>Unpublish</Button>
+            <Button variant="secondary" onClick={startGame}>Spel starten</Button>
+            <Button variant="ghost" onClick={unpublishGame}>Publicatie ongedaan maken</Button>
           </>
         )}
 
         {game.status === 'finished' && (
-          <Button variant="ghost" onClick={reopenGame}>Reopen game</Button>
+          <Button variant="ghost" onClick={reopenGame}>Spel heropenen</Button>
         )}
 
         {/* Live monitoring — always available */}
@@ -187,12 +187,12 @@ function DetailsTab({ game, updateGame, publishGame, unpublishGame, startGame, r
           {game.status === 'draft' && '• Players can\'t see this game yet.'}
           {game.status === 'published' && '• Teams can log in. Intro is hidden until you Start game.'}
           {game.status === 'active' && '• Game is live. Intro carousel is shown, challenges are playable.'}
-          {game.status === 'finished' && '• Game is closed. Leaderboard remains visible.'}
+          {game.status === 'finished' && '• Spel is afgesloten. Het leaderboard blijft zichtbaar.'}
         </span>
       </div>
 
       {/* Reset confirm */}
-      <Modal open={resetOpen} onClose={() => !resetting && setResetOpen(false)} title="Reset game?">
+      <Modal open={resetOpen} onClose={() => !resetting && setResetOpen(false)} title="Spel resetten?">
         <div className="space-y-4">
           <div className="flex items-start gap-2 p-3 rounded-lg bg-magenta/5 border border-magenta/30">
             <AlertTriangle size={16} className="text-magenta shrink-0 mt-0.5" />
@@ -234,7 +234,7 @@ function SortableChallenge({ challenge, onDelete, onEdit }: { challenge: Challen
           <p className="font-semibold truncate">{challenge.title}</p>
           <p className="text-xs text-text-muted capitalize">{challenge.type.replace('_', ' ')}</p>
         </div>
-        <Badge variant="neon">{challenge.points} pts</Badge>
+        <Badge variant="neon">{challenge.points} ptn</Badge>
         <button
           onClick={(e) => { e.stopPropagation(); onDelete() }}
           className="p-1.5 text-text-faint hover:text-magenta transition-colors"
@@ -394,8 +394,8 @@ function SectionsTab({ sections, challenges, createSection, updateSection, delet
   return (
     <div className="space-y-4 max-w-lg">
       <p className="text-sm text-text-muted">
-        Sections group challenges into chapters. Open a section to make its challenges playable.
-        Locked sections are visible to players but their challenges are not clickable.
+        Secties groeperen challenges in hoofdstukken. Open een sectie om de challenges speelbaar te maken.
+        Gesloten secties zijn zichtbaar voor spelers, maar hun challenges zijn niet aanklikbaar.
       </p>
 
       {/* Add */}
@@ -404,7 +404,7 @@ function SectionsTab({ sections, challenges, createSection, updateSection, delet
           value={newTitle}
           onChange={(e) => setNewTitle(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAdd() } }}
-          placeholder="New section title..."
+          placeholder="Titel van nieuwe sectie..."
           className="flex-1"
         />
         <Button onClick={handleAdd} disabled={!newTitle.trim()}>Add</Button>
@@ -428,17 +428,17 @@ function SectionsTab({ sections, challenges, createSection, updateSection, delet
                   <Input
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    placeholder="Section title"
+                    placeholder="Titel van de sectie"
                   />
                   <Textarea
                     value={editDesc}
                     onChange={(e) => setEditDesc(e.target.value)}
-                    placeholder="Optional description shown to players"
+                    placeholder="Optionele beschrijving die spelers zien"
                     rows={2}
                   />
                   <div className="flex gap-2">
-                    <Button size="sm" onClick={() => saveEdit(s.id)} disabled={!editTitle.trim()}>Save</Button>
-                    <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>Cancel</Button>
+                    <Button size="sm" onClick={() => saveEdit(s.id)} disabled={!editTitle.trim()}>Opslaan</Button>
+                    <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>Annuleren</Button>
                   </div>
                 </>
               ) : (
@@ -465,7 +465,7 @@ function SectionsTab({ sections, challenges, createSection, updateSection, delet
                       type="button"
                       onClick={() => startEdit(s)}
                       className="p-1.5 text-text-faint hover:text-text"
-                      title="Edit"
+                      title="Bewerken"
                     >
                       <Edit size={14} />
                     </button>
@@ -473,7 +473,7 @@ function SectionsTab({ sections, challenges, createSection, updateSection, delet
                       type="button"
                       onClick={() => handleDelete(s)}
                       className="p-1.5 text-text-faint hover:text-magenta"
-                      title="Delete"
+                      title="Verwijderen"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -485,7 +485,7 @@ function SectionsTab({ sections, challenges, createSection, updateSection, delet
                     className="w-full gap-2"
                   >
                     {s.is_open ? <Lock size={14} /> : <Unlock size={14} />}
-                    {s.is_open ? 'Close section' : 'Open section'}
+                    {s.is_open ? 'Sectie sluiten' : 'Sectie openen'}
                   </Button>
                 </>
               )}
@@ -529,7 +529,7 @@ function TeamsTab({ teams, createTeam, deleteTeam, regeneratePasscode, updateMem
   return (
     <div className="space-y-4 max-w-lg">
       <p className="text-sm text-text-muted">
-        Each team gets a unique passcode. Share it with the player so they can log in.
+        Elk team krijgt een eigen toegangscode. Deel die met de spelers zodat ze kunnen inloggen.
       </p>
 
       <div className="flex gap-3">
@@ -560,14 +560,14 @@ function TeamsTab({ teams, createTeam, deleteTeam, regeneratePasscode, updateMem
               <button
                 onClick={() => copyPasscode(team)}
                 className="p-1.5 text-text-faint hover:text-neon transition-colors"
-                title="Copy credentials"
+                title="Inloggegevens kopiëren"
               >
                 {copiedId === team.id ? <Check size={14} className="text-lime" /> : <Copy size={14} />}
               </button>
               <button
                 onClick={() => regeneratePasscode(team.id)}
                 className="p-1.5 text-text-faint hover:text-amber transition-colors"
-                title="Regenerate passcode"
+                title="Nieuwe toegangscode genereren"
               >
                 <RefreshCw size={14} />
               </button>
@@ -631,7 +631,7 @@ function TeamMembersEditor({ members, onChange }: { members: string[]; onChange:
                 type="button"
                 onClick={() => removeMember(i)}
                 className="text-text-faint hover:text-magenta transition-colors"
-                title="Remove"
+                title="Verwijderen"
               >
                 <X size={10} />
               </button>
@@ -650,7 +650,7 @@ function TeamMembersEditor({ members, onChange }: { members: string[]; onChange:
               addMember()
             }
           }}
-          placeholder="Add member name..."
+          placeholder="Naam teamlid toevoegen..."
           className="flex-1 bg-surface border border-surface-overlay rounded px-2.5 py-1 text-xs text-text placeholder:text-text-faint outline-none focus:border-neon"
         />
         <button

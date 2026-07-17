@@ -122,7 +122,7 @@ function MultipleChoiceEditor({ config, onChange, gameId }: { config: MultipleCh
 
   return (
     <div className="space-y-3">
-      <p className="text-sm font-medium text-text-muted">Options</p>
+      <p className="text-sm font-medium text-text-muted">Opties</p>
       {config.options.map((option, i) => (
         <div key={i} className="space-y-2 p-3 rounded-lg bg-surface-overlay/30">
           <div className="flex items-center gap-2">
@@ -138,7 +138,7 @@ function MultipleChoiceEditor({ config, onChange, gameId }: { config: MultipleCh
             <Input
               value={option.text}
               onChange={(e) => updateOption(i, e.target.value)}
-              placeholder={`Option ${i + 1}`}
+              placeholder={`Optie ${i + 1}`}
               className="flex-1"
             />
             <button
@@ -165,7 +165,7 @@ function MultipleChoiceEditor({ config, onChange, gameId }: { config: MultipleCh
           ) : (
             <label className="ml-7 flex items-center gap-1.5 text-xs text-text-faint hover:text-text-muted cursor-pointer transition-colors">
               <ImagePlus size={14} />
-              <span>Add image</span>
+              <span>Afbeelding toevoegen</span>
               <input
                 type="file"
                 accept="image/*"
@@ -180,10 +180,10 @@ function MultipleChoiceEditor({ config, onChange, gameId }: { config: MultipleCh
         </div>
       ))}
       <Button type="button" variant="ghost" size="sm" className="gap-1" onClick={addOption}>
-        <Plus size={14} /> Add Option
+        <Plus size={14} /> Optie toevoegen
       </Button>
       <Toggle
-        label="Allow multiple correct answers"
+        label="Meerdere juiste antwoorden toestaan"
         checked={config.allow_multiple}
         onChange={(v) => onChange({ ...config, allow_multiple: v })}
       />
@@ -196,14 +196,14 @@ function FreeTextEditor({ config, onChange }: { config: FreeTextConfig; onChange
     <div className="space-y-3">
       <Input
         id="correct-answer"
-        label="Correct Answer"
+        label="Juiste antwoord"
         value={config.correct_answer}
         onChange={(e) => onChange({ ...config, correct_answer: e.target.value })}
-        placeholder="The expected answer"
+        placeholder="Het verwachte antwoord"
       />
       <Toggle
-        label="Case sensitive"
-        description="Require exact casing to match"
+        label="Hoofdlettergevoelig"
+        description="Hoofdletters moeten exact overeenkomen"
         checked={config.case_sensitive}
         onChange={(v) => onChange({ ...config, case_sensitive: v })}
       />
@@ -329,7 +329,7 @@ function OpenDoorEditor({ config, onChange }: { config: OpenDoorConfig; onChange
                   }}
                 />
               </div>
-              <span className="text-xs text-text-faint shrink-0">pt</span>
+              <span className="text-xs text-text-faint shrink-0">ptn</span>
               <button
                 type="button"
                 onClick={() => removePlace(i)}
@@ -348,7 +348,7 @@ function OpenDoorEditor({ config, onChange }: { config: OpenDoorConfig; onChange
             <Plus size={12} /> Plaats toevoegen
           </button>
           <p className="text-xs text-text-faint">
-            Teams die later komen dan {placements.length}e krijgen 0 pt.
+            Teams die later komen dan {placements.length}e krijgen 0 ptn.
           </p>
         </div>
       )}
@@ -382,7 +382,7 @@ function OpenDoorEditor({ config, onChange }: { config: OpenDoorConfig; onChange
       <p className="text-xs text-text-faint">
         Maximaal mogelijk per team:{' '}
         <span className="text-text">
-          {scoringMode === 'fixed' ? totalFixed : totalPlacementBestCase} pt
+          {scoringMode === 'fixed' ? totalFixed : totalPlacementBestCase} ptn
         </span>
         {scoringMode === 'placement' && ' (als 1e voor alle 4)'}
       </p>
@@ -541,7 +541,7 @@ function PuzzleEditor({ config, onChange }: { config: PuzzleConfig; onChange: (c
         <p className="text-xs text-text-faint">
           {scoringMode === 'fixed'
             ? 'Elk team krijgt vaste punten per opgelost thema.'
-            : '1e team dat een thema raadt krijgt meer pt dan latere teams. Per thema apart.'}
+            : '1e team dat een thema raadt krijgt meer ptn dan latere teams. Per thema apart.'}
         </p>
       </div>
 
@@ -644,7 +644,7 @@ function PuzzleEditor({ config, onChange }: { config: PuzzleConfig; onChange: (c
                   }}
                 />
               </div>
-              <span className="text-xs text-text-faint shrink-0">pt</span>
+              <span className="text-xs text-text-faint shrink-0">ptn</span>
               <button
                 type="button"
                 onClick={() => updatePlacements(placements.filter((_, idx) => idx !== i))}
@@ -671,7 +671,7 @@ function PuzzleEditor({ config, onChange }: { config: PuzzleConfig; onChange: (c
       <p className="text-xs text-text-faint">
         Maximaal mogelijk per team:{' '}
         <span className="text-text">
-          {scoringMode === 'fixed' ? totalFixed : totalPlacementBest} pt
+          {scoringMode === 'fixed' ? totalFixed : totalPlacementBest} ptn
         </span>
         {scoringMode === 'placement' && ' (als 1e voor alle 3)'}
       </p>
@@ -784,7 +784,7 @@ function GalleryEditor({ config, onChange, gameId }: { config: GalleryConfig; on
         <p className="text-xs text-text-faint">
           {scoringMode === 'fixed'
             ? 'Vaste punten per goed antwoord.'
-            : '1e team met antwoord X = meeste pt. Per foto apart.'}
+            : '1e team met antwoord X = meeste ptn. Per foto apart.'}
         </p>
       </div>
 
@@ -844,7 +844,7 @@ function GalleryEditor({ config, onChange, gameId }: { config: GalleryConfig; on
                       />
                     </div>
                   )}
-                  <span className="text-xs text-text-faint">{scoringMode === 'fixed' ? 'pt' : ''}</span>
+                  <span className="text-xs text-text-faint">{scoringMode === 'fixed' ? 'ptn' : ''}</span>
                   <div className="flex-1" />
                   <button
                     type="button"
@@ -890,7 +890,7 @@ function GalleryEditor({ config, onChange, gameId }: { config: GalleryConfig; on
                   }}
                 />
               </div>
-              <span className="text-xs text-text-faint shrink-0">pt</span>
+              <span className="text-xs text-text-faint shrink-0">ptn</span>
               <button
                 type="button"
                 onClick={() => updatePlacements(placements.filter((_, idx) => idx !== i))}
@@ -942,7 +942,7 @@ function GalleryEditor({ config, onChange, gameId }: { config: GalleryConfig; on
       <p className="text-xs text-text-faint">
         Maximaal mogelijk per team:{' '}
         <span className="text-text">
-          {scoringMode === 'fixed' ? totalFixed : totalPlacementBest} pt
+          {scoringMode === 'fixed' ? totalFixed : totalPlacementBest} ptn
         </span>
         {scoringMode === 'placement' && items.length > 0 && ` (als 1e voor alle ${items.length})`}
       </p>
@@ -994,7 +994,7 @@ function CollectiveMemoryEditor({ config, onChange }: { config: CollectiveMemory
     <div className="space-y-5">
       <p className="text-sm text-text-muted">
         Voeg het beeldfragment toe via Challenge Prompt (media-upload bovenaan). Speler ziet de media + 5 trefwoord-slots
-        met oplopende waardes (10/20/30/40/50 pt typisch). Hoogste waarde = lastigste/meest specifiek.
+        met oplopende waardes (10/20/30/40/50 ptn typisch). Hoogste waarde = lastigste/meest specifiek.
       </p>
 
       {/* Scoring mode */}
@@ -1020,7 +1020,7 @@ function CollectiveMemoryEditor({ config, onChange }: { config: CollectiveMemory
         <p className="text-xs text-text-faint">
           {scoringMode === 'fixed'
             ? 'Vaste punten per trefwoord (oplopend).'
-            : '1e team met trefwoord X = meeste pt. Per trefwoord apart.'}
+            : '1e team met trefwoord X = meeste ptn. Per trefwoord apart.'}
         </p>
       </div>
 
@@ -1072,7 +1072,7 @@ function CollectiveMemoryEditor({ config, onChange }: { config: CollectiveMemory
                   }}
                 />
               </div>
-              <span className="text-xs text-text-faint shrink-0">pt</span>
+              <span className="text-xs text-text-faint shrink-0">ptn</span>
               <button
                 type="button"
                 onClick={() => updatePlacements(placements.filter((_, idx) => idx !== i))}
@@ -1124,7 +1124,7 @@ function CollectiveMemoryEditor({ config, onChange }: { config: CollectiveMemory
       <p className="text-xs text-text-faint">
         Maximaal mogelijk per team:{' '}
         <span className="text-text">
-          {scoringMode === 'fixed' ? totalFixed : totalPlacementBest} pt
+          {scoringMode === 'fixed' ? totalFixed : totalPlacementBest} ptn
         </span>
         {scoringMode === 'placement' && ` (als 1e voor alle 5)`}
       </p>

@@ -75,7 +75,7 @@ function FreeTextPreview() {
       <input
         type="text"
         readOnly
-        placeholder="Type your answer..."
+        placeholder="Typ je antwoord..."
         className="w-full bg-surface-raised border border-surface-overlay rounded-lg px-4 py-3 text-text placeholder:text-text-faint outline-none"
       />
     </div>
@@ -116,7 +116,7 @@ function OpenDoorPreview({ config }: { config: OpenDoorConfig }) {
                 <HelpCircle size={16} className="text-text-faint shrink-0" />
                 <span className="text-xs text-text-faint">Deur {i + 1}</span>
               </div>
-              <span className="text-xs text-amber font-mono shrink-0">{display} pt</span>
+              <span className="text-xs text-amber font-mono shrink-0">{display} ptn</span>
             </div>
           )
         })}
@@ -187,7 +187,7 @@ function GalleryPreview({ config }: { config: GalleryConfig }) {
                 </div>
               )}
               <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-void/80 text-[10px] font-mono text-amber">
-                {mode === 'placement' ? `tot ${bestPlace}` : `${item.points}`} pt
+                {mode === 'placement' ? `tot ${bestPlace}` : `${item.points}`} ptn
               </div>
             </div>
           ))
@@ -288,32 +288,32 @@ export function ChallengePreview({
     const total = mode === 'placement'
       ? (od.placements?.[0]?.points ?? 0) * (od.answers?.length ?? 0)
       : od.answers?.reduce((s, a) => s + (a.points || 0), 0) ?? 0
-    pointsLabel = `max ${total} pt`
+    pointsLabel = `max ${total} ptn`
   } else if (type === 'puzzle') {
     const pz = config as PuzzleConfig
     const mode = pz.scoring_mode ?? 'fixed'
     const total = mode === 'placement'
       ? (pz.placements?.[0]?.points ?? 0) * (pz.themes?.length ?? 0)
       : pz.themes?.reduce((s, t) => s + (t.points || 0), 0) ?? 0
-    pointsLabel = `max ${total} pt`
+    pointsLabel = `max ${total} ptn`
   } else if (type === 'gallery') {
     const g = config as GalleryConfig
     const mode = g.scoring_mode ?? 'fixed'
     const total = mode === 'placement'
       ? (g.placements?.[0]?.points ?? 0) * (g.items?.length ?? 0)
       : g.items?.reduce((s, it) => s + (it.points || 0), 0) ?? 0
-    pointsLabel = `max ${total} pt`
+    pointsLabel = `max ${total} ptn`
   } else if (type === 'collective_memory') {
     const cm = config as CollectiveMemoryConfig
     const mode = cm.scoring_mode ?? 'fixed'
     const total = mode === 'placement'
       ? (cm.placements?.[0]?.points ?? 0) * (cm.keywords?.length ?? 0)
       : cm.keywords?.reduce((s, k) => s + (k.points || 0), 0) ?? 0
-    pointsLabel = `max ${total} pt`
+    pointsLabel = `max ${total} ptn`
   } else if (scoring.mode === 'fixed') {
-    pointsLabel = `${scoring.fixed_points} pts`
+    pointsLabel = `${scoring.fixed_points} ptn`
   } else {
-    pointsLabel = scoring.placements.map((p) => `${p.points}`).join(' / ') + ' pts'
+    pointsLabel = scoring.placements.map((p) => `${p.points}`).join(' / ') + ' ptn'
   }
 
   const hasMedia = mediaItems.length > 0
@@ -443,8 +443,8 @@ export function ChallengePreview({
             >
               <Lightbulb size={14} />
               {revealedHints >= hints.items.length
-                ? 'No more hints'
-                : `Get hint (−${hints.items[revealedHints]?.deduction ?? 0} pts)`}
+                ? 'Geen hints meer'
+                : `Hint tonen (−${hints.items[revealedHints]?.deduction ?? 0} ptn)`}
             </button>
             {revealedHints > 0 && (
               <div className="space-y-1.5">

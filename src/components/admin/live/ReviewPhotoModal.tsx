@@ -67,7 +67,7 @@ function ReviewForm({ review, onClose, onDone }: { review: PhotoReview } & Omit<
       return
     }
 
-    toast.success(`${review.team_name}: ${ptsNum} pt toegekend`, {
+    toast.success(`${review.team_name}: ${ptsNum} ptn toegekend`, {
       description: ptsNum > 0 ? review.challenge_title : `Geen punten voor "${review.challenge_title}"`,
     })
     onDone?.()
@@ -104,7 +104,7 @@ function ReviewForm({ review, onClose, onDone }: { review: PhotoReview } & Omit<
 
           <Input
             id="award-points"
-            label={`Punten toekennen (richtlijn: ${review.challenge_points} pt)`}
+            label={`Punten toekennen (richtlijn: ${review.challenge_points} ptn)`}
             type="number"
             min={0}
             value={points}
@@ -123,7 +123,7 @@ function ReviewForm({ review, onClose, onDone }: { review: PhotoReview } & Omit<
           <p className="text-xs text-text-faint">
             {review.reviewed
               ? 'Deze foto is al beoordeeld — toekennen overschrijft de vorige punten.'
-              : 'Het team ziet de punten en de notitie direct na het toekennen. 0 pt = beoordeeld zonder punten.'}
+              : 'Het team ziet de punten en de notitie direct na het toekennen. 0 ptn = beoordeeld zonder punten.'}
           </p>
 
           <div className="flex gap-2 pt-2">

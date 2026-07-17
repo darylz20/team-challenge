@@ -59,9 +59,9 @@ export function CollectiveMemoryPlay({ challenge }: CollectiveMemoryPlayProps) {
         if (res && !res.error) {
           setFinalResult({ points: res.points_awarded, isCorrect: res.is_correct })
           if (allFound) {
-            toast.success('Alle 5 trefwoorden gevonden!', { description: `Eindscore: ${res.points_awarded} pt` })
+            toast.success('Alle 5 trefwoorden gevonden!', { description: `Eindscore: ${res.points_awarded} ptn` })
           } else {
-            toast(`Geen pogingen meer — ${res.points_awarded} pt verdiend`, { duration: 4000 })
+            toast(`Geen pogingen meer — ${res.points_awarded} ptn verdiend`, { duration: 4000 })
           }
         }
       })
@@ -89,7 +89,7 @@ export function CollectiveMemoryPlay({ challenge }: CollectiveMemoryPlayProps) {
       if (result.attempts_exhausted) {
         toast.error('Geen pogingen meer over')
       } else {
-        toast.error('Submit mislukt', { description: result.error })
+        toast.error('Insturen mislukt', { description: result.error })
       }
       return
     }
@@ -103,7 +103,7 @@ export function CollectiveMemoryPlay({ challenge }: CollectiveMemoryPlayProps) {
         points: result.points ?? 0,
       })
       const placeLabel = result.place ? ` (${result.place}e team)` : ''
-      toast.success(`+${result.points} pt${placeLabel}`, { description: kw?.text })
+      toast.success(`+${result.points} ptn${placeLabel}`, { description: kw?.text })
     } else {
       setFeedback({ type: 'miss' })
     }
@@ -163,7 +163,7 @@ export function CollectiveMemoryPlay({ challenge }: CollectiveMemoryPlayProps) {
           )}
           <span className="font-mono">
             <span className="text-neon font-bold">{earnedSoFar}</span>
-            <span className="text-text-faint"> / {totalPossible} pt</span>
+            <span className="text-text-faint"> / {totalPossible} ptn</span>
           </span>
         </div>
       </div>

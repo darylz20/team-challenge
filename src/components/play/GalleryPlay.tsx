@@ -59,9 +59,9 @@ export function GalleryPlay({ challenge }: GalleryPlayProps) {
         if (res && !res.error) {
           setFinalResult({ points: res.points_awarded, isCorrect: res.is_correct })
           if (allFound) {
-            toast.success('Alle foto\'s gevonden!', { description: `Eindscore: ${res.points_awarded} pt` })
+            toast.success('Alle foto\'s gevonden!', { description: `Eindscore: ${res.points_awarded} ptn` })
           } else {
-            toast(`Geen pogingen meer — ${res.points_awarded} pt verdiend`, { duration: 4000 })
+            toast(`Geen pogingen meer — ${res.points_awarded} ptn verdiend`, { duration: 4000 })
           }
         }
       })
@@ -89,7 +89,7 @@ export function GalleryPlay({ challenge }: GalleryPlayProps) {
       if (result.attempts_exhausted) {
         toast.error('Geen pogingen meer over')
       } else {
-        toast.error('Submit mislukt', { description: result.error })
+        toast.error('Insturen mislukt', { description: result.error })
       }
       return
     }
@@ -103,7 +103,7 @@ export function GalleryPlay({ challenge }: GalleryPlayProps) {
         points: result.points ?? 0,
       })
       const placeLabel = result.place ? ` (${result.place}e team)` : ''
-      toast.success(`+${result.points} pt${placeLabel}`, { description: item?.answer })
+      toast.success(`+${result.points} ptn${placeLabel}`, { description: item?.answer })
     } else {
       setFeedback({ type: 'miss' })
     }
@@ -171,7 +171,7 @@ export function GalleryPlay({ challenge }: GalleryPlayProps) {
           )}
           <span className="font-mono">
             <span className="text-neon font-bold">{earnedSoFar}</span>
-            <span className="text-text-faint"> / {totalPossible} pt</span>
+            <span className="text-text-faint"> / {totalPossible} ptn</span>
           </span>
         </div>
       </div>
@@ -207,13 +207,13 @@ export function GalleryPlay({ challenge }: GalleryPlayProps) {
               {isFound && (
                 <div className="absolute inset-0 bg-gradient-to-t from-void/95 via-void/40 to-transparent flex flex-col justify-end p-2">
                   <p className="text-sm font-bold text-lime truncate">{item.answer}</p>
-                  <p className="text-xs font-mono text-lime/80">+{award} pt</p>
+                  <p className="text-xs font-mono text-lime/80">+{award} ptn</p>
                 </div>
               )}
               {/* Unfound badge */}
               {!isFound && (
                 <div className="absolute top-1 right-1 px-1.5 py-0.5 rounded bg-void/80 text-[10px] font-mono text-amber">
-                  {scoringMode === 'placement' ? `tot ${maxPerItemForMode(i)}` : `${maxPerItemForMode(i)}`} pt
+                  {scoringMode === 'placement' ? `tot ${maxPerItemForMode(i)}` : `${maxPerItemForMode(i)}`} ptn
                 </div>
               )}
             </div>

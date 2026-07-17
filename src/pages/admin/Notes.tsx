@@ -19,7 +19,7 @@ export function Notes() {
 
   return (
     <div className="animate-fade-in">
-      <PageHeader title="Notes" subtitle="Ideas, sketches, scratch pad" />
+      <PageHeader title="Notities" subtitle="Ideeën, schetsen, kladblok" />
 
       <div className="flex justify-end mb-4">
         <Button className="gap-2" onClick={handleNew} disabled={creating}>
@@ -121,7 +121,7 @@ function NoteCard({ note, onUpdate, onDelete }: NoteCardProps) {
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Title (optional)"
+          placeholder="Titel (optioneel)"
           className="flex-1 bg-transparent text-base font-semibold text-text placeholder:text-text-faint outline-none"
         />
         <div className="flex items-center gap-2 shrink-0 pt-0.5">
@@ -139,7 +139,7 @@ function NoteCard({ note, onUpdate, onDelete }: NoteCardProps) {
                 ? 'text-magenta bg-magenta/10'
                 : 'text-text-faint hover:text-magenta',
             )}
-            title={confirmDelete ? 'Click again to confirm' : 'Delete note'}
+            title={confirmDelete ? 'Klik nogmaals om te bevestigen' : 'Notitie verwijderen'}
           >
             <Trash2 size={14} />
           </button>
@@ -148,7 +148,7 @@ function NoteCard({ note, onUpdate, onDelete }: NoteCardProps) {
       <textarea
         value={body}
         onChange={(e) => setBody(e.target.value)}
-        placeholder="Write down your idea..."
+        placeholder="Schrijf je idee op..."
         rows={Math.max(3, body.split('\n').length)}
         className="w-full bg-transparent text-sm text-text-muted placeholder:text-text-faint outline-none resize-none leading-relaxed"
       />

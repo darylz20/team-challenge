@@ -1,15 +1,16 @@
 import { ListChecks, Type, DoorOpen, Grid3x3, Images, Brain, Camera } from 'lucide-react'
 import { cn } from '../../lib/utils'
+import { CHALLENGE_TYPE_LABELS } from '../../types'
 import type { ChallengeType } from '../../types'
 
-const types: { value: ChallengeType; label: string; icon: typeof ListChecks; description: string }[] = [
-  { value: 'multiple_choice', label: 'Multiple Choice', icon: ListChecks, description: 'Pick from options' },
-  { value: 'free_text', label: 'Free Text', icon: Type, description: 'Type an answer' },
-  { value: 'open_door', label: 'Open Deur', icon: DoorOpen, description: 'We zoeken 4 antwoorden' },
-  { value: 'puzzle', label: 'Puzzel', icon: Grid3x3, description: '12 termen, 3 thema\'s raden' },
-  { value: 'gallery', label: 'Galerij', icon: Images, description: 'Antwoord per foto onder thema' },
-  { value: 'collective_memory', label: 'Collectief Geheugen', icon: Brain, description: 'Beeldfragment + 5 trefwoorden' },
-  { value: 'photo_upload', label: 'Foto Upload', icon: Camera, description: 'Team uploadt 1 foto, jij geeft punten' },
+const types: { value: ChallengeType; icon: typeof ListChecks; description: string }[] = [
+  { value: 'multiple_choice', icon: ListChecks, description: 'Kies uit opties' },
+  { value: 'free_text', icon: Type, description: 'Typ een antwoord' },
+  { value: 'open_door', icon: DoorOpen, description: 'We zoeken 4 antwoorden' },
+  { value: 'puzzle', icon: Grid3x3, description: '12 termen, 3 thema\'s raden' },
+  { value: 'gallery', icon: Images, description: 'Antwoord per foto onder thema' },
+  { value: 'collective_memory', icon: Brain, description: 'Beeldfragment + 5 trefwoorden' },
+  { value: 'photo_upload', icon: Camera, description: 'Team uploadt 1 foto, jij geeft punten' },
 ]
 
 interface ChallengeTypeSelectorProps {
@@ -20,7 +21,7 @@ interface ChallengeTypeSelectorProps {
 export function ChallengeTypeSelector({ value, onChange }: ChallengeTypeSelectorProps) {
   return (
     <div className="grid grid-cols-2 gap-3">
-      {types.map(({ value: type, label, icon: Icon, description }) => (
+      {types.map(({ value: type, icon: Icon, description }) => (
         <button
           key={type}
           type="button"
@@ -34,7 +35,9 @@ export function ChallengeTypeSelector({ value, onChange }: ChallengeTypeSelector
         >
           <Icon size={24} className={value === type ? 'text-neon' : 'text-text-muted'} />
           <div>
-            <p className={cn('text-sm font-medium', value === type ? 'text-neon' : 'text-text')}>{label}</p>
+            <p className={cn('text-sm font-medium', value === type ? 'text-neon' : 'text-text')}>
+              {CHALLENGE_TYPE_LABELS[type]}
+            </p>
             <p className="text-xs text-text-muted">{description}</p>
           </div>
         </button>

@@ -51,7 +51,7 @@ export function MediaUploader({ gameId, mediaUrl, onUploaded }: MediaUploaderPro
           onFile={handleFile}
           preview={mediaUrl}
           onClear={handleClear}
-          label="Media Attachment (optional)"
+          label="Mediabijlage (optioneel)"
         />
       )}
     </div>

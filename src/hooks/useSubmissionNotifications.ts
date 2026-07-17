@@ -50,14 +50,14 @@ export function useSubmissionNotifications(
             supabase.from('challenges').select('title').eq('id', sub.challenge_id).single(),
           ])
 
-          const teamName = team?.name ?? 'Another team'
-          const challengeTitle = challenge?.title ?? 'a challenge'
+          const teamName = team?.name ?? 'Een ander team'
+          const challengeTitle = challenge?.title ?? 'een challenge'
           const points = sub.points_awarded ?? 0
 
-          toast(`${teamName} solved "${challengeTitle}"`, {
-            description: `+${points} pts · Tap to see the leaderboard`,
+          toast(`${teamName} loste "${challengeTitle}" op`, {
+            description: `+${points} ptn · Tik om het leaderboard te zien`,
             action: {
-              label: 'View',
+              label: 'Bekijk',
               onClick: () => navigate('/leaderboard'),
             },
             onDismiss: () => {},

@@ -31,7 +31,7 @@ export function ResetChallengeModal({ open, onClose, teamId, teamName, completed
       options.push({
         id: c.challenge_id,
         title: c.challenge_title,
-        note: `Solved · ${c.points} pt`,
+        note: `Solved · ${c.points} ptn`,
       })
     }
   }
@@ -58,7 +58,7 @@ export function ResetChallengeModal({ open, onClose, teamId, teamName, completed
     })
     setSaving(false)
     if (error || data?.error) {
-      toast.error('Reset failed', { description: error?.message ?? data?.error })
+      toast.error('Reset mislukt', { description: error?.message ?? data?.error })
       return
     }
     const title = options.find((o) => o.id === challengeId)?.title ?? 'Challenge'

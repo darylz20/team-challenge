@@ -74,9 +74,9 @@ export function PuzzlePlay({ challenge }: PuzzlePlayProps) {
         if (res && !res.error) {
           setFinalResult({ points: res.points_awarded, isCorrect: res.is_correct })
           if (allSolved) {
-            toast.success('Alle thema\'s gevonden!', { description: `Eindscore: ${res.points_awarded} pt` })
+            toast.success('Alle thema\'s gevonden!', { description: `Eindscore: ${res.points_awarded} ptn` })
           } else {
-            toast(`Geen pogingen meer — ${res.points_awarded} pt verdiend`, { duration: 4000 })
+            toast(`Geen pogingen meer — ${res.points_awarded} ptn verdiend`, { duration: 4000 })
           }
         }
       })
@@ -102,7 +102,7 @@ export function PuzzlePlay({ challenge }: PuzzlePlayProps) {
     setSubmitting(false)
 
     if (result.error) {
-      toast.error('Submit mislukt', { description: result.error })
+      toast.error('Insturen mislukt', { description: result.error })
       return
     }
 
@@ -115,7 +115,7 @@ export function PuzzlePlay({ challenge }: PuzzlePlayProps) {
         points: result.points ?? 0,
       })
       const placeLabel = result.place ? ` (${result.place}e team)` : ''
-      toast.success(`+${result.points} pt${placeLabel}`, { description: theme?.name })
+      toast.success(`+${result.points} ptn${placeLabel}`, { description: theme?.name })
     } else if (result.already_solved) {
       setFeedback({ type: 'noop', reason: 'already_solved' })
     } else if (result.already_locked) {
@@ -185,7 +185,7 @@ export function PuzzlePlay({ challenge }: PuzzlePlayProps) {
         </span>
         <span className="font-mono">
           <span className="text-neon font-bold">{earnedSoFar}</span>
-          <span className="text-text-faint"> / {totalPossible} pt</span>
+          <span className="text-text-faint"> / {totalPossible} ptn</span>
         </span>
       </div>
 
@@ -227,12 +227,12 @@ export function PuzzlePlay({ challenge }: PuzzlePlayProps) {
                 isSolved ? themeTextColors[i] : 'text-text-faint',
               )}>
                 {isSolved
-                  ? `+${award} pt`
+                  ? `+${award} ptn`
                   : isLocked
-                    ? '0 pt'
+                    ? '0 ptn'
                     : scoringMode === 'placement'
-                      ? `tot ${maxPerThemeForMode(i)} pt`
-                      : `${maxPerThemeForMode(i)} pt`}
+                      ? `tot ${maxPerThemeForMode(i)} ptn`
+                      : `${maxPerThemeForMode(i)} ptn`}
               </p>
               {!isSolved && !isLocked && (
                 <p className="text-[10px] text-text-faint mt-0.5">{remaining} pog.</p>

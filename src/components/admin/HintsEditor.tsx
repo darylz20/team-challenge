@@ -34,7 +34,7 @@ export function HintsEditor({ hints, onChange }: HintsEditorProps) {
     <div className="space-y-3">
       {hints.items.length === 0 ? (
         <p className="text-sm text-text-faint">
-          No hints configured. Players won't be able to request help.
+          Geen hints ingesteld. Spelers kunnen dan geen hulp opvragen.
         </p>
       ) : (
         hints.items.map((item, i) => (
@@ -52,11 +52,11 @@ export function HintsEditor({ hints, onChange }: HintsEditorProps) {
             <Textarea
               value={item.text}
               onChange={(e) => updateHintText(i, e.target.value)}
-              placeholder="A clue to help players..."
+              placeholder="Een aanwijzing om spelers te helpen..."
               rows={2}
             />
             <Input
-              label="Point Deduction"
+              label="Puntenaftrek"
               type="number"
               value={item.deduction}
               onChange={(e) => updateHintDeduction(i, parseInt(e.target.value) || 0)}
@@ -66,7 +66,7 @@ export function HintsEditor({ hints, onChange }: HintsEditorProps) {
         ))
       )}
       <Button type="button" variant="ghost" size="sm" className="gap-1" onClick={addHint}>
-        <Plus size={14} /> Add Hint
+        <Plus size={14} /> Hint toevoegen
       </Button>
     </div>
   )

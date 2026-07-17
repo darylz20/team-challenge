@@ -48,7 +48,7 @@ export function LiveMonitor() {
     setEndingGame(false)
     setEndConfirmOpen(false)
     if (error || data?.error) {
-      toast.error('End game failed', { description: error?.message ?? data?.error })
+      toast.error('Spel beëindigen mislukt', { description: error?.message ?? data?.error })
       return
     }
     toast.success(`Game beëindigd`, {
@@ -174,7 +174,7 @@ export function LiveMonitor() {
                   <p className="text-[10px] mt-1">
                     {r.reviewed ? (
                       <span className={r.points_awarded > 0 ? 'text-lime' : 'text-text-faint'}>
-                        {r.points_awarded} pt toegekend
+                        {r.points_awarded} ptn toegekend
                       </span>
                     ) : (
                       <span className="text-amber">Wacht op beoordeling</span>
@@ -219,7 +219,7 @@ export function LiveMonitor() {
       </div>
 
       {/* End-game confirm */}
-      <Modal open={endConfirmOpen} onClose={() => !endingGame && setEndConfirmOpen(false)} title="End game now?">
+      <Modal open={endConfirmOpen} onClose={() => !endingGame && setEndConfirmOpen(false)} title="Spel nu beëindigen?">
         <div className="space-y-4">
           <div className="flex items-start gap-2 p-3 rounded-lg bg-magenta/5 border border-magenta/30">
             <AlertTriangle size={16} className="text-magenta shrink-0 mt-0.5" />
@@ -319,7 +319,7 @@ function TeamPanel({
         </div>
         <div className="text-right shrink-0">
           <p className="font-display font-bold text-base">{total_points}</p>
-          <p className="text-xs text-text-faint">pts</p>
+          <p className="text-xs text-text-faint">ptn</p>
         </div>
       </div>
 
