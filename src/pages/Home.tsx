@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { LogOut, ChevronRight, CheckCircle2, Lock, Gift, Hourglass } from 'lucide-react'
+import { LogOut, ChevronRight, CheckCircle2, Lock, Gift, Hourglass, Trophy } from 'lucide-react'
 import { Card } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
 import { ThemeToggle } from '../components/ui/ThemeToggle'
@@ -8,6 +8,7 @@ import { useChallenges } from '../hooks/useChallenges'
 import { useTeamSubmissions, useChallengeSolvers } from '../hooks/useSubmissions'
 import { useSections } from '../hooks/useSections'
 import { useGameProgress } from '../hooks/useGameProgress'
+import { useLeaderboard } from '../hooks/useLeaderboard'
 import { cn, livePointsFromState, isPlacementBased } from '../lib/utils'
 import { CHALLENGE_TYPE_LABELS } from '../types'
 import { placementRemainingForTeam } from '../lib/placement'
@@ -23,6 +24,7 @@ export function Home() {
   const { sections } = useSections(teamSession?.game.id)
   const { progress } = useGameProgress(teamSession?.game.id)
   const { solversByChallenge } = useChallengeSolvers(teamSession?.game.id)
+  const { entries: leaderboardEntries } = useLeaderboard(teamSession?.game.id)
 
   if (!teamSession) return null
 
@@ -95,6 +97,14 @@ export function Home() {
   const bonuses = submissions.filter((s) => !s.challenge_id)
   totalPoints += bonuses.reduce((sum, b) => sum + b.points_awarded, 0)
 
+  // Max points this game can yield, for the progress bar
+  const maxPoints = challenges.reduce((sum, c) => sum + c.points, 0)
+
+  // Leaderboard position among all teams
+  const myRankIndex = leaderboardEntries.findIndex((e) => e.team_id === myTeamId)
+  const myRank = myRankIndex === -1 ? null : myRankIndex + 1
+  const totalTeams = leaderboardEntries.length
+
   // Group challenges by section
   const bySection = new Map<string, typeof challenges>()
   for (const c of challenges) {
@@ -133,15 +143,42 @@ export function Home() {
         </div>
       </div>
 
-      {/* Game title + live total */}
-      <div className="mb-6">
-        <h1 className="font-display text-2xl font-black text-neon-ink tracking-wider">
-          {teamSession.game.title}
-        </h1>
-        <p className="text-sm text-text-muted mt-1">
-          <span className="font-bold text-neon-ink">{totalPoints}</span> punten
-          <span className="text-text-faint"> · {solvedCount}/{challenges.length} opgelost</span>
-        </p>
+      {/* Game title */}
+      <h1 className="font-display text-2xl font-black text-neon-ink tracking-wider mb-4">
+        {teamSession.game.title}
+      </h1>
+
+      {/* Team stats: points, leaderboard position, progress */}
+      <div className="mb-6 space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <Card className="border border-surface-overlay">
+            <p className="text-[10px] font-medium text-neon-ink uppercase tracking-wider">Jouw punten</p>
+            <p className="mt-1 font-display text-2xl font-black text-neon-ink">
+              {totalPoints}
+              <span className="ml-1 font-sans text-sm font-normal text-text-muted">pt</span>
+            </p>
+          </Card>
+          <Card className="border border-surface-overlay">
+            <p className="text-[10px] font-medium text-text-muted uppercase tracking-wider">Positie</p>
+            <p className="mt-1 flex items-center gap-1.5 font-display text-2xl font-black text-text">
+              <Trophy size={20} className="text-amber-ink shrink-0" />
+              {myRank ? `${myRank}e` : '—'}
+              <span className="font-sans text-sm font-normal text-text-muted">/ {totalTeams || '—'}</span>
+            </p>
+          </Card>
+        </div>
+        <div>
+          <div className="flex items-center justify-between text-sm text-text-muted mb-1.5">
+            <span>{solvedCount}/{challenges.length} opgelost</span>
+            <span className="text-neon-ink">{totalPoints}/{maxPoints} pt</span>
+          </div>
+          <div className="h-1.5 bg-surface-overlay rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full bg-neon transition-all duration-700"
+              style={{ width: `${maxPoints > 0 ? Math.min(100, (totalPoints / maxPoints) * 100) : 0}%` }}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Sections + challenges */}
