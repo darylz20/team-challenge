@@ -31,7 +31,23 @@ function MediaItemView({ item, size }: { item: MediaItem; size: MediaSize }) {
   return null
 }
 
-// ── Carousel with dot indicators ──
+// ── Carousel with chevron navigation ──
+
+function ChevronIcon({ direction }: { direction: 'left' | 'right' }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="w-6 h-6"
+    >
+      <path d={direction === 'left' ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6'} />
+    </svg>
+  )
+}
 
 function CarouselLayout({ items, size }: { items: MediaItem[]; size: MediaSize }) {
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -58,7 +74,7 @@ function CarouselLayout({ items, size }: { items: MediaItem[]; size: MediaSize }
   }
 
   return (
-    <div>
+    <div className="relative">
       <div
         ref={scrollRef}
         className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide rounded-lg"
@@ -70,23 +86,25 @@ function CarouselLayout({ items, size }: { items: MediaItem[]; size: MediaSize }
           </div>
         ))}
       </div>
-      {items.length > 1 && (
-        <div className="flex items-center justify-center gap-1.5 mt-2">
-          {items.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => scrollTo(i)}
-              className={cn(
-                'w-2 h-2 rounded-full transition-all',
-                i === activeIndex
-                  ? 'bg-neon w-4'
-                  : 'bg-surface-overlay hover:bg-text-faint',
-              )}
-              aria-label={`Go to slide ${i + 1}`}
-            />
-          ))}
-        </div>
+      {activeIndex > 0 && (
+        <button
+          type="button"
+          onClick={() => scrollTo(activeIndex - 1)}
+          className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-black/25 text-white/70 backdrop-blur-sm transition-colors hover:bg-black/40 hover:text-white"
+          aria-label="Previous image"
+        >
+          <ChevronIcon direction="left" />
+        </button>
+      )}
+      {activeIndex < items.length - 1 && (
+        <button
+          type="button"
+          onClick={() => scrollTo(activeIndex + 1)}
+          className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full bg-black/25 text-white/70 backdrop-blur-sm transition-colors hover:bg-black/40 hover:text-white"
+          aria-label="Next image"
+        >
+          <ChevronIcon direction="right" />
+        </button>
       )}
     </div>
   )
