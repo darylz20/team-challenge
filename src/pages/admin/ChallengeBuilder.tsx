@@ -173,7 +173,7 @@ export function ChallengeBuilder() {
       return
     }
 
-    navigate(`/admin/games/${gameId}`)
+    navigate(`/admin/games/${gameId}?tab=2`)
   }
 
   if (isEditing && challengeLoading) {
@@ -187,7 +187,7 @@ export function ChallengeBuilder() {
   return (
     <div className="animate-fade-in max-w-2xl">
       <button
-        onClick={() => navigate(`/admin/games/${gameId}`)}
+        onClick={() => navigate(`/admin/games/${gameId}?tab=2`)}
         className="flex items-center gap-1 text-sm text-text-muted hover:text-neon transition-colors mb-4"
       >
         <ArrowLeft size={16} /> Terug naar spel

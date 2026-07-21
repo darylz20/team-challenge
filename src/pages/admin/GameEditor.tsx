@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Copy, Check, Plus, Trash2, GripVertical, RefreshCw, X, ChevronUp, ChevronDown, ImagePlus, Loader2, Edit, Lock, Unlock, Activity, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '../../lib/utils'
@@ -46,6 +46,8 @@ export function GameEditor() {
   const { challenges, deleteChallenge, reorderChallenges } = useChallenges(id)
   const { teams, createTeam, deleteTeam, regeneratePasscode, updateMembers } = useTeams(id)
   const { sections, createSection, updateSection, deleteSection } = useSections(id)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeTab = Number(searchParams.get('tab') ?? 0)
 
   if (loading || !game) {
     return (
@@ -70,7 +72,15 @@ export function GameEditor() {
         <ArrowLeft size={16} /> Back to Games
       </button>
       <PageHeader title={game.title} subtitle={`Code: ${game.code}`} />
-      <Tabs tabs={tabs} />
+      <Tabs
+        tabs={tabs}
+        active={activeTab}
+        onChange={(i) => setSearchParams((prev) => {
+          const next = new URLSearchParams(prev)
+          next.set('tab', String(i))
+          return next
+        }, { replace: true })}
+      />
     </div>
   )
 }

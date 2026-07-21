@@ -9,10 +9,19 @@ interface Tab {
 interface TabsProps {
   tabs: Tab[]
   defaultTab?: number
+  // Controlled mode: lets a parent persist the active tab (e.g. in the URL)
+  // so it survives navigating away and back, instead of resetting on remount.
+  active?: number
+  onChange?: (index: number) => void
 }
 
-export function Tabs({ tabs, defaultTab = 0 }: TabsProps) {
-  const [active, setActive] = useState(defaultTab)
+export function Tabs({ tabs, defaultTab = 0, active: activeProp, onChange }: TabsProps) {
+  const [activeState, setActiveState] = useState(defaultTab)
+  const active = activeProp ?? activeState
+
+  function select(i: number) {
+    onChange ? onChange(i) : setActiveState(i)
+  }
 
   return (
     <div>
@@ -20,7 +29,7 @@ export function Tabs({ tabs, defaultTab = 0 }: TabsProps) {
         {tabs.map((tab, i) => (
           <button
             key={tab.label}
-            onClick={() => setActive(i)}
+            onClick={() => select(i)}
             className={cn(
               'px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors border-b-2 -mb-px',
               active === i
