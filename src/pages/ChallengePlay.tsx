@@ -17,6 +17,7 @@ import { PhotoUploadPlay } from '../components/play/PhotoUploadPlay'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
+import { Modal } from '../components/ui/Modal'
 import { PlacementBadge } from '../components/shared/PlacementBadge'
 import { cn, isPlacementBased } from '../lib/utils'
 import { DEFAULT_DISPLAY, TYPE_CAPABILITIES } from '../types'
@@ -217,6 +218,7 @@ export function ChallengePlay() {
   const [selectedOptions, setSelectedOptions] = useState<number[]>([])
   const [freeText, setFreeText] = useState('')
   const [revealedHints, setRevealedHints] = useState(0)
+  const [hintConfirmOpen, setHintConfirmOpen] = useState(false)
   const [submitResult, setSubmitResult] = useState<{ correct: boolean; points: number } | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
@@ -510,7 +512,7 @@ export function ChallengePlay() {
           <div className="space-y-2">
             <button
               type="button"
-              onClick={() => setRevealedHints((prev) => Math.min(prev + 1, hints.items.length))}
+              onClick={() => setHintConfirmOpen(true)}
               disabled={revealedHints >= hints.items.length}
               className={cn(
                 'flex items-center gap-2 text-sm transition-colors',
@@ -566,6 +568,33 @@ export function ChallengePlay() {
           </Button>
         )}
       </div>
+
+      {/* Hint confirmation */}
+      <Modal open={hintConfirmOpen} onClose={() => setHintConfirmOpen(false)} title="Weet je het zeker?">
+        <div className="space-y-4">
+          <p className="text-sm text-text-muted">
+            Deze hint kost je{' '}
+            <span className="text-amber-ink font-semibold">
+              −{hints.items[revealedHints]?.deduction ?? 0} punten
+            </span>
+            . Wil je hem toch tonen?
+          </p>
+          <div className="flex gap-2">
+            <Button
+              className="flex-1"
+              onClick={() => {
+                setRevealedHints((prev) => Math.min(prev + 1, hints.items.length))
+                setHintConfirmOpen(false)
+              }}
+            >
+              Ja, toon hint
+            </Button>
+            <Button variant="ghost" onClick={() => setHintConfirmOpen(false)}>
+              Annuleren
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }
