@@ -33,7 +33,7 @@ export function Tabs({ tabs, defaultTab = 0, active: activeProp, onChange }: Tab
             className={cn(
               'px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors border-b-2 -mb-px',
               active === i
-                ? 'text-neon border-neon'
+                ? 'text-neon-ink border-neon'
                 : 'text-text-muted border-transparent hover:text-text hover:border-surface-overlay',
             )}
           >

@@ -35,7 +35,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       aria-label={light ? 'Schakel naar donkere modus' : 'Schakel naar lichte modus'}
       title={light ? 'Donkere modus' : 'Lichte modus'}
       className={cn(
-        'p-2 rounded-lg text-text-muted hover:text-neon hover:bg-surface-overlay/50 transition-colors',
+        'p-2 rounded-lg text-text-muted hover:text-neon-ink hover:bg-surface-overlay/50 transition-colors',
         className,
       )}
     >

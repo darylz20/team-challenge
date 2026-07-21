@@ -40,19 +40,19 @@ export function FileUpload({ accept, onFile, preview, onClear, label }: FileUplo
           )}
           {isAudio && (
             <div className="flex items-center gap-3 py-2">
-              <FileAudio size={24} className="text-neon" />
+              <FileAudio size={24} className="text-neon-ink" />
               <span className="text-sm text-text-muted truncate">{preview.split('/').pop()}</span>
             </div>
           )}
           {isVideo && (
             <div className="flex items-center gap-3 py-2">
-              <FileVideo size={24} className="text-neon" />
+              <FileVideo size={24} className="text-neon-ink" />
               <span className="text-sm text-text-muted truncate">{preview.split('/').pop()}</span>
             </div>
           )}
           {!isImage && !isAudio && !isVideo && (
             <div className="flex items-center gap-3 py-2">
-              <FileImage size={24} className="text-neon" />
+              <FileImage size={24} className="text-neon-ink" />
               <span className="text-sm text-text-muted truncate">File uploaded</span>
             </div>
           )}

@@ -60,7 +60,7 @@ export function Login() {
     <div className="min-h-dvh bg-abyss flex items-center justify-center px-4">
       <div className="w-full max-w-sm animate-fade-in">
         <div className="text-center mb-8">
-          <h1 className="font-display text-3xl font-black text-neon tracking-wider">
+          <h1 className="font-display text-3xl font-black text-neon-ink tracking-wider">
             TEAM
             <br />
             CHALLENGE
@@ -76,7 +76,7 @@ export function Login() {
             className={cn(
               'flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all',
               mode === 'player'
-                ? 'bg-neon/15 text-neon border border-neon/40'
+                ? 'bg-neon/15 text-neon-ink border border-neon/40'
                 : 'bg-surface-overlay/50 text-text-muted border border-surface-overlay hover:border-text-faint',
             )}
           >
@@ -89,7 +89,7 @@ export function Login() {
             className={cn(
               'flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all',
               mode === 'admin'
-                ? 'bg-neon/15 text-neon border border-neon/40'
+                ? 'bg-neon/15 text-neon-ink border border-neon/40'
                 : 'bg-surface-overlay/50 text-text-muted border border-surface-overlay hover:border-text-faint',
             )}
           >
@@ -121,7 +121,7 @@ export function Login() {
                 className="font-mono tracking-widest"
               />
 
-              {error && <p className="text-sm text-magenta">{error}</p>}
+              {error && <p className="text-sm text-magenta-ink">{error}</p>}
 
               <Button type="submit" disabled={submitting} className="w-full gap-2 mt-2">
                 <LogIn size={16} />
@@ -151,7 +151,7 @@ export function Login() {
                 autoComplete="current-password"
               />
 
-              {error && <p className="text-sm text-magenta">{error}</p>}
+              {error && <p className="text-sm text-magenta-ink">{error}</p>}
 
               <Button type="submit" disabled={submitting} className="w-full gap-2 mt-2">
                 <LogIn size={16} />

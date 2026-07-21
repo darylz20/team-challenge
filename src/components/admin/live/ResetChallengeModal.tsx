@@ -93,8 +93,8 @@ export function ResetChallengeModal({ open, onClose, teamId, teamName, completed
           </div>
 
           <div className="flex items-start gap-2 p-3 rounded-lg bg-magenta/5 border border-magenta/30">
-            <AlertTriangle size={16} className="text-magenta shrink-0 mt-0.5" />
-            <p className="text-xs text-magenta">
+            <AlertTriangle size={16} className="text-magenta-ink shrink-0 mt-0.5" />
+            <p className="text-xs text-magenta-ink">
               Verwijdert <strong>alle</strong> submissions en progress voor deze challenge voor dit team. Het team
               kan de challenge daarna opnieuw beginnen alsof ze er nooit aan begonnen waren. Punten gaan verloren.
             </p>

@@ -118,7 +118,7 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 size={24} className="text-neon animate-spin" />
+        <Loader2 size={24} className="text-neon-ink animate-spin" />
       </div>
     )
   }
@@ -126,7 +126,7 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
   if (error) {
     return (
       <Card className="border border-magenta/30 bg-magenta/5 text-center py-6">
-        <p className="text-sm text-magenta">{error}</p>
+        <p className="text-sm text-magenta-ink">{error}</p>
       </Card>
     )
   }
@@ -154,12 +154,12 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
         <div className="flex items-center gap-3">
           {!attempts.unlimited && (
             <span className="text-xs text-text-muted">
-              <span className={cn('font-mono', attemptsRemaining <= 1 && 'text-magenta')}>{attemptsRemaining}</span>
+              <span className={cn('font-mono', attemptsRemaining <= 1 && 'text-magenta-ink')}>{attemptsRemaining}</span>
               <span className="text-text-faint"> pog.</span>
             </span>
           )}
           <span className="font-mono">
-            <span className="text-neon font-bold">{earnedSoFar}</span>
+            <span className="text-neon-ink font-bold">{earnedSoFar}</span>
             <span className="text-text-faint"> / {totalPossible} ptn</span>
           </span>
         </div>
@@ -186,7 +186,7 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
               )}
             >
               {isFound ? (
-                <DoorOpen size={18} className="text-lime shrink-0" />
+                <DoorOpen size={18} className="text-lime-ink shrink-0" />
               ) : (
                 <DoorClosed size={18} className="text-text-faint shrink-0" />
               )}
@@ -198,7 +198,7 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
                 )}
                 <p className={cn(
                   'text-xs font-mono',
-                  isFound ? 'text-lime' : 'text-text-faint',
+                  isFound ? 'text-lime-ink' : 'text-text-faint',
                 )}>
                   {isFound
                     ? `+${awarded} ptn`
@@ -221,9 +221,9 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
             : 'border border-magenta/30 bg-magenta/5',
         )}>
           {found.length > 0 ? (
-            <CheckCircle2 size={22} className="text-lime shrink-0" />
+            <CheckCircle2 size={22} className="text-lime-ink shrink-0" />
           ) : (
-            <XCircle size={22} className="text-magenta shrink-0" />
+            <XCircle size={22} className="text-magenta-ink shrink-0" />
           )}
           <div className="flex-1">
             <p className="font-semibold text-sm">
@@ -271,7 +271,7 @@ export function OpenDoorPlay({ challenge }: OpenDoorPlayProps) {
             </Button>
           </div>
           {feedback?.type === 'miss' && (
-            <p className="text-xs text-magenta">
+            <p className="text-xs text-magenta-ink">
               Geen match{!attempts.unlimited ? ` — ${attemptsRemaining} pog. over` : ' — probeer een ander antwoord'}
             </p>
           )}

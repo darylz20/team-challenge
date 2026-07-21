@@ -44,7 +44,7 @@ export function HintsEditor({ hints, onChange }: HintsEditorProps) {
               <button
                 type="button"
                 onClick={() => removeHint(i)}
-                className="p-1.5 text-text-faint hover:text-magenta transition-colors"
+                className="p-1.5 text-text-faint hover:text-magenta-ink transition-colors"
               >
                 <Trash2 size={14} />
               </button>

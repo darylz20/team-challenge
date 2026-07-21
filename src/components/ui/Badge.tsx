@@ -8,10 +8,10 @@ interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 const variantStyles: Record<BadgeVariant, string> = {
-  neon: 'bg-neon/15 text-neon border-neon/30',
-  magenta: 'bg-magenta/15 text-magenta border-magenta/30',
-  lime: 'bg-lime/15 text-lime border-lime/30',
-  amber: 'bg-amber/15 text-amber border-amber/30',
+  neon: 'bg-neon/15 text-neon-ink border-neon/30',
+  magenta: 'bg-magenta/15 text-magenta-ink border-magenta/30',
+  lime: 'bg-lime/15 text-lime-ink border-lime/30',
+  amber: 'bg-amber/15 text-amber-ink border-amber/30',
   muted: 'bg-surface-overlay text-text-muted border-surface-overlay',
 }
 

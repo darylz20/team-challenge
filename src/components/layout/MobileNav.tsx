@@ -19,7 +19,7 @@ export function MobileNav() {
               cn(
                 'flex flex-col items-center gap-1 px-3 py-2 text-xs transition-colors',
                 isActive
-                  ? 'text-neon'
+                  ? 'text-neon-ink'
                   : 'text-text-faint hover:text-text-muted',
               )
             }

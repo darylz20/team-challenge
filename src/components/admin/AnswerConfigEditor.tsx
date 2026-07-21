@@ -63,7 +63,7 @@ function PhotoUploadEditor() {
           'Pas dan ziet het team de punten en telt het mee in het klassement.',
         ].map((step, i) => (
           <li key={i} className="flex gap-2.5">
-            <span className="font-display text-neon font-bold shrink-0">{i + 1}</span>
+            <span className="font-display text-neon-ink font-bold shrink-0">{i + 1}</span>
             <span>{step}</span>
           </li>
         ))}
@@ -147,7 +147,7 @@ function MultipleChoiceEditor({ config, onChange, gameId }: { config: MultipleCh
             <button
               type="button"
               onClick={() => removeOption(i)}
-              className="p-1.5 text-text-faint hover:text-magenta transition-colors"
+              className="p-1.5 text-text-faint hover:text-magenta-ink transition-colors"
               disabled={config.options.length <= 2}
             >
               <Trash2 size={14} />
@@ -160,7 +160,7 @@ function MultipleChoiceEditor({ config, onChange, gameId }: { config: MultipleCh
               <button
                 type="button"
                 onClick={() => clearOptionImage(i)}
-                className="absolute -top-1 -right-1 p-0.5 rounded-full bg-surface text-text-muted hover:text-magenta transition-colors"
+                className="absolute -top-1 -right-1 p-0.5 rounded-full bg-surface text-text-muted hover:text-magenta-ink transition-colors"
               >
                 <X size={12} />
               </button>
@@ -281,7 +281,7 @@ function OpenDoorEditor({ config, onChange }: { config: OpenDoorConfig; onChange
             className={cn(
               'flex-1 px-3 py-2 rounded-lg text-sm font-medium border-2 transition-all',
               scoringMode === mode
-                ? 'border-neon bg-neon/10 text-neon'
+                ? 'border-neon bg-neon/10 text-neon-ink'
                 : 'border-surface-overlay bg-surface-raised text-text-muted hover:border-text-faint',
             )}
           >
@@ -299,7 +299,7 @@ function OpenDoorEditor({ config, onChange }: { config: OpenDoorConfig; onChange
       <div className="space-y-2">
         {answers.map((answer, i) => (
           <div key={i} className="flex gap-2 items-start p-2.5 rounded-lg bg-surface-overlay/30">
-            <span className="font-display text-neon font-bold w-6 text-center pt-2.5">{i + 1}</span>
+            <span className="font-display text-neon-ink font-bold w-6 text-center pt-2.5">{i + 1}</span>
             <div className="flex-1 min-w-0 space-y-1.5">
               <div className="flex gap-2 items-start">
                 <Input
@@ -358,7 +358,7 @@ function OpenDoorEditor({ config, onChange }: { config: OpenDoorConfig; onChange
               <button
                 type="button"
                 onClick={() => removePlace(i)}
-                className="p-1.5 text-text-faint hover:text-magenta transition-colors"
+                className="p-1.5 text-text-faint hover:text-magenta-ink transition-colors"
                 disabled={placements.length <= 1}
               >
                 <Trash2 size={14} />
@@ -368,7 +368,7 @@ function OpenDoorEditor({ config, onChange }: { config: OpenDoorConfig; onChange
           <button
             type="button"
             onClick={addPlace}
-            className="flex items-center gap-1 text-xs text-neon hover:text-neon-dim transition-colors mt-1"
+            className="flex items-center gap-1 text-xs text-neon-ink hover:text-neon-ink-dim transition-colors mt-1"
           >
             <Plus size={12} /> Plaats toevoegen
           </button>
@@ -532,12 +532,12 @@ function PuzzleEditor({ config, onChange }: { config: PuzzleConfig; onChange: (c
           })}
         </div>
         {unassigned.length > 0 && (
-          <p className="text-xs text-amber">
+          <p className="text-xs text-amber-ink">
             ⚠ {unassigned.length} term{unassigned.length !== 1 ? 'en' : ''} niet aan een thema toegewezen
           </p>
         )}
         {overlapping.length > 0 && (
-          <p className="text-xs text-magenta">
+          <p className="text-xs text-magenta-ink">
             ⚠ Term{overlapping.length !== 1 ? 'en' : ''} {overlapping.map((i) => i + 1).join(', ')} zit in meerdere thema's
           </p>
         )}
@@ -555,7 +555,7 @@ function PuzzleEditor({ config, onChange }: { config: PuzzleConfig; onChange: (c
               className={cn(
                 'flex-1 px-3 py-2 rounded-lg text-sm font-medium border-2 transition-all',
                 scoringMode === mode
-                  ? 'border-neon bg-neon/10 text-neon'
+                  ? 'border-neon bg-neon/10 text-neon-ink'
                   : 'border-surface-overlay bg-surface-raised text-text-muted hover:border-text-faint',
               )}
             >
@@ -625,7 +625,7 @@ function PuzzleEditor({ config, onChange }: { config: PuzzleConfig; onChange: (c
                       className={cn(
                         'px-2 py-1 rounded text-xs text-left transition-all border',
                         inThis
-                          ? 'border-neon bg-neon/15 text-neon'
+                          ? 'border-neon bg-neon/15 text-neon-ink'
                           : inOther
                             ? 'border-surface-overlay bg-surface-overlay/20 text-text-faint'
                             : 'border-surface-overlay bg-surface-raised text-text-muted hover:border-text-faint',
@@ -642,7 +642,7 @@ function PuzzleEditor({ config, onChange }: { config: PuzzleConfig; onChange: (c
           </div>
         ))}
         {wrongCountThemes.length > 0 && (
-          <p className="text-xs text-amber">
+          <p className="text-xs text-amber-ink">
             ⚠ Elk thema moet exact 4 termen hebben.
           </p>
         )}
@@ -673,7 +673,7 @@ function PuzzleEditor({ config, onChange }: { config: PuzzleConfig; onChange: (c
               <button
                 type="button"
                 onClick={() => updatePlacements(placements.filter((_, idx) => idx !== i))}
-                className="p-1.5 text-text-faint hover:text-magenta transition-colors"
+                className="p-1.5 text-text-faint hover:text-magenta-ink transition-colors"
                 disabled={placements.length <= 1}
               >
                 <Trash2 size={14} />
@@ -686,7 +686,7 @@ function PuzzleEditor({ config, onChange }: { config: PuzzleConfig; onChange: (c
               const nextPlace = (placements[placements.length - 1]?.place ?? 0) + 1
               updatePlacements([...placements, { place: nextPlace, points: 0 }])
             }}
-            className="flex items-center gap-1 text-xs text-neon hover:text-neon-dim transition-colors"
+            className="flex items-center gap-1 text-xs text-neon-ink hover:text-neon-ink-dim transition-colors"
           >
             <Plus size={12} /> Plaats toevoegen
           </button>
@@ -798,7 +798,7 @@ function GalleryEditor({ config, onChange, gameId }: { config: GalleryConfig; on
               className={cn(
                 'flex-1 px-3 py-2 rounded-lg text-sm font-medium border-2 transition-all',
                 scoringMode === mode
-                  ? 'border-neon bg-neon/10 text-neon'
+                  ? 'border-neon bg-neon/10 text-neon-ink'
                   : 'border-surface-overlay bg-surface-raised text-text-muted hover:border-text-faint',
               )}
             >
@@ -829,7 +829,7 @@ function GalleryEditor({ config, onChange, gameId }: { config: GalleryConfig; on
                     <button
                       type="button"
                       onClick={() => clearImage(i)}
-                      className="absolute -top-1 -right-1 p-0.5 rounded-full bg-surface text-text-muted hover:text-magenta transition-colors"
+                      className="absolute -top-1 -right-1 p-0.5 rounded-full bg-surface text-text-muted hover:text-magenta-ink transition-colors"
                     >
                       <X size={12} />
                     </button>
@@ -878,7 +878,7 @@ function GalleryEditor({ config, onChange, gameId }: { config: GalleryConfig; on
                   <button
                     type="button"
                     onClick={() => removeItem(i)}
-                    className="p-1.5 text-text-faint hover:text-magenta transition-colors"
+                    className="p-1.5 text-text-faint hover:text-magenta-ink transition-colors"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -891,10 +891,10 @@ function GalleryEditor({ config, onChange, gameId }: { config: GalleryConfig; on
           <Plus size={14} /> Foto toevoegen
         </Button>
         {itemsMissingImage > 0 && (
-          <p className="text-xs text-amber">⚠ {itemsMissingImage} foto{itemsMissingImage !== 1 ? "'s" : ''} mist een afbeelding</p>
+          <p className="text-xs text-amber-ink">⚠ {itemsMissingImage} foto{itemsMissingImage !== 1 ? "'s" : ''} mist een afbeelding</p>
         )}
         {itemsMissingAnswer > 0 && (
-          <p className="text-xs text-amber">⚠ {itemsMissingAnswer} foto{itemsMissingAnswer !== 1 ? "'s" : ''} mist een antwoord</p>
+          <p className="text-xs text-amber-ink">⚠ {itemsMissingAnswer} foto{itemsMissingAnswer !== 1 ? "'s" : ''} mist een antwoord</p>
         )}
       </div>
 
@@ -923,7 +923,7 @@ function GalleryEditor({ config, onChange, gameId }: { config: GalleryConfig; on
               <button
                 type="button"
                 onClick={() => updatePlacements(placements.filter((_, idx) => idx !== i))}
-                className="p-1.5 text-text-faint hover:text-magenta transition-colors"
+                className="p-1.5 text-text-faint hover:text-magenta-ink transition-colors"
                 disabled={placements.length <= 1}
               >
                 <Trash2 size={14} />
@@ -936,7 +936,7 @@ function GalleryEditor({ config, onChange, gameId }: { config: GalleryConfig; on
               const nextPlace = (placements[placements.length - 1]?.place ?? 0) + 1
               updatePlacements([...placements, { place: nextPlace, points: 0 }])
             }}
-            className="flex items-center gap-1 text-xs text-neon hover:text-neon-dim transition-colors"
+            className="flex items-center gap-1 text-xs text-neon-ink hover:text-neon-ink-dim transition-colors"
           >
             <Plus size={12} /> Plaats toevoegen
           </button>
@@ -1038,7 +1038,7 @@ function CollectiveMemoryEditor({ config, onChange }: { config: CollectiveMemory
               className={cn(
                 'flex-1 px-3 py-2 rounded-lg text-sm font-medium border-2 transition-all',
                 scoringMode === mode
-                  ? 'border-neon bg-neon/10 text-neon'
+                  ? 'border-neon bg-neon/10 text-neon-ink'
                   : 'border-surface-overlay bg-surface-raised text-text-muted hover:border-text-faint',
               )}
             >
@@ -1058,7 +1058,7 @@ function CollectiveMemoryEditor({ config, onChange }: { config: CollectiveMemory
         <p className="text-xs font-medium text-text-muted uppercase tracking-wider">5 trefwoorden</p>
         {keywords.map((kw, i) => (
           <div key={i} className="flex gap-2 items-start p-2.5 rounded-lg bg-surface-overlay/30">
-            <span className="font-display text-neon font-bold w-6 text-center pt-2.5">{i + 1}</span>
+            <span className="font-display text-neon-ink font-bold w-6 text-center pt-2.5">{i + 1}</span>
             <div className="flex-1 min-w-0 space-y-1.5">
               <div className="flex gap-2 items-start">
                 <Input
@@ -1113,7 +1113,7 @@ function CollectiveMemoryEditor({ config, onChange }: { config: CollectiveMemory
               <button
                 type="button"
                 onClick={() => updatePlacements(placements.filter((_, idx) => idx !== i))}
-                className="p-1.5 text-text-faint hover:text-magenta transition-colors"
+                className="p-1.5 text-text-faint hover:text-magenta-ink transition-colors"
                 disabled={placements.length <= 1}
               >
                 <Trash2 size={14} />
@@ -1126,7 +1126,7 @@ function CollectiveMemoryEditor({ config, onChange }: { config: CollectiveMemory
               const nextPlace = (placements[placements.length - 1]?.place ?? 0) + 1
               updatePlacements([...placements, { place: nextPlace, points: 0 }])
             }}
-            className="flex items-center gap-1 text-xs text-neon hover:text-neon-dim transition-colors"
+            className="flex items-center gap-1 text-xs text-neon-ink hover:text-neon-ink-dim transition-colors"
           >
             <Plus size={12} /> Plaats toevoegen
           </button>

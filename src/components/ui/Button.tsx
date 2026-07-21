@@ -13,7 +13,7 @@ const variantStyles: Record<ButtonVariant, string> = {
   primary:
     'bg-neon text-void font-semibold shadow-glow-neon hover:bg-neon-dim',
   secondary:
-    'border border-neon text-neon hover:bg-neon/10',
+    'border border-neon text-neon-ink hover:bg-neon/10',
   danger:
     'bg-magenta text-white font-semibold shadow-glow-magenta hover:bg-magenta-dim',
   ghost:

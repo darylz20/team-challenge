@@ -23,7 +23,7 @@ const themeBorderColors = [
   'border-amber bg-amber/15',
   'border-magenta bg-magenta/15',
 ]
-const themeTextColors = ['text-neon', 'text-amber', 'text-magenta']
+const themeTextColors = ['text-neon-ink', 'text-amber-ink', 'text-magenta-ink']
 
 export function PuzzlePlay({ challenge }: PuzzlePlayProps) {
   const config = challenge.config as PuzzleConfig
@@ -136,7 +136,7 @@ export function PuzzlePlay({ challenge }: PuzzlePlayProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 size={24} className="text-neon animate-spin" />
+        <Loader2 size={24} className="text-neon-ink animate-spin" />
       </div>
     )
   }
@@ -144,7 +144,7 @@ export function PuzzlePlay({ challenge }: PuzzlePlayProps) {
   if (error) {
     return (
       <Card className="border border-magenta/30 bg-magenta/5 text-center py-6">
-        <p className="text-sm text-magenta">{error}</p>
+        <p className="text-sm text-magenta-ink">{error}</p>
       </Card>
     )
   }
@@ -174,7 +174,7 @@ export function PuzzlePlay({ challenge }: PuzzlePlayProps) {
           {solved.length} / {themes.length} thema's
         </span>
         <span className="font-mono">
-          <span className="text-neon font-bold">{earnedSoFar}</span>
+          <span className="text-neon-ink font-bold">{earnedSoFar}</span>
           <span className="text-text-faint"> / {totalPossible} ptn</span>
         </span>
       </div>
@@ -264,9 +264,9 @@ export function PuzzlePlay({ challenge }: PuzzlePlayProps) {
             : 'border border-magenta/30 bg-magenta/5',
         )}>
           {solved.length > 0 ? (
-            <CheckCircle2 size={22} className="text-lime shrink-0" />
+            <CheckCircle2 size={22} className="text-lime-ink shrink-0" />
           ) : (
-            <XCircle size={22} className="text-magenta shrink-0" />
+            <XCircle size={22} className="text-magenta-ink shrink-0" />
           )}
           <div className="flex-1">
             <p className="font-semibold text-sm">
@@ -311,12 +311,12 @@ export function PuzzlePlay({ challenge }: PuzzlePlayProps) {
             </Button>
           </div>
           {feedback?.type === 'miss' && (
-            <p className="text-xs text-magenta">
+            <p className="text-xs text-magenta-ink">
               Geen match — élk nog niet opgelost thema verloor 1 poging
             </p>
           )}
           {feedback?.type === 'noop' && (
-            <p className="text-xs text-amber">
+            <p className="text-xs text-amber-ink">
               {feedback.reason === 'already_solved' ? 'Dit thema is al opgelost' : 'Dit thema is al gelocked'}
             </p>
           )}

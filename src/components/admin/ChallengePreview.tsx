@@ -116,7 +116,7 @@ function OpenDoorPreview({ config }: { config: OpenDoorConfig }) {
                 <HelpCircle size={16} className="text-text-faint shrink-0" />
                 <span className="text-xs text-text-faint">Deur {i + 1}</span>
               </div>
-              <span className="text-xs text-amber font-mono shrink-0">{display} ptn</span>
+              <span className="text-xs text-amber-ink font-mono shrink-0">{display} ptn</span>
             </div>
           )
         })}
@@ -146,7 +146,7 @@ function CollectiveMemoryPreview({ config }: { config: CollectiveMemoryConfig })
               className="flex flex-col items-center justify-center p-2 rounded border-2 border-surface-overlay bg-surface-raised"
             >
               <HelpCircle size={14} className="text-text-faint mb-0.5" />
-              <span className="text-[10px] font-mono text-amber">{display}</span>
+              <span className="text-[10px] font-mono text-amber-ink">{display}</span>
             </div>
           )
         })}
@@ -186,7 +186,7 @@ function GalleryPreview({ config }: { config: GalleryConfig }) {
                   <HelpCircle size={20} className="text-text-faint" />
                 </div>
               )}
-              <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-void/80 text-[10px] font-mono text-amber">
+              <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-void/80 text-[10px] font-mono text-amber-ink">
                 {mode === 'placement' ? `tot ${bestPlace}` : `${item.points}`} ptn
               </div>
             </div>
@@ -404,7 +404,7 @@ export function ChallengePreview({
       <div className="bg-surface px-4 py-3 border-b border-surface-overlay flex items-center justify-between">
         <span className="text-xs text-text-faint font-mono">PLAYER VIEW</span>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 text-neon text-xs font-mono">
+          <div className="flex items-center gap-1 text-neon-ink text-xs font-mono">
             <Trophy size={12} />
             {pointsLabel}
           </div>
@@ -438,7 +438,7 @@ export function ChallengePreview({
                 'flex items-center gap-2 text-sm transition-colors',
                 revealedHints >= hints.items.length
                   ? 'text-text-faint cursor-not-allowed'
-                  : 'text-amber hover:text-amber-dim cursor-pointer',
+                  : 'text-amber-ink hover:text-amber-ink-dim cursor-pointer',
               )}
             >
               <Lightbulb size={14} />
@@ -450,7 +450,7 @@ export function ChallengePreview({
               <div className="space-y-1.5">
                 {hints.items.slice(0, revealedHints).map((h, i) => (
                   <div key={i} className="flex items-start gap-2 text-sm bg-amber/5 border border-amber/20 rounded-lg px-3 py-2">
-                    <Lightbulb size={14} className="text-amber shrink-0 mt-0.5" />
+                    <Lightbulb size={14} className="text-amber-ink shrink-0 mt-0.5" />
                     <span className="text-text-muted">{h.text || <em className="text-text-faint">Empty hint</em>}</span>
                   </div>
                 ))}

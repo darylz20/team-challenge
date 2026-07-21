@@ -28,7 +28,7 @@ export function SolvedByTeams({
       )}
     >
       <span className="inline-flex items-center gap-1.5 text-xs text-text-muted">
-        <Users size={13} className="text-amber" />
+        <Users size={13} className="text-amber-ink" />
         Al opgelost door
       </span>
       {shown.map((t) => (

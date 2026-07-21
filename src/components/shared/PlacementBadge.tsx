@@ -21,7 +21,7 @@ export function PlacementBadge({
         title={title}
         aria-label={title}
         className={cn(
-          'inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber/15 text-amber border border-amber/30 shrink-0',
+          'inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber/15 text-amber-ink border border-amber/30 shrink-0',
           className,
         )}
       >
@@ -34,7 +34,7 @@ export function PlacementBadge({
     <span
       title={title}
       className={cn(
-        'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber/15 text-amber border border-amber/30',
+        'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber/15 text-amber-ink border border-amber/30',
         className,
       )}
     >

@@ -37,7 +37,7 @@ export function AdminNav({ open, onClose }: AdminNavProps) {
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-surface-overlay">
-          <h1 className="font-display text-sm font-bold text-neon tracking-wider">
+          <h1 className="font-display text-sm font-bold text-neon-ink tracking-wider">
             TC ADMIN
           </h1>
           <button onClick={onClose} className="lg:hidden text-text-muted hover:text-text">
@@ -57,7 +57,7 @@ export function AdminNav({ open, onClose }: AdminNavProps) {
                 cn(
                   'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                   isActive
-                    ? 'bg-neon/10 text-neon'
+                    ? 'bg-neon/10 text-neon-ink'
                     : 'text-text-muted hover:text-text hover:bg-surface-overlay',
                 )
               }
@@ -71,7 +71,7 @@ export function AdminNav({ open, onClose }: AdminNavProps) {
         {/* User */}
         <div className="p-3 border-t border-surface-overlay">
           <div className="flex items-center gap-3 px-3 py-2">
-            <div className="w-8 h-8 rounded-full bg-surface-overlay flex items-center justify-center text-xs font-bold text-neon">
+            <div className="w-8 h-8 rounded-full bg-surface-overlay flex items-center justify-center text-xs font-bold text-neon-ink">
               {profile?.display_name?.charAt(0).toUpperCase() ?? 'A'}
             </div>
             <div className="flex-1 min-w-0">

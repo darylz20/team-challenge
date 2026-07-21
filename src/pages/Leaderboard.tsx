@@ -6,7 +6,7 @@ import { useAuth } from '../providers/AuthProvider'
 import { useLeaderboard } from '../hooks/useLeaderboard'
 import { cn } from '../lib/utils'
 
-const placeColors = ['text-amber', 'text-text-muted', 'text-amber/60']
+const placeColors = ['text-amber-ink', 'text-text-muted', 'text-amber-ink/60']
 const placeLabels = ['🥇', '🥈', '🥉']
 
 interface LeaderboardViewProps {
@@ -45,7 +45,7 @@ export function LeaderboardView({ gameId, currentTeamId }: LeaderboardViewProps)
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Loader2 size={28} className="text-neon animate-spin" />
+        <Loader2 size={28} className="text-neon-ink animate-spin" />
       </div>
     )
   }
@@ -60,7 +60,7 @@ export function LeaderboardView({ gameId, currentTeamId }: LeaderboardViewProps)
           type="button"
           onClick={handleRefresh}
           disabled={refreshing}
-          className="mx-auto mt-4 flex items-center gap-1.5 text-xs text-text-muted hover:text-neon transition-colors disabled:opacity-60"
+          className="mx-auto mt-4 flex items-center gap-1.5 text-xs text-text-muted hover:text-neon-ink transition-colors disabled:opacity-60"
         >
           <RefreshCw size={12} className={cn(refreshing && 'animate-spin')} />
           Ververs
@@ -108,14 +108,14 @@ export function LeaderboardView({ gameId, currentTeamId }: LeaderboardViewProps)
                       className="w-2.5 h-2.5 rounded-full shrink-0"
                       style={{ backgroundColor: entry.team_color }}
                     />
-                    <p className={cn('font-semibold truncate', isCurrentTeam && 'text-neon')}>
+                    <p className={cn('font-semibold truncate', isCurrentTeam && 'text-neon-ink')}>
                       {entry.team_name}
                       {isCurrentTeam && (
                         <span className="ml-1.5 text-xs font-normal text-text-faint">(jij)</span>
                       )}
                     </p>
                     {isFirst && entry.total_points > 0 && (
-                      <Trophy size={13} className="text-amber shrink-0" />
+                      <Trophy size={13} className="text-amber-ink shrink-0" />
                     )}
                   </div>
 
@@ -158,10 +158,10 @@ export function LeaderboardView({ gameId, currentTeamId }: LeaderboardViewProps)
                 {/* Points */}
                 <div className="text-right shrink-0">
                   <div className="flex items-center gap-1 justify-end">
-                    {isCurrentTeam && <Star size={11} className="text-neon" />}
+                    {isCurrentTeam && <Star size={11} className="text-neon-ink" />}
                     <span className={cn(
                       'font-display font-bold text-base',
-                      isFirst && entry.total_points > 0 ? 'text-neon' : 'text-text',
+                      isFirst && entry.total_points > 0 ? 'text-neon-ink' : 'text-text',
                     )}>
                       {entry.total_points}
                     </span>
@@ -178,7 +178,7 @@ export function LeaderboardView({ gameId, currentTeamId }: LeaderboardViewProps)
                       key={c.challenge_id}
                       className="flex items-center gap-2 text-xs"
                     >
-                      <CheckCircle2 size={12} className="text-lime shrink-0" />
+                      <CheckCircle2 size={12} className="text-lime-ink shrink-0" />
                       <span className="flex-1 truncate text-text">{c.title}</span>
                       <span className="font-mono text-text-muted shrink-0">+{c.points} ptn</span>
                     </div>
@@ -187,11 +187,11 @@ export function LeaderboardView({ gameId, currentTeamId }: LeaderboardViewProps)
                     const positive = b.points >= 0
                     return (
                       <div key={`bonus-${bi}`} className="flex items-center gap-2 text-xs">
-                        <Gift size={12} className={cn('shrink-0', positive ? 'text-lime' : 'text-magenta')} />
+                        <Gift size={12} className={cn('shrink-0', positive ? 'text-lime-ink' : 'text-magenta-ink')} />
                         <span className="flex-1 truncate text-text">
                           {b.reason || (positive ? 'Bonuspunten' : 'Puntenaftrek')}
                         </span>
-                        <span className={cn('font-mono shrink-0', positive ? 'text-text-muted' : 'text-magenta')}>
+                        <span className={cn('font-mono shrink-0', positive ? 'text-text-muted' : 'text-magenta-ink')}>
                           {positive ? '+' : ''}{b.points} ptn
                         </span>
                       </div>
@@ -214,7 +214,7 @@ export function LeaderboardView({ gameId, currentTeamId }: LeaderboardViewProps)
           type="button"
           onClick={handleRefresh}
           disabled={refreshing}
-          className="flex items-center gap-1.5 text-xs text-text-muted hover:text-neon transition-colors disabled:opacity-60"
+          className="flex items-center gap-1.5 text-xs text-text-muted hover:text-neon-ink transition-colors disabled:opacity-60"
         >
           <RefreshCw size={12} className={cn(refreshing && 'animate-spin')} />
           Ververs

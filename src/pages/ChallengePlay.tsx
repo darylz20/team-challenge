@@ -465,9 +465,9 @@ export function ChallengePlay() {
               : 'border border-magenta/30 bg-magenta/5',
           )}>
             {(submission?.is_correct ?? submitResult?.correct) ? (
-              <CheckCircle2 size={24} className="text-lime shrink-0" />
+              <CheckCircle2 size={24} className="text-lime-ink shrink-0" />
             ) : (
-              <XCircle size={24} className="text-magenta shrink-0" />
+              <XCircle size={24} className="text-magenta-ink shrink-0" />
             )}
             <div>
               <p className="font-semibold text-sm">
@@ -516,7 +516,7 @@ export function ChallengePlay() {
                 'flex items-center gap-2 text-sm transition-colors',
                 revealedHints >= hints.items.length
                   ? 'text-text-faint cursor-not-allowed'
-                  : 'text-amber hover:text-amber-dim cursor-pointer',
+                  : 'text-amber-ink hover:text-amber-ink-dim cursor-pointer',
               )}
             >
               <Lightbulb size={14} />
@@ -528,12 +528,12 @@ export function ChallengePlay() {
               <div className="space-y-1.5">
                 {hints.items.slice(0, revealedHints).map((h, i) => (
                   <div key={i} className="flex items-start gap-2 text-sm bg-amber/5 border border-amber/20 rounded-lg px-3 py-2">
-                    <Lightbulb size={14} className="text-amber shrink-0 mt-0.5" />
+                    <Lightbulb size={14} className="text-amber-ink shrink-0 mt-0.5" />
                     <span className="text-text-muted">{h.text}</span>
                   </div>
                 ))}
                 {hintDeduction > 0 && (
-                  <p className="text-xs text-amber/70 pl-6">Totale hintaftrek: −{hintDeduction} ptn</p>
+                  <p className="text-xs text-amber-ink/70 pl-6">Totale hintaftrek: −{hintDeduction} ptn</p>
                 )}
               </div>
             )}
@@ -542,7 +542,7 @@ export function ChallengePlay() {
 
         {/* Error */}
         {submitError && (
-          <p className="text-sm text-magenta text-center">{submitError}</p>
+          <p className="text-sm text-magenta-ink text-center">{submitError}</p>
         )}
 
         {/* Submit button */}
