@@ -67,13 +67,13 @@ function SortableMediaItem({ item, position, onRemove }: { item: MediaItem; posi
         )}
         {isAudio && (
           <div className="flex items-center gap-2 py-1">
-            <FileAudio size={18} className="text-neon shrink-0" />
+            <FileAudio size={18} className="text-neon-ink shrink-0" />
             <span className="text-sm text-text-muted truncate">{filename}</span>
           </div>
         )}
         {isVideo && (
           <div className="flex items-center gap-2 py-1">
-            <FileVideo size={18} className="text-neon shrink-0" />
+            <FileVideo size={18} className="text-neon-ink shrink-0" />
             <span className="text-sm text-text-muted truncate">{filename}</span>
           </div>
         )}
@@ -81,7 +81,7 @@ function SortableMediaItem({ item, position, onRemove }: { item: MediaItem; posi
       <button
         type="button"
         onClick={onRemove}
-        className="p-1 rounded-full text-text-faint hover:text-magenta transition-colors shrink-0"
+        className="p-1 rounded-full text-text-faint hover:text-magenta-ink transition-colors shrink-0"
       >
         <X size={14} />
       </button>

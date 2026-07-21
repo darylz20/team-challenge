@@ -23,7 +23,7 @@ export function AdminShell({ children }: AdminShellProps) {
           >
             <Menu size={22} />
           </button>
-          <h1 className="lg:hidden font-display text-sm font-bold text-neon tracking-wider">
+          <h1 className="lg:hidden font-display text-sm font-bold text-neon-ink tracking-wider">
             TC ADMIN
           </h1>
           <ThemeToggle className="ml-auto" />

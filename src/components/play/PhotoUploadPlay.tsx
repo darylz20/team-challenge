@@ -70,7 +70,7 @@ export function PhotoUploadPlay({ challenge }: { challenge: Challenge }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-10">
-        <Loader2 size={20} className="animate-spin text-neon" />
+        <Loader2 size={20} className="animate-spin text-neon-ink" />
       </div>
     )
   }
@@ -92,7 +92,7 @@ export function PhotoUploadPlay({ challenge }: { challenge: Challenge }) {
 
         {!reviewed ? (
           <Card className="flex items-center gap-3">
-            <Hourglass size={18} className="text-amber shrink-0 animate-pulse" />
+            <Hourglass size={18} className="text-amber-ink shrink-0 animate-pulse" />
             <div>
               <p className="text-sm font-medium text-text">Wacht op beoordeling</p>
               <p className="text-xs text-text-muted">
@@ -102,22 +102,22 @@ export function PhotoUploadPlay({ challenge }: { challenge: Challenge }) {
           </Card>
         ) : submission.is_correct ? (
           <Card className="flex items-center gap-3 border-lime/40 bg-lime/5">
-            <CheckCircle2 size={18} className="text-lime shrink-0" />
+            <CheckCircle2 size={18} className="text-lime-ink shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-lime">
+              <p className="text-sm font-medium text-lime-ink">
                 Beoordeeld · +{submission.points_awarded} ptn
               </p>
               {answer.review_note && (
                 <p className="text-xs text-text-muted break-words">"{answer.review_note}"</p>
               )}
             </div>
-            <Trophy size={16} className="text-lime shrink-0" />
+            <Trophy size={16} className="text-lime-ink shrink-0" />
           </Card>
         ) : (
           <Card className="flex items-center gap-3 border-magenta/40 bg-magenta/5">
-            <XCircle size={18} className="text-magenta shrink-0" />
+            <XCircle size={18} className="text-magenta-ink shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-magenta">Beoordeeld · geen punten</p>
+              <p className="text-sm font-medium text-magenta-ink">Beoordeeld · geen punten</p>
               {answer.review_note && (
                 <p className="text-xs text-text-muted break-words">"{answer.review_note}"</p>
               )}
@@ -148,7 +148,7 @@ export function PhotoUploadPlay({ challenge }: { challenge: Challenge }) {
             <button
               type="button"
               onClick={() => setFile(null)}
-              className="absolute top-2 right-2 p-1.5 rounded-full bg-void/80 text-text-muted hover:text-magenta transition-colors"
+              className="absolute top-2 right-2 p-1.5 rounded-full bg-void/80 text-text-muted hover:text-magenta-ink transition-colors"
               aria-label="Foto verwijderen"
             >
               <X size={16} />

@@ -79,8 +79,8 @@ export function AdjustPointsModal({ open, onClose, teamId, teamName, gameId, onD
                 'flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border-2 text-sm font-medium transition-all',
                 direction === v
                   ? color === 'lime'
-                    ? 'border-lime bg-lime/10 text-lime'
-                    : 'border-magenta bg-magenta/10 text-magenta'
+                    ? 'border-lime bg-lime/10 text-lime-ink'
+                    : 'border-magenta bg-magenta/10 text-magenta-ink'
                   : 'border-surface-overlay bg-surface text-text-muted hover:border-text-faint',
               )}
             >

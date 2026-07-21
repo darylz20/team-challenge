@@ -30,7 +30,7 @@ export function Notes() {
 
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <Loader2 size={24} className="text-neon animate-spin" />
+          <Loader2 size={24} className="text-neon-ink animate-spin" />
         </div>
       ) : notes.length === 0 ? (
         <Card className="text-center py-10">
@@ -128,7 +128,7 @@ function NoteCard({ note, onUpdate, onDelete }: NoteCardProps) {
           {saving ? (
             <Loader2 size={12} className="text-text-faint animate-spin" />
           ) : justSaved ? (
-            <Check size={12} className="text-lime" />
+            <Check size={12} className="text-lime-ink" />
           ) : null}
           <button
             type="button"
@@ -136,8 +136,8 @@ function NoteCard({ note, onUpdate, onDelete }: NoteCardProps) {
             className={cn(
               'p-1.5 rounded transition-colors',
               confirmDelete
-                ? 'text-magenta bg-magenta/10'
-                : 'text-text-faint hover:text-magenta',
+                ? 'text-magenta-ink bg-magenta/10'
+                : 'text-text-faint hover:text-magenta-ink',
             )}
             title={confirmDelete ? 'Klik nogmaals om te bevestigen' : 'Notitie verwijderen'}
           >

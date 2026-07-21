@@ -60,7 +60,7 @@ export function GameList() {
             onClick={() => setFilter(f.value)}
             className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors whitespace-nowrap ${
               filter === f.value
-                ? 'bg-neon/15 text-neon border border-neon/30'
+                ? 'bg-neon/15 text-neon-ink border border-neon/30'
                 : 'bg-surface-overlay text-text-muted hover:text-text'
             }`}
           >
@@ -99,7 +99,7 @@ export function GameList() {
                 </Badge>
                 <button
                   onClick={(e) => { e.stopPropagation(); setDeleteTarget({ id: game.id, title: game.title }) }}
-                  className="p-1.5 text-text-faint hover:text-magenta transition-colors"
+                  className="p-1.5 text-text-faint hover:text-magenta-ink transition-colors"
                 >
                   <Trash2 size={14} />
                 </button>

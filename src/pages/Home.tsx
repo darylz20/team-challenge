@@ -135,11 +135,11 @@ export function Home() {
 
       {/* Game title + live total */}
       <div className="mb-6">
-        <h1 className="font-display text-2xl font-black text-neon tracking-wider">
+        <h1 className="font-display text-2xl font-black text-neon-ink tracking-wider">
           {teamSession.game.title}
         </h1>
         <p className="text-sm text-text-muted mt-1">
-          <span className="font-bold text-neon">{totalPoints}</span> punten
+          <span className="font-bold text-neon-ink">{totalPoints}</span> punten
           <span className="text-text-faint"> · {solvedCount}/{challenges.length} opgelost</span>
         </p>
       </div>
@@ -215,13 +215,13 @@ export function Home() {
                         onClick={() => navigate(`/challenge/${challenge.id}`)}
                       >
                         {status === 'solved' ? (
-                          <CheckCircle2 size={20} className="text-lime shrink-0" />
+                          <CheckCircle2 size={20} className="text-lime-ink shrink-0" />
                         ) : (
                           <span className={cn(
                             'w-8 h-8 rounded-lg flex items-center justify-center text-sm font-mono shrink-0',
-                            status === 'inprogress' ? 'bg-amber/10 text-amber' :
-                            status === 'retry' ? 'bg-magenta/10 text-magenta' :
-                            status === 'pending' ? 'bg-amber/10 text-amber' :
+                            status === 'inprogress' ? 'bg-amber/10 text-amber-ink' :
+                            status === 'retry' ? 'bg-magenta/10 text-magenta-ink' :
+                            status === 'pending' ? 'bg-amber/10 text-amber-ink' :
                             'bg-surface-overlay text-text-faint',
                           )}>
                             {status === 'pending' ? <Hourglass size={14} /> : i + 1}
@@ -234,12 +234,12 @@ export function Home() {
                           </div>
                           <p className="text-xs text-text-muted">
                             {CHALLENGE_TYPE_LABELS[challenge.type]}
-                            {status === 'inprogress' && <span className="text-amber"> · bezig</span>}
-                            {status === 'retry' && <span className="text-magenta"> · opnieuw proberen</span>}
-                            {status === 'pending' && <span className="text-amber"> · wacht op beoordeling</span>}
+                            {status === 'inprogress' && <span className="text-amber-ink"> · bezig</span>}
+                            {status === 'retry' && <span className="text-magenta-ink"> · opnieuw proberen</span>}
+                            {status === 'pending' && <span className="text-amber-ink"> · wacht op beoordeling</span>}
                             {status === 'done' && <span className="text-text-faint"> · afgerond</span>}
                             {status === 'inprogress' && showRemaining && remaining > 0 && (
-                              <span className="text-amber"> · nog {remaining} ptn te halen</span>
+                              <span className="text-amber-ink"> · nog {remaining} ptn te halen</span>
                             )}
                           </p>
                         </div>
@@ -284,7 +284,7 @@ export function Home() {
                     <Card key={b.id} className="flex items-center gap-3">
                       <span className={cn(
                         'w-8 h-8 rounded-lg flex items-center justify-center shrink-0',
-                        positive ? 'bg-lime/10 text-lime' : 'bg-magenta/10 text-magenta',
+                        positive ? 'bg-lime/10 text-lime-ink' : 'bg-magenta/10 text-magenta-ink',
                       )}>
                         <Gift size={14} />
                       </span>

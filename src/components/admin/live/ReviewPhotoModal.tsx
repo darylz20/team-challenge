@@ -86,7 +86,7 @@ function ReviewForm({ review, onClose, onDone }: { review: PhotoReview } & Omit<
               href={review.photo_url}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 mt-1.5 text-xs text-neon hover:text-neon-dim transition-colors"
+              className="inline-flex items-center gap-1 mt-1.5 text-xs text-neon-ink hover:text-neon-ink-dim transition-colors"
             >
               <ExternalLink size={12} /> Open op volledig formaat
             </a>

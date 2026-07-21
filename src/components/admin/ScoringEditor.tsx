@@ -53,7 +53,7 @@ export function ScoringEditor({ scoring, onChange }: ScoringEditorProps) {
           onClick={() => setMode('fixed')}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             scoring.mode === 'fixed'
-              ? 'bg-neon/15 text-neon border border-neon/40'
+              ? 'bg-neon/15 text-neon-ink border border-neon/40'
               : 'bg-surface-overlay/50 text-text-muted border border-surface-overlay hover:border-text-faint'
           }`}
         >
@@ -65,7 +65,7 @@ export function ScoringEditor({ scoring, onChange }: ScoringEditorProps) {
           onClick={() => setMode('placement')}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             scoring.mode === 'placement'
-              ? 'bg-neon/15 text-neon border border-neon/40'
+              ? 'bg-neon/15 text-neon-ink border border-neon/40'
               : 'bg-surface-overlay/50 text-text-muted border border-surface-overlay hover:border-text-faint'
           }`}
         >
@@ -104,7 +104,7 @@ export function ScoringEditor({ scoring, onChange }: ScoringEditorProps) {
               <button
                 type="button"
                 onClick={() => removePlacement(i)}
-                className="p-1.5 text-text-faint hover:text-magenta transition-colors"
+                className="p-1.5 text-text-faint hover:text-magenta-ink transition-colors"
                 disabled={scoring.placements.length <= 1}
               >
                 <Trash2 size={14} />

@@ -188,7 +188,7 @@ export function ChallengeBuilder() {
     <div className="animate-fade-in max-w-2xl">
       <button
         onClick={() => navigate(`/admin/games/${gameId}?tab=2`)}
-        className="flex items-center gap-1 text-sm text-text-muted hover:text-neon transition-colors mb-4"
+        className="flex items-center gap-1 text-sm text-text-muted hover:text-neon-ink transition-colors mb-4"
       >
         <ArrowLeft size={16} /> Terug naar spel
       </button>
@@ -203,7 +203,7 @@ export function ChallengeBuilder() {
           onClick={() => setShowPreview((v) => !v)}
           className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all shrink-0 mt-1 ${
             showPreview
-              ? 'bg-neon/15 text-neon border border-neon/40'
+              ? 'bg-neon/15 text-neon-ink border border-neon/40'
               : 'bg-surface-overlay/50 text-text-muted border border-surface-overlay hover:border-text-faint'
           }`}
         >
@@ -235,7 +235,7 @@ export function ChallengeBuilder() {
             Sectie
           </h3>
           {sections.length === 0 ? (
-            <p className="text-xs text-amber">
+            <p className="text-xs text-amber-ink">
               Dit spel heeft nog geen secties. Maak er eerst een aan via Spel bewerken → tab Secties.
             </p>
           ) : (
@@ -312,7 +312,7 @@ export function ChallengeBuilder() {
             <h3 className="font-display text-sm font-bold text-text-muted uppercase tracking-wider">
               Antwoordtoelichting
             </h3>
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber/15 text-amber text-[10px] font-medium uppercase tracking-wider">
+            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber/15 text-amber-ink text-[10px] font-medium uppercase tracking-wider">
               <Lock size={10} /> Alleen admin
             </span>
           </div>

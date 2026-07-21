@@ -114,7 +114,7 @@ export function CollectiveMemoryPlay({ challenge }: CollectiveMemoryPlayProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 size={24} className="text-neon animate-spin" />
+        <Loader2 size={24} className="text-neon-ink animate-spin" />
       </div>
     )
   }
@@ -122,7 +122,7 @@ export function CollectiveMemoryPlay({ challenge }: CollectiveMemoryPlayProps) {
   if (error) {
     return (
       <Card className="border border-magenta/30 bg-magenta/5 text-center py-6">
-        <p className="text-sm text-magenta">{error}</p>
+        <p className="text-sm text-magenta-ink">{error}</p>
       </Card>
     )
   }
@@ -147,12 +147,12 @@ export function CollectiveMemoryPlay({ challenge }: CollectiveMemoryPlayProps) {
         <div className="flex items-center gap-3">
           {!attempts.unlimited && (
             <span className="text-xs text-text-muted">
-              <span className={cn('font-mono', attemptsRemaining <= 1 && 'text-magenta')}>{attemptsRemaining}</span>
+              <span className={cn('font-mono', attemptsRemaining <= 1 && 'text-magenta-ink')}>{attemptsRemaining}</span>
               <span className="text-text-faint"> pog.</span>
             </span>
           )}
           <span className="font-mono">
-            <span className="text-neon font-bold">{earnedSoFar}</span>
+            <span className="text-neon-ink font-bold">{earnedSoFar}</span>
             <span className="text-text-faint"> / {totalPossible} ptn</span>
           </span>
         </div>
@@ -177,15 +177,15 @@ export function CollectiveMemoryPlay({ challenge }: CollectiveMemoryPlayProps) {
             >
               {isFound ? (
                 <>
-                  <CheckCircle2 size={14} className="text-lime" />
+                  <CheckCircle2 size={14} className="text-lime-ink" />
                   <p className="text-[11px] font-medium text-text text-center leading-tight truncate w-full">{kw.text}</p>
-                  <p className="text-[10px] font-mono text-lime">+{award}</p>
+                  <p className="text-[10px] font-mono text-lime-ink">+{award}</p>
                 </>
               ) : (
                 <>
                   <HelpCircle size={14} className="text-text-faint" />
                   <p className="text-[10px] text-text-faint">?</p>
-                  <p className="text-[10px] font-mono text-amber">
+                  <p className="text-[10px] font-mono text-amber-ink">
                     {scoringMode === 'placement' ? `tot ${maxPerKeywordForMode(i)}` : `${maxPerKeywordForMode(i)}`}
                   </p>
                 </>
@@ -204,9 +204,9 @@ export function CollectiveMemoryPlay({ challenge }: CollectiveMemoryPlayProps) {
             : 'border border-magenta/30 bg-magenta/5',
         )}>
           {found.length > 0 ? (
-            <CheckCircle2 size={22} className="text-lime shrink-0" />
+            <CheckCircle2 size={22} className="text-lime-ink shrink-0" />
           ) : (
-            <XCircle size={22} className="text-magenta shrink-0" />
+            <XCircle size={22} className="text-magenta-ink shrink-0" />
           )}
           <div className="flex-1">
             <p className="font-semibold text-sm">
@@ -250,7 +250,7 @@ export function CollectiveMemoryPlay({ challenge }: CollectiveMemoryPlayProps) {
             </Button>
           </div>
           {feedback?.type === 'miss' && (
-            <p className="text-xs text-magenta">
+            <p className="text-xs text-magenta-ink">
               Geen match{!attempts.unlimited ? ` — ${attemptsRemaining} pog. over` : ''}
             </p>
           )}

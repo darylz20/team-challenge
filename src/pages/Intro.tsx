@@ -16,7 +16,7 @@ export function Intro() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 size={24} className="text-neon animate-spin" />
+        <Loader2 size={24} className="text-neon-ink animate-spin" />
       </div>
     )
   }
@@ -158,7 +158,7 @@ export function Intro() {
           <button
             type="button"
             onClick={() => setPageIdx((i) => Math.min(introPages.length - 1, i + 1))}
-            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg bg-neon/10 border-2 border-neon/40 text-neon font-medium hover:bg-neon/20 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg bg-neon/10 border-2 border-neon/40 text-neon-ink font-medium hover:bg-neon/20 transition-colors"
           >
             Volgende
             <ChevronRight size={18} />

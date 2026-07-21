@@ -68,7 +68,7 @@ export function GameEditor() {
 
   return (
     <div className="animate-fade-in">
-      <button onClick={() => navigate('/admin/games')} className="flex items-center gap-1 text-sm text-text-muted hover:text-neon transition-colors mb-4">
+      <button onClick={() => navigate('/admin/games')} className="flex items-center gap-1 text-sm text-text-muted hover:text-neon-ink transition-colors mb-4">
         <ArrowLeft size={16} /> Back to Games
       </button>
       <PageHeader title={game.title} subtitle={`Code: ${game.code}`} />
@@ -140,9 +140,9 @@ function DetailsTab({ game, updateGame, publishGame, unpublishGame, startGame, r
         >
           {game.status}
         </Badge>
-        <button onClick={copyCode} className="flex items-center gap-1 text-xs font-mono text-text-muted hover:text-neon transition-colors">
+        <button onClick={copyCode} className="flex items-center gap-1 text-xs font-mono text-text-muted hover:text-neon-ink transition-colors">
           {game.code}
-          {copied ? <Check size={12} className="text-lime" /> : <Copy size={12} />}
+          {copied ? <Check size={12} className="text-lime-ink" /> : <Copy size={12} />}
         </button>
       </div>
 
@@ -185,7 +185,7 @@ function DetailsTab({ game, updateGame, publishGame, unpublishGame, startGame, r
           <button
             type="button"
             onClick={() => setResetOpen(true)}
-            className="flex items-center gap-1.5 text-xs text-text-muted hover:text-magenta transition-colors"
+            className="flex items-center gap-1.5 text-xs text-text-muted hover:text-magenta-ink transition-colors"
           >
             <RefreshCw size={12} /> Reset game (wis scores, terug naar draft)
           </button>
@@ -207,9 +207,9 @@ function DetailsTab({ game, updateGame, publishGame, unpublishGame, startGame, r
       <Modal open={resetOpen} onClose={() => !resetting && setResetOpen(false)} title="Spel resetten?">
         <div className="space-y-4">
           <div className="flex items-start gap-2 p-3 rounded-lg bg-magenta/5 border border-magenta/30">
-            <AlertTriangle size={16} className="text-magenta shrink-0 mt-0.5" />
+            <AlertTriangle size={16} className="text-magenta-ink shrink-0 mt-0.5" />
             <div className="text-sm space-y-1">
-              <p className="text-magenta font-medium">Dit kan niet ongedaan worden gemaakt.</p>
+              <p className="text-magenta-ink font-medium">Dit kan niet ongedaan worden gemaakt.</p>
               <p className="text-text-muted">
                 Alle scores, submissions en voortgang worden gewist. Teams moeten de intro opnieuw
                 doorlopen. Challenges, secties en teams (incl. passcodes) blijven behouden. De status
@@ -249,7 +249,7 @@ function SortableChallenge({ challenge, onDelete, onEdit }: { challenge: Challen
         <Badge variant="neon">{challenge.points} ptn</Badge>
         <button
           onClick={(e) => { e.stopPropagation(); onDelete() }}
-          className="p-1.5 text-text-faint hover:text-magenta transition-colors"
+          className="p-1.5 text-text-faint hover:text-magenta-ink transition-colors"
         >
           <Trash2 size={14} />
         </button>
@@ -308,7 +308,7 @@ function ChallengesTab({ gameId, challenges, sections, deleteChallenge, reorderC
                   <span className={cn(
                     'text-[10px] px-1.5 py-0.5 rounded font-mono uppercase',
                     section.is_open
-                      ? 'bg-lime/10 text-lime border border-lime/30'
+                      ? 'bg-lime/10 text-lime-ink border border-lime/30'
                       : 'bg-surface-overlay text-text-faint border border-surface-overlay',
                   )}>
                     {section.is_open ? 'OPEN' : 'CLOSED'}
@@ -424,7 +424,7 @@ function SectionsTab({ sections, challenges, createSection, updateSection, delet
 
       {deleteError && (
         <Card className="border border-magenta/30 bg-magenta/5">
-          <p className="text-sm text-magenta">{deleteError}</p>
+          <p className="text-sm text-magenta-ink">{deleteError}</p>
         </Card>
       )}
 
@@ -462,7 +462,7 @@ function SectionsTab({ sections, challenges, createSection, updateSection, delet
                         <span className={cn(
                           'text-[10px] px-1.5 py-0.5 rounded font-mono uppercase',
                           s.is_open
-                            ? 'bg-lime/10 text-lime border border-lime/30'
+                            ? 'bg-lime/10 text-lime-ink border border-lime/30'
                             : 'bg-surface-overlay text-text-faint border border-surface-overlay',
                         )}>
                           {s.is_open ? 'OPEN' : 'CLOSED'}
@@ -484,7 +484,7 @@ function SectionsTab({ sections, challenges, createSection, updateSection, delet
                     <button
                       type="button"
                       onClick={() => handleDelete(s)}
-                      className="p-1.5 text-text-faint hover:text-magenta"
+                      className="p-1.5 text-text-faint hover:text-magenta-ink"
                       title="Verwijderen"
                     >
                       <Trash2 size={14} />
@@ -571,21 +571,21 @@ function TeamsTab({ teams, createTeam, deleteTeam, regeneratePasscode, updateMem
               </div>
               <button
                 onClick={() => copyPasscode(team)}
-                className="p-1.5 text-text-faint hover:text-neon transition-colors"
+                className="p-1.5 text-text-faint hover:text-neon-ink transition-colors"
                 title="Inloggegevens kopiëren"
               >
-                {copiedId === team.id ? <Check size={14} className="text-lime" /> : <Copy size={14} />}
+                {copiedId === team.id ? <Check size={14} className="text-lime-ink" /> : <Copy size={14} />}
               </button>
               <button
                 onClick={() => regeneratePasscode(team.id)}
-                className="p-1.5 text-text-faint hover:text-amber transition-colors"
+                className="p-1.5 text-text-faint hover:text-amber-ink transition-colors"
                 title="Nieuwe toegangscode genereren"
               >
                 <RefreshCw size={14} />
               </button>
               <button
                 onClick={() => deleteTeam(team.id)}
-                className="p-1.5 text-text-faint hover:text-magenta transition-colors"
+                className="p-1.5 text-text-faint hover:text-magenta-ink transition-colors"
                 title="Delete team"
               >
                 <Trash2 size={14} />
@@ -642,7 +642,7 @@ function TeamMembersEditor({ members, onChange }: { members: string[]; onChange:
               <button
                 type="button"
                 onClick={() => removeMember(i)}
-                className="text-text-faint hover:text-magenta transition-colors"
+                className="text-text-faint hover:text-magenta-ink transition-colors"
                 title="Verwijderen"
               >
                 <X size={10} />
@@ -669,7 +669,7 @@ function TeamMembersEditor({ members, onChange }: { members: string[]; onChange:
           type="button"
           onClick={addMember}
           disabled={!newName.trim()}
-          className="px-2.5 py-1 rounded text-xs bg-neon/10 text-neon border border-neon/40 hover:bg-neon/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="px-2.5 py-1 rounded text-xs bg-neon/10 text-neon-ink border border-neon/40 hover:bg-neon/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           Add
         </button>
@@ -764,7 +764,7 @@ function IntroTab({ game, updateGame }: {
         {pages.map((page, i) => (
           <Card key={i} className="space-y-3">
             <div className="flex items-center gap-2">
-              <span className="font-display text-neon font-bold text-sm">Pagina {i + 1}</span>
+              <span className="font-display text-neon-ink font-bold text-sm">Pagina {i + 1}</span>
               <div className="flex-1" />
               <button
                 type="button"
@@ -787,7 +787,7 @@ function IntroTab({ game, updateGame }: {
               <button
                 type="button"
                 onClick={() => removePage(i)}
-                className="p-1 text-text-faint hover:text-magenta"
+                className="p-1 text-text-faint hover:text-magenta-ink"
                 title="Verwijder pagina"
               >
                 <Trash2 size={14} />
@@ -822,7 +822,7 @@ function IntroTab({ game, updateGame }: {
                   <button
                     type="button"
                     onClick={() => clearPageMedia(i)}
-                    className="absolute -top-1.5 -right-1.5 p-1 rounded-full bg-surface text-text-muted hover:text-magenta border border-surface-overlay"
+                    className="absolute -top-1.5 -right-1.5 p-1 rounded-full bg-surface text-text-muted hover:text-magenta-ink border border-surface-overlay"
                   >
                     <X size={12} />
                   </button>
@@ -873,8 +873,8 @@ function IntroTab({ game, updateGame }: {
           {saving ? <Loader2 size={14} className="animate-spin" /> : null}
           {saving ? 'Opslaan...' : 'Wijzigingen opslaan'}
         </Button>
-        {savedAt && <span className="text-xs text-lime flex items-center gap-1"><Check size={12} /> Opgeslagen</span>}
-        {dirty && !saving && !savedAt && <span className="text-xs text-amber">Niet-opgeslagen wijzigingen</span>}
+        {savedAt && <span className="text-xs text-lime-ink flex items-center gap-1"><Check size={12} /> Opgeslagen</span>}
+        {dirty && !saving && !savedAt && <span className="text-xs text-amber-ink">Niet-opgeslagen wijzigingen</span>}
       </div>
 
       {/* Reset acks */}
@@ -887,13 +887,13 @@ function IntroTab({ game, updateGame }: {
           disabled={resetting}
           variant="ghost"
           size="sm"
-          className="gap-2 text-amber border-amber/30 hover:bg-amber/10"
+          className="gap-2 text-amber-ink border-amber/30 hover:bg-amber/10"
         >
           {resetting ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           Reset acknowledgements voor alle teams
         </Button>
         {resetCount !== null && (
-          <span className="text-xs text-lime block">✓ {resetCount} team{resetCount !== 1 ? 's' : ''} gereset</span>
+          <span className="text-xs text-lime-ink block">✓ {resetCount} team{resetCount !== 1 ? 's' : ''} gereset</span>
         )}
       </div>
     </div>

@@ -48,7 +48,7 @@ export function AlternativesEditor({ value, onChange, addLabel = 'Ook goed reken
           <button
             type="button"
             onClick={() => remove(i)}
-            className="p-1 text-text-faint hover:text-magenta transition-colors shrink-0"
+            className="p-1 text-text-faint hover:text-magenta-ink transition-colors shrink-0"
           >
             <X size={12} />
           </button>
@@ -57,7 +57,7 @@ export function AlternativesEditor({ value, onChange, addLabel = 'Ook goed reken
       <button
         type="button"
         onClick={add}
-        className="flex items-center gap-1 text-xs text-text-faint hover:text-neon transition-colors"
+        className="flex items-center gap-1 text-xs text-text-faint hover:text-neon-ink transition-colors"
       >
         <Plus size={12} /> {addLabel}
       </button>

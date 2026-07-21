@@ -33,9 +33,9 @@ export function ChallengeTypeSelector({ value, onChange }: ChallengeTypeSelector
               : 'border-surface-overlay hover:border-text-faint',
           )}
         >
-          <Icon size={24} className={value === type ? 'text-neon' : 'text-text-muted'} />
+          <Icon size={24} className={value === type ? 'text-neon-ink' : 'text-text-muted'} />
           <div>
-            <p className={cn('text-sm font-medium', value === type ? 'text-neon' : 'text-text')}>
+            <p className={cn('text-sm font-medium', value === type ? 'text-neon-ink' : 'text-text')}>
               {CHALLENGE_TYPE_LABELS[type]}
             </p>
             <p className="text-xs text-text-muted">{description}</p>

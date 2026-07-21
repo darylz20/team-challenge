@@ -114,7 +114,7 @@ export function GalleryPlay({ challenge }: GalleryPlayProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 size={24} className="text-neon animate-spin" />
+        <Loader2 size={24} className="text-neon-ink animate-spin" />
       </div>
     )
   }
@@ -122,7 +122,7 @@ export function GalleryPlay({ challenge }: GalleryPlayProps) {
   if (error) {
     return (
       <Card className="border border-magenta/30 bg-magenta/5 text-center py-6">
-        <p className="text-sm text-magenta">{error}</p>
+        <p className="text-sm text-magenta-ink">{error}</p>
       </Card>
     )
   }
@@ -155,12 +155,12 @@ export function GalleryPlay({ challenge }: GalleryPlayProps) {
         <div className="flex items-center gap-3">
           {!attempts.unlimited && (
             <span className="text-xs text-text-muted">
-              <span className={cn('font-mono', attemptsRemaining <= 1 && 'text-magenta')}>{attemptsRemaining}</span>
+              <span className={cn('font-mono', attemptsRemaining <= 1 && 'text-magenta-ink')}>{attemptsRemaining}</span>
               <span className="text-text-faint"> pog.</span>
             </span>
           )}
           <span className="font-mono">
-            <span className="text-neon font-bold">{earnedSoFar}</span>
+            <span className="text-neon-ink font-bold">{earnedSoFar}</span>
             <span className="text-text-faint"> / {totalPossible} ptn</span>
           </span>
         </div>
@@ -196,13 +196,13 @@ export function GalleryPlay({ challenge }: GalleryPlayProps) {
               {/* Found overlay */}
               {isFound && (
                 <div className="absolute inset-0 bg-gradient-to-t from-void/95 via-void/40 to-transparent flex flex-col justify-end p-2">
-                  <p className="text-sm font-bold text-lime truncate">{item.answer}</p>
-                  <p className="text-xs font-mono text-lime/80">+{award} ptn</p>
+                  <p className="text-sm font-bold text-lime-ink truncate">{item.answer}</p>
+                  <p className="text-xs font-mono text-lime-ink/80">+{award} ptn</p>
                 </div>
               )}
               {/* Unfound badge */}
               {!isFound && (
-                <div className="absolute top-1 right-1 px-1.5 py-0.5 rounded bg-void/80 text-[10px] font-mono text-amber">
+                <div className="absolute top-1 right-1 px-1.5 py-0.5 rounded bg-void/80 text-[10px] font-mono text-amber-ink">
                   {scoringMode === 'placement' ? `tot ${maxPerItemForMode(i)}` : `${maxPerItemForMode(i)}`} ptn
                 </div>
               )}
@@ -220,9 +220,9 @@ export function GalleryPlay({ challenge }: GalleryPlayProps) {
             : 'border border-magenta/30 bg-magenta/5',
         )}>
           {found.length > 0 ? (
-            <CheckCircle2 size={22} className="text-lime shrink-0" />
+            <CheckCircle2 size={22} className="text-lime-ink shrink-0" />
           ) : (
-            <XCircle size={22} className="text-magenta shrink-0" />
+            <XCircle size={22} className="text-magenta-ink shrink-0" />
           )}
           <div className="flex-1">
             <p className="font-semibold text-sm">
@@ -266,7 +266,7 @@ export function GalleryPlay({ challenge }: GalleryPlayProps) {
             </Button>
           </div>
           {feedback?.type === 'miss' && (
-            <p className="text-xs text-magenta">
+            <p className="text-xs text-magenta-ink">
               Geen match{!attempts.unlimited ? ` — ${attemptsRemaining} pog. over` : ''}
             </p>
           )}

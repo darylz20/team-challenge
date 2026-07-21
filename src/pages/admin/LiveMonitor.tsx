@@ -71,7 +71,7 @@ export function LiveMonitor() {
       {/* Header */}
       <button
         onClick={() => navigate(`/admin/games/${gameId}`)}
-        className="flex items-center gap-1 text-sm text-text-muted hover:text-neon transition-colors mb-4"
+        className="flex items-center gap-1 text-sm text-text-muted hover:text-neon-ink transition-colors mb-4"
       >
         <ArrowLeft size={16} /> Back to Game Editor
       </button>
@@ -103,7 +103,7 @@ export function LiveMonitor() {
             variant="ghost"
             onClick={() => setEndConfirmOpen(true)}
             disabled={endingGame}
-            className="shrink-0 gap-2 text-magenta hover:bg-magenta/10"
+            className="shrink-0 gap-2 text-magenta-ink hover:bg-magenta/10"
           >
             <Power size={16} /> End game now
           </Button>
@@ -113,17 +113,17 @@ export function LiveMonitor() {
       {/* Top stats */}
       <div className="grid grid-cols-3 gap-3 mb-6">
         <Card className="text-center">
-          <Users size={16} className="text-neon mx-auto mb-1" />
+          <Users size={16} className="text-neon-ink mx-auto mb-1" />
           <p className="font-display text-xl font-bold">{states.length}</p>
           <p className="text-[10px] text-text-faint uppercase tracking-wider">Teams</p>
         </Card>
         <Card className="text-center">
-          <Trophy size={16} className="text-amber mx-auto mb-1" />
+          <Trophy size={16} className="text-amber-ink mx-auto mb-1" />
           <p className="font-display text-xl font-bold">{allChallenges.length}</p>
           <p className="text-[10px] text-text-faint uppercase tracking-wider">Challenges</p>
         </Card>
         <Card className="text-center">
-          <CheckCircle2 size={16} className="text-lime mx-auto mb-1" />
+          <CheckCircle2 size={16} className="text-lime-ink mx-auto mb-1" />
           <p className="font-display text-xl font-bold">{totals.completed}</p>
           <p className="text-[10px] text-text-faint uppercase tracking-wider">Total solves</p>
         </Card>
@@ -133,7 +133,7 @@ export function LiveMonitor() {
       {photoReviews.length > 0 && (
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2 px-1">
-            <Camera size={16} className="text-neon" />
+            <Camera size={16} className="text-neon-ink" />
             <h2 className="font-display text-sm font-bold uppercase tracking-wider text-text">
               Foto's beoordelen
             </h2>
@@ -173,11 +173,11 @@ export function LiveMonitor() {
                   <p className="text-[10px] text-text-muted truncate mt-0.5">{r.challenge_title}</p>
                   <p className="text-[10px] mt-1">
                     {r.reviewed ? (
-                      <span className={r.points_awarded > 0 ? 'text-lime' : 'text-text-faint'}>
+                      <span className={r.points_awarded > 0 ? 'text-lime-ink' : 'text-text-faint'}>
                         {r.points_awarded} ptn toegekend
                       </span>
                     ) : (
-                      <span className="text-amber">Wacht op beoordeling</span>
+                      <span className="text-amber-ink">Wacht op beoordeling</span>
                     )}
                   </p>
                 </div>
@@ -189,7 +189,7 @@ export function LiveMonitor() {
 
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <Loader2 size={28} className="text-neon animate-spin" />
+          <Loader2 size={28} className="text-neon-ink animate-spin" />
         </div>
       ) : states.length === 0 ? (
         <Card className="text-center py-10">
@@ -222,9 +222,9 @@ export function LiveMonitor() {
       <Modal open={endConfirmOpen} onClose={() => !endingGame && setEndConfirmOpen(false)} title="Spel nu beëindigen?">
         <div className="space-y-4">
           <div className="flex items-start gap-2 p-3 rounded-lg bg-magenta/5 border border-magenta/30">
-            <AlertTriangle size={16} className="text-magenta shrink-0 mt-0.5" />
+            <AlertTriangle size={16} className="text-magenta-ink shrink-0 mt-0.5" />
             <div className="text-sm space-y-1">
-              <p className="text-magenta font-medium">Dit kan niet ongedaan worden gemaakt.</p>
+              <p className="text-magenta-ink font-medium">Dit kan niet ongedaan worden gemaakt.</p>
               <p className="text-text-muted">
                 Alle in-progress challenges worden gefinaliseerd op de huidige state. De game status
                 wordt 'finished' en teams kunnen geen challenges meer doen.
@@ -360,7 +360,7 @@ function TeamPanel({
           <div className="mt-2 space-y-1">
             {completed.map((c) => (
               <div key={c.challenge_id} className="flex items-center gap-2 text-xs">
-                <CheckCircle2 size={11} className="text-lime shrink-0" />
+                <CheckCircle2 size={11} className="text-lime-ink shrink-0" />
                 <span className="flex-1 truncate text-text">{c.challenge_title}</span>
                 <span className="font-mono text-text-muted shrink-0">+{c.points}</span>
               </div>
@@ -381,14 +381,14 @@ function TeamPanel({
         <button
           type="button"
           onClick={onComplete}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-lime/10 text-lime hover:bg-lime/20 transition-colors"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-lime/10 text-lime-ink hover:bg-lime/20 transition-colors"
         >
           <Check size={12} /> Manual complete
         </button>
         <button
           type="button"
           onClick={onReset}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-amber/10 text-amber hover:bg-amber/20 transition-colors"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-amber/10 text-amber-ink hover:bg-amber/20 transition-colors"
         >
           <RotateCw size={12} /> Reset
         </button>
@@ -405,7 +405,7 @@ function ActiveBlock({ active }: { active: import('../../hooks/useLiveMonitor').
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2 min-w-0">
-        <Activity size={14} className="text-neon shrink-0" />
+        <Activity size={14} className="text-neon-ink shrink-0" />
         <p className="text-sm font-medium text-text truncate flex-1">{active.challenge_title}</p>
         <span className="text-[10px] font-mono uppercase text-text-faint shrink-0">{active.challenge_type.replace('_', ' ')}</span>
       </div>

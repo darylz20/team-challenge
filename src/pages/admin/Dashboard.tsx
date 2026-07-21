@@ -20,7 +20,7 @@ export function Dashboard() {
       <div className="grid grid-cols-2 gap-3 mb-6">
         <Card>
           <div className="flex items-center gap-3">
-            <Gamepad2 size={20} className="text-neon" />
+            <Gamepad2 size={20} className="text-neon-ink" />
             <div>
               <p className="font-display text-xl font-bold">{loading ? '—' : games.length}</p>
               <p className="text-xs text-text-muted">Total Games</p>
@@ -29,7 +29,7 @@ export function Dashboard() {
         </Card>
         <Card>
           <div className="flex items-center gap-3">
-            <Zap size={20} className="text-lime" />
+            <Zap size={20} className="text-lime-ink" />
             <div>
               <p className="font-display text-xl font-bold">{loading ? '—' : activeGames}</p>
               <p className="text-xs text-text-muted">Active</p>
